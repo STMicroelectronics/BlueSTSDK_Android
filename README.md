@@ -27,14 +27,14 @@ Currently used values are:
 Currently, bits are mapped in the following way:
   
    |Bit|31|30|29|28|27|26|25|24|23|22|21|20|19|18|17|16|
-   |:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+   |:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
    |Feature|RFU|RFU|RFU|RFU|RFU|RFU|Proximity|Lux|Acc|Gyro|Mag|Pressure|Humidity|Temperature|Battery|RFU|
    
    |Bit|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1|0|
-   |:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+   |:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
    |Feature|RFU|RFU|RFU|RFU|RFU|RFU|RFU|Sensor Fusion Compact|Sensor Fusion|RFU|RFU|Activity|Carry Position|RFU|RFU|RFU|
 You can use one of the RFU bits or define a new device and decide how to map the feature. 
-To see how the data is exported by pre-defined features, consult the export method  *int extractData(long,byte[],int)* within the feature class definition.
+To see how the data is exported by pre-defined features, consult the export method [<code> Feature.ExtractResult Feature.extractData(long,byte[],int)</code>](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Feature.html#extractData-long-byte:A-int-).  within the feature class definition.
 
 
 - The device MAC address is optional and useful only for obtaining the device MAC address on an iOS device.
@@ -89,6 +89,8 @@ If available, the configuration service must have the UUID <code>00000000-000F-1
 
 - <code>00000002-000F-11e1-ac36-0002a5d5c51b</code> (Read/Write/Notify): if available it is used to access the board configuration register that can be modified using the [ConfigControl](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Config/ConfigControl.html) class.
 
+###Example
+The ST Bluemicrosystem1 firmware implements this protocol, you can find the project source here: [Bluemicrosystem1](http://www.st.com/bluemicrosystem1)
 
 ##How to install the library
 ###As an external library
@@ -99,7 +101,7 @@ If available, the configuration service must have the UUID <code>00000000-000F-1
 1. Add the repository as a submodule:
   
   ```Shell
-  $ git submodule add https://github.com/STclab/stm32nucleo-spirit1-lib.git BlueSTSDK
+  $ git submodule add https://github.com/STMicroelectronics-CentralLabs/BlueSTSDK_Android.git BlueSTSDK
   ```
 2. Add the SDK as a project submodule in the *settings.gradle* file, adding the line:
 <pre>include ':BlueSTSDK:BlueSTSDK'</pre>
@@ -151,7 +153,7 @@ Available features can be retrieved from [Features package](https://stmicroelect
  1. Extend the class Feature: 
     1.	Create an array of [<code>Feature.Field</code>](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Features/Field.html) that will describe the data exported by the new feature
     2.	Create a constructor that accepts only the node as a parameter. From this constructor call the [super constructor](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Feature.html#Feature-java.lang.String-com.st.BlueSTSDK.Node-com.st.BlueSTSDK.Features.Field:A-), passing the feature name and the feature field.
-    3.  Implement the method [<code>int Feature.extractData(long,byte[],int)</code>](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Feature.html#extractData-long-byte:A-int-). The method must create the sample object and assign it to the instance variable <code>mLastSample</code>
+    3.  Implement the method [<code> Feature.ExtractResult Feature.extractData(long,byte[],int)</code>](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Feature.html#extractData-long-byte:A-int-). 
     3.  Create a utility static method that extracts the data from the Feature.Sample class 
  2. Before start the scanning register the new feature
  
