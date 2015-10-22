@@ -26,13 +26,8 @@
  ******************************************************************************/
 package com.st.BlueSTSDK.Example;
 
-import android.app.Activity;
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothManager;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -41,26 +36,17 @@ import android.widget.AdapterView;
 
 import com.st.BlueSTSDK.Manager;
 import com.st.BlueSTSDK.Node;
+import com.st.BlueSTSDK.Utils.NodeScanActivity;
 
 /**
  * This activity will show a list of device that are supported by the sdk
  */
-public class ScanActivity extends AppCompatActivity implements AbsListView.OnItemClickListener {
-
-    /**
-     * request id for the activity that will ask to the user to enable the bt
-     */
-    private static final int REQUEST_ENABLE_BT = 1;
+public class ScanActivity extends NodeScanActivity implements AbsListView.OnItemClickListener {
 
     /**
      * number of millisecond that we spend looking for a new node
      */
     private final static int SCAN_TIME_MS = 10 * 1000; //10sec
-
-    /**
-     * class used for manage the ble adapter and that will keep the list of the discovered device
-     */
-    private Manager mManager;
 
     /**
      * adapter that will build the gui for each discovered node
@@ -106,9 +92,6 @@ public class ScanActivity extends AppCompatActivity implements AbsListView.OnIte
         // Set OnItemClickListener so we can be notified on item clicks
         listView.setOnItemClickListener(this);
 
-        //retrieve the manager instance
-        mManager = Manager.getSharedInstance();
-
         //add the already discovered nodes
         mAdapter.addAll(mManager.getNodes());
 
@@ -128,21 +111,8 @@ public class ScanActivity extends AppCompatActivity implements AbsListView.OnIte
      * check that the bluetooth is enabled and register the lister to the manager
      */
     @Override
-    protected void onResume() {
-        super.onResume();
-
-        final BluetoothManager bluetoothManager =
-                (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
-        //the adapter is !=null since we request in the manifest to have the bt capability
-        final BluetoothAdapter btAdapter = bluetoothManager.getAdapter();
-
-        // Ensures Bluetooth is enabled on the device.  If Bluetooth is not currently enabled,
-        // fire an intent to display a dialog asking the user to grant permission to enable it.
-        if (!btAdapter.isEnabled()) {
-            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
-            return;
-        }//else
+    protected void onStart() {
+        super.onStart();
 
         //add the listener that will hide the progress indicator when the first device is discovered
         mManager.addListener(mUpdateDiscoverGui);
@@ -155,34 +125,16 @@ public class ScanActivity extends AppCompatActivity implements AbsListView.OnIte
     }//onStart
 
     /**
-     * return after ask to the user to enable the bluetooth
-     *
-     * @param requestCode request code id
-     * @param resultCode  request result, if is {@code Activity.RESULT_CANCELED} the activity is
-     *                    closed since we need the bluetooth
-     * @param data        request data
-     */
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        // User chose not to enable Bluetooth -> close all
-        if (requestCode == REQUEST_ENABLE_BT && resultCode == Activity.RESULT_CANCELED) {
-            finish();
-            return;
-        }//if
-        super.onActivityResult(requestCode, resultCode, data);
-    }//onActivityResult
-
-    /**
      * stop the discovery and remove all the lister that we attach to the manager
      */
     @Override
-    protected void onPause() {
+    protected void onStop() {
         if (mManager.isDiscovering())
             mManager.stopDiscovery();
         //remove the listener add by this class
         mManager.removeListener(mUpdateDiscoverGui);
         mManager.removeListener(mAdapter);
-        super.onPause();
+        super.onStop();
     }//onPause
 
     /**
@@ -231,16 +183,16 @@ public class ScanActivity extends AppCompatActivity implements AbsListView.OnIte
     /**
      * method start a discovery and update the gui for the new state
      */
-    private void startNodeDiscovery() {
-        mManager.startDiscovery(SCAN_TIME_MS);
+    public void startNodeDiscovery() {
+        super.startNodeDiscovery(SCAN_TIME_MS);
         invalidateOptionsMenu(); //ask to redraw the menu for change the menu icon
     }
 
     /**
      * method that stop the discovery and update the gui state
      */
-    private void stopNodeDiscovery() {
-        mManager.stopDiscovery();
+    public void stopNodeDiscovery() {
+        super.stopNodeDiscovery();
         invalidateOptionsMenu();//ask to redraw the menu for change the menu icon
     }
 

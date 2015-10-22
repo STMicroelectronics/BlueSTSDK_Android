@@ -87,10 +87,10 @@ public class NodeTest {
 
     private BluetoothGattCharacteristic createReadNotifyChar(UUID uuid){
         BluetoothGattCharacteristic temp = new BluetoothGattCharacteristic(uuid,
-                BluetoothGattCharacteristic.PERMISSION_READ|
-                        BluetoothGattCharacteristic.PERMISSION_WRITE,
                 BluetoothGattCharacteristic.PROPERTY_READ|BluetoothGattCharacteristic
-                        .PROPERTY_NOTIFY);
+                        .PROPERTY_NOTIFY,
+                BluetoothGattCharacteristic.PERMISSION_READ|
+                        BluetoothGattCharacteristic.PERMISSION_WRITE);
         temp.addDescriptor(new BluetoothGattDescriptor(UUID.fromString
                 ("00002902-0000-1000-8000-00805f9b34fb"),
                 BluetoothGattDescriptor.PERMISSION_READ | BluetoothGattDescriptor.PERMISSION_WRITE));

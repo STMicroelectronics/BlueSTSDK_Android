@@ -28,6 +28,7 @@ package com.st.BlueSTSDK;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.WorkerThread;
 
 import com.st.BlueSTSDK.Features.Field;
 
@@ -110,7 +111,7 @@ public abstract class Feature {
      * array of feature field that describe the feature data with the name,
      * unit and min/max value for each feature field
      */
-    private Field[] mDataDesc;
+    protected Field[] mDataDesc;
 
     /**
      * build a new disabled feature, that doesn't need to be initialized in the node side
@@ -461,6 +462,7 @@ public abstract class Feature {
          * @param f feature that has received an update
          * @param sample new data received from the feature
          */
+        @WorkerThread
         void onUpdate( Feature f, Sample sample);
 
     }//FeatureListener
@@ -485,6 +487,7 @@ public abstract class Feature {
          * @param sample data extracted by the feature
          *
          */
+        @WorkerThread
         void logFeatureUpdate( Feature feature, byte[] rawData,
                                Sample sample);
     }

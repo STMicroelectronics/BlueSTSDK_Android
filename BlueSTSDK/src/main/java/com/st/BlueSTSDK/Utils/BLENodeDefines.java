@@ -40,6 +40,7 @@ import com.st.BlueSTSDK.Features.FeatureLuminosity;
 import com.st.BlueSTSDK.Features.FeatureMagnetometer;
 import com.st.BlueSTSDK.Features.FeatureMemsSensorFusion;
 import com.st.BlueSTSDK.Features.FeatureMemsSensorFusionCompact;
+import com.st.BlueSTSDK.Features.FeatureMicLevel;
 import com.st.BlueSTSDK.Features.FeaturePressure;
 import com.st.BlueSTSDK.Features.FeatureProximity;
 import com.st.BlueSTSDK.Features.FeatureTemperature;
@@ -270,6 +271,7 @@ public class BLENodeDefines {
             Nucleo_0_Features.put(0x00100000, FeaturePressure.class);
             Nucleo_0_Features.put(0x01000000, FeatureLuminosity.class);
             Nucleo_0_Features.put(0x02000000, FeatureProximity.class);
+            Nucleo_0_Features.put(0x04000000, FeatureMicLevel.class);
             Nucleo_0_Features.put(0x00020000, FeatureBattery.class);
             Nucleo_0_Features.put(0x00000200, FeatureFreeFall.class);
             Nucleo_0_Features.put(0x00000100, FeatureMemsSensorFusionCompact.class);

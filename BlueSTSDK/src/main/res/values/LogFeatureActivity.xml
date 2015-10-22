@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="startLogging">Start Logging</string>
+    <string name="stopLogging">Stop Logging</string>
+
+    <string name="askExprotByMailTitle">Send Mail</string>
+    <string name="askExprotByMailMessage">Send a mail with the logs files?</string>
+    <string name="WriteSDRationale">The app need to save the log file in your SD</string>
+    <string name="WriteSDNotGranted">Impossible save the log file in your SD</string>
+</resources>

@@ -90,9 +90,11 @@ public class ManagerTest {
         }
     }
 
+    private int nBuildNode=0;
     private Node buildMockNode() {
         Node n = mock(Node.class);
         when(n.isBounded()).thenReturn(false);
+        when(n.getTag()).thenReturn(""+nBuildNode++);
         return n;
     }
 

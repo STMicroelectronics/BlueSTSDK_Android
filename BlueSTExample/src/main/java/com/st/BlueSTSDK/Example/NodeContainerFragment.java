@@ -30,7 +30,6 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.app.ProgressDialog;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.st.BlueSTSDK.Manager;

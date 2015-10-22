@@ -40,6 +40,7 @@ import android.content.IntentFilter;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.Nullable;
+import android.support.annotation.WorkerThread;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -75,7 +76,7 @@ public class Node{
     /**
      * wait this time before retry to send a command to the ble api
      */
-    private static final long RETRY_COMMAND_DELAY_MS =100;
+    private static final long RETRY_COMMAND_DELAY_MS =300;
 
     /** possible node working mode, if a node is build the board is in Application mode */
     public enum Mode {
@@ -130,6 +131,7 @@ public class Node{
          * @param node node that update its rssi value
          * @param newRSSIValue new rssi
          */
+        @WorkerThread
         void onRSSIChanged(Node node,int newRSSIValue);
 
         /**
@@ -153,6 +155,7 @@ public class Node{
          * @param newState new node status
          * @param prevState previous node status
          */
+        @WorkerThread
         void onStateChange(Node node, State newState, State prevState);
     }//NodeStateListener
 
@@ -435,6 +438,8 @@ public class Node{
          */
         private void dispatchCommandResponseData(BluetoothGattCharacteristic characteristic){
             byte data[] = characteristic.getValue();
+            if(data.length<7) //if we miss some data
+                return;
             int timeStamps = NumberConversion.LittleEndian.bytesToUInt16(data);
             int mask = NumberConversion.BigEndian.bytesToInt32(data,2);
             byte reqType= data[6];
@@ -625,12 +630,7 @@ public class Node{
         @Override
         public void onStateChange(Node node, State newState, State prevState) {
             if(newState == State.Connected && mInitialization !=null) {
-                mConnection.setCharacteristicNotification(mInitialization,true);
-                BluetoothGattDescriptor descriptor = mInitialization.getDescriptor(NOTIFY_CHAR_DESC_UUID);
-                if(descriptor!=null) {
-                    descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
-                    enqueueWriteDesc(descriptor);
-                }//if
+                changeNotificationStatus(mInitialization,true);
             }//if
             //error during connection (connecting ->dead or connected -> dead )
             if((prevState == State.Connecting || prevState== State.Connected ) && newState==State
@@ -1124,6 +1124,30 @@ public class Node{
         }//synchronized
     }//waitCompleteAllDescriptorWriteRequest
 
+
+    /**
+     * take the fist element in the mWriteDescQueue and call the writeDescriptor, if it fail it
+     * will retry after {@code RETRY_COMMAND_DELAY_MS} ms.
+     */
+    private Runnable mWriteDescriptorTask = new Runnable() {
+        @Override
+        public void run() {
+        if(mConnection!=null &&  (isConnected() || mState==State.Disconnecting)) {
+            synchronized (mWriteDescQueue) {
+                if(mWriteDescQueue.size()>=1) {
+                    BluetoothGattDescriptor desc = mWriteDescQueue.peek();
+                    if (Arrays.equals(desc.getValue(), BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE))
+                        mConnection.setCharacteristicNotification(desc.getCharacteristic(), true);
+                    if (Arrays.equals(desc.getValue(), BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE))
+                        mConnection.setCharacteristicNotification(desc.getCharacteristic(), false);
+                    if (!mConnection.writeDescriptor(desc))
+                        mBleThread.postDelayed(this, RETRY_COMMAND_DELAY_MS);
+                }//if size
+            }//synchronized
+        }//if
+    }//run
+};
+
     /**
      * add a descriptor to the queue for write it
      * @param desc descriptor to write
@@ -1133,18 +1157,10 @@ public class Node{
             mWriteDescQueue.add(desc);
             //if the queue contains only the element that we just add
             if(mWriteDescQueue.size()==1) {
-                mBleThread.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        if(mConnection!=null &&  (isConnected() || mState==State.Disconnecting)) {
-                            if (!mConnection.writeDescriptor(desc))
-                                mBleThread.postDelayed(this, RETRY_COMMAND_DELAY_MS);
-                        }//if
-                    }//run
-                });
+                mBleThread.post(mWriteDescriptorTask);
             }//if
         }//synchronized
-    }
+    }//enqueueWriteDesc
 
     /**
      * remove the descriptor from the queue and if present start a new write
@@ -1155,19 +1171,11 @@ public class Node{
             mWriteDescQueue.remove(desc);
             //if there still element in the queue, start write the head
             if(!mWriteDescQueue.isEmpty()) {
-                mBleThread.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        if(mConnection!=null &&  (isConnected() || mState==State.Disconnecting)) {
-                            if (!mConnection.writeDescriptor(mWriteDescQueue.peek()))
-                                mBleThread.postDelayed(this, RETRY_COMMAND_DELAY_MS);
-                        }
-                    }
-                });
+                mBleThread.post(mWriteDescriptorTask);
             }else
                 mWriteDescQueue.notifyAll();
         }//synchronized
-    }
+    }//dequeueWriteDesc
 
     /**
      * send a request for enable/disable the notification update on a specific characteristics
@@ -1178,7 +1186,6 @@ public class Node{
     boolean changeNotificationStatus(BluetoothGattCharacteristic characteristic,
                                           boolean enable){
         if(characteristic!=null && mConnection!=null && isConnected()){
-            mConnection.setCharacteristicNotification(characteristic,enable);
             BluetoothGattDescriptor descriptor = characteristic.getDescriptor(NOTIFY_CHAR_DESC_UUID);
             if(descriptor==null)
                 return false;

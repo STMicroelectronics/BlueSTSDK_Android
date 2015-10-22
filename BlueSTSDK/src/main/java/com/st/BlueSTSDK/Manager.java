@@ -26,10 +26,13 @@
  ******************************************************************************/
 package com.st.BlueSTSDK;
 
+import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.os.Handler;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresPermission;
+import android.support.annotation.WorkerThread;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -209,6 +212,10 @@ public class Manager {
      *
      * @return true if the process is started, false if it is already running
      */
+    @RequiresPermission(allOf = {
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.BLUETOOTH,
+            Manifest.permission.BLUETOOTH_ADMIN})
     public boolean startDiscovery() {
         return startDiscovery(-1);
     }//startDiscovery;
@@ -236,6 +243,10 @@ public class Manager {
      * @param timeoutMs time to wait before stop the discovery process.
      * @return true if the process is started, false if a discovery is already running
      */
+    @RequiresPermission(allOf = {
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.BLUETOOTH,
+            Manifest.permission.BLUETOOTH_ADMIN})
     public boolean startDiscovery(int timeoutMs) {
 
         if (mBtAdapter != null && mBtAdapter.isEnabled()) {
@@ -318,7 +329,7 @@ public class Manager {
         synchronized (mDiscoverNode){
             Collection<Node> removeMe = new ArrayList<>(mDiscoverNode.size());
             for(Node n: mDiscoverNode){
-                if(!n.isBounded()){
+                if(!n.isBounded() && !n.isConnected()){
                     removeMe.add(n);
                 }//if
             }//for
@@ -419,6 +430,7 @@ public class Manager {
          * @param m       manager that start/stop the process
          * @param enabled true if a new discovery start, false otherwise
          */
+        @WorkerThread
         void onDiscoveryChange(Manager m, boolean enabled);
 
         /**
@@ -427,6 +439,7 @@ public class Manager {
          * @param m    manager that discover the node
          * @param node new node discovered
          */
+        @WorkerThread
         void onNodeDiscovered(Manager m, Node node);
     }//ManagerListener
 

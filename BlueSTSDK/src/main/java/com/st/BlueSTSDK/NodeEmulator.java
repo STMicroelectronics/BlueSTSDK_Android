@@ -40,6 +40,7 @@ import com.st.BlueSTSDK.Features.emul.FeatureRandomLuminosity;
 import com.st.BlueSTSDK.Features.emul.FeatureRandomMagnetometer;
 import com.st.BlueSTSDK.Features.emul.FeatureRandomMemsSensorFusion;
 import com.st.BlueSTSDK.Features.emul.FeatureRandomMemsSensorFusionCompact;
+import com.st.BlueSTSDK.Features.emul.FeatureRandomMicLevel;
 import com.st.BlueSTSDK.Features.emul.FeatureRandomPressure;
 import com.st.BlueSTSDK.Features.emul.FeatureRandomProximity;
 import com.st.BlueSTSDK.Features.emul.FeatureRandomTemperature;
@@ -85,7 +86,8 @@ public class NodeEmulator extends Node {
             FeatureRandomGyroscope.class,
             FeatureRandomHumidity.class,
             FeatureRandomMagnetometer.class,
-            FeatureRandomHumidity.class
+            FeatureRandomHumidity.class,
+            FeatureRandomMicLevel.class
     };
 
     /**

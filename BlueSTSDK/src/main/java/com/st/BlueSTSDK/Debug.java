@@ -61,6 +61,10 @@ public class Debug {
      * class where the notify that we receive a new data
      */
     private DebugOutputListener mListener;
+    /**
+     * Max size of string to sent in the input char
+     */
+    public static final int MAX_STRING_SIZE_TO_SENT = 20;
 
     /**
      * @param n          node that will send the data
@@ -77,13 +81,19 @@ public class Debug {
     }//Debug
 
     /**
-     * write a message to the stdIn of the debug console
+     * write a message to the stdIn of the debug console prepare the string to sent and check
+     * if there is a current message in queue to be sent
      *
      * @param message message to send
+     * @return number of char sent in Terminal standard characteristic, or -1 if was impossible send
+     * the message
      */
-    public void write(String message) {
+    public int write(String message) {
         mTermChar.setValue(message);
-        mConnection.writeCharacteristic(mTermChar);
+        if(mConnection.writeCharacteristic(mTermChar))
+            return (message.length() > MAX_STRING_SIZE_TO_SENT) ? MAX_STRING_SIZE_TO_SENT :message.length();
+        else
+            return -1;
     }
 
     /**
@@ -95,6 +105,8 @@ public class Debug {
      * @param listener class with the callback when something appear in the debug console
      */
     public void setDebugOutputListener(DebugOutputListener listener) {
+        if(mListener==listener)
+            return;
         mListener = listener;
         boolean enable = mListener != null;
         mNode.changeNotificationStatus(mTermChar, enable);
@@ -128,8 +140,13 @@ public class Debug {
         if (mListener == null)
             return;
         UUID charUuid = characteristic.getUuid();
-        if (charUuid.equals(BLENodeDefines.Services.Debug.DEBUG_TERM_UUID))
-            mListener.onStdInSent(this, characteristic.getStringValue(0), status);
+        if (charUuid.equals(BLENodeDefines.Services.Debug.DEBUG_TERM_UUID)) {
+            String str = characteristic.getStringValue(0);
+            if(str.length()>MAX_STRING_SIZE_TO_SENT)
+                mListener.onStdInSent(this,str.substring(0,MAX_STRING_SIZE_TO_SENT) , status);
+            else
+                mListener.onStdInSent(this,str , status);
+        }
     }//receiveCharacteristicsWriteUpdate
 
     /**

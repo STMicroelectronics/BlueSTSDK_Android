@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto"
+      xmlns:tools="http://schemas.android.com/tools"
+      tools:context="com.st.BlueSTSDK.Utils.LogFeatureActivity">
+
+    <item android:id="@+id/startLog"
+          android:title="@string/startLogging"
+          android:orderInCategory="100"
+          app:showAsAction="ifRoom"/>
+
+    <item android:id="@+id/stopLog"
+          android:title="@string/stopLogging"
+          android:orderInCategory="100"
+          app:showAsAction="ifRoom"/>
+</menu>

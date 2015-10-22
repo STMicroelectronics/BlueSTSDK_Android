@@ -7,6 +7,8 @@
     <uses-permission android:name="android.permission.BLUETOOTH"/>
     <!-- search for new devices -->
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+    <!-- need for search for new devices for api >23 !-->
+    <uses-permission-sdk-23 android:name="android.permission.ACCESS_COARSE_LOCATION"/>
 
     <!-- store log files -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -14,10 +16,5 @@
     <uses-permission
         android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="18" />
-
-    <application android:allowBackup="true"
-                 android:label="@string/app_name" >
-
-    </application>
 
 </manifest>

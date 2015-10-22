@@ -26,11 +26,10 @@
  ******************************************************************************/
 package com.st.BlueSTSDK.Example;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.os.Bundle;
+import android.support.annotation.ColorRes;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Spannable;
@@ -64,7 +63,25 @@ public class DebugConsoleActivity extends AppCompatActivity {
 
     private final static String NODE_TAG = DebugConsoleActivity.class.getCanonicalName() + "" +
             ".NODE_TAG";
-
+    /**
+     * enable the console when the node connect
+     */
+    private Node.NodeStateListener mNodeStateChangeListener = new Node.NodeStateListener() {
+        @Override
+        public void onStateChange(Node node, Node.State newState, Node.State prevState) {
+            if (newState == Node.State.Connected) {
+                setUpConsoleService(node.getDebug());
+            } else if (newState == Node.State.Dead) {
+                DebugConsoleActivity.this.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(DebugConsoleActivity.this, R.string.DebugNotAvailable,
+                                Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }//if-else
+        }//onStateChange
+    };//NodeStateListener
 
     /**
      * text view where we will dump the console out
@@ -93,24 +110,23 @@ public class DebugConsoleActivity extends AppCompatActivity {
     private Debug mDebugService;
 
     /**
-     * enable the console when the node connect
+     * message that we are sending
      */
-    private Node.NodeStateListener mNodeStateChangeListener = new Node.NodeStateListener() {
-        @Override
-        public void onStateChange(Node node, Node.State newState, Node.State prevState) {
-            if (newState == Node.State.Connected) {
-                setUpConsoleService(node.getDebug());
-            } else if (newState == Node.State.Dead) {
-                DebugConsoleActivity.this.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(DebugConsoleActivity.this, R.string.DebugNotAvailable,
-                                Toast.LENGTH_SHORT).show();
-                    }
-                });
-            }//if-else
-        }//onStateChange
-    };//NodeStateListener
+    private String mToSent=null;
+
+    /**
+     * index of the last byte send, negative if we didn't send anything
+     */
+    private int mNextPartToSentIndex = -1;
+
+    /**
+     * last time that the user send a message
+     */
+    private Date mLastMessageSending = new Date();
+    /**
+     * threshold to use for send an user message also if we are still sending a previous message
+     */
+    private static final long SENDING_TIME_OUT_MS = 1000; //ms
 
     /**
      * create an intent for start the activity that will log the information from the node
@@ -145,13 +161,26 @@ public class DebugConsoleActivity extends AppCompatActivity {
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 boolean handled = false;
                 if (actionId == EditorInfo.IME_ACTION_SEND) {
-                    mDebugService.write(v.getText().toString() + "\n");
+
+                    String toSend = v.getText().toString();
                     v.setText(""); //reset the string
+                    if (!toSend.isEmpty())
+                        if (!sendMessage(toSend + '\n')) {
+                            resetMessageToSend();
+                            DebugConsoleActivity.this.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(DebugConsoleActivity.this,
+                                            R.string.AnotherMsgIsSending,
+                                            Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        }//if
                     handled = true;
-                }//if
+                }//if action
                 return handled;
             }//onEditorAction
-        });
+        });//setOnEditorActionListener
 
         // recover the node
         String nodeTag = getIntent().getStringExtra(NODE_TAG);
@@ -164,7 +193,6 @@ public class DebugConsoleActivity extends AppCompatActivity {
             mNodeContainer.setArguments(i.getExtras());
             getFragmentManager().beginTransaction()
                     .add(mNodeContainer, NODE_FRAGMENT).commit();
-
         } else {
             mNodeContainer = (NodeContainerFragment) getFragmentManager()
                     .findFragmentByTag(NODE_FRAGMENT);
@@ -173,19 +201,69 @@ public class DebugConsoleActivity extends AppCompatActivity {
     }//onCreate
 
     /**
+     * write a message to the stdIn of the debug console prepare the string to sent and check
+     * if there is a current message in queue to be sent
+     *
+     * @param message message to send
+     * @return false if there is a message current sending else true
+     */
+    private boolean sendMessage(String message) {
+        Date  now = new Date();
+        //not message already sending or time out
+        if ((mToSent == null) || (now.getTime() - mLastMessageSending.getTime() > SENDING_TIME_OUT_MS)) {
+            resetMessageToSend();
+            if (message != null && !message.isEmpty()) {
+                mToSent = message;
+                mNextPartToSentIndex=0;
+                writeNextMessage();
+                return true;
+            }//if
+        }//if
+        return false;
+    }//sendMessage
+
+    /**
+     * clear the current message that we were sending
+     */
+    private void resetMessageToSend(){
+        mToSent = null;
+        mNextPartToSentIndex = -1;
+    }//resetMessageToSend
+
+    /**
+     * write the next part of the current message to the input characteristic
+     * @return true if there is another message to send
+     */
+    //it is synchronized because it is called by a callback and we need to complete all the method
+    //before run it again otherwise we can send the same message 2 times or
+    private synchronized boolean writeNextMessage() {
+
+        if (mToSent == null )
+            return false;
+
+        int byteSend = mDebugService.write(mToSent.substring(mNextPartToSentIndex));
+        mNextPartToSentIndex += byteSend;
+
+        if(byteSend<0)
+            return false;
+
+        if(mNextPartToSentIndex>=mToSent.length()) {
+            resetMessageToSend(); // we sending complete we don't need it
+            return false;
+        }//if
+        return  true;
+    }//writeNextMessage
+
+    /**
      * when the node connected check the presence of the debug service and enable the gui if it
      * present otherwise it will show an error message
      *
      * @param debugService debug service return from the node, null if not present
      */
-    private void setUpConsoleService(Debug debugService) {
-        mDebugService = debugService;
-        if (mDebugService != null) {
-            Resources res = DebugConsoleActivity.this.getResources();
-            mDebugService.setDebugOutputListener(new UpdateConsole(
-                    res.getColor(R.color.OutMsg),
-                    res.getColor(R.color.InMsg),
-                    res.getColor(R.color.ErrorMsg)));
+    private void setUpConsoleService(Debug debugService){
+        mDebugService=debugService;
+        if(mDebugService!=null) {
+            mDebugService.setDebugOutputListener( new UpdateConsole());
             DebugConsoleActivity.this.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -200,8 +278,8 @@ public class DebugConsoleActivity extends AppCompatActivity {
                             Toast.LENGTH_SHORT).show();
                 }
             });
-        }
-    }
+        }//if-else
+    }//setUpConsoleService
 
     /**
      * if the node is connected enable the gui otherwise attach a listener for do it when the node
@@ -259,7 +337,48 @@ public class DebugConsoleActivity extends AppCompatActivity {
         }//switch
 
         return super.onOptionsItemSelected(item);
-    }
+    }//onOptionsItemSelected
+
+
+    /**
+     * enum with the information about the type of console available
+     */
+    private enum ConsoleType{
+        /** Node output console */
+        OUTPUT,
+        /** Node input console */
+        INPUT,
+        /** Node error console */
+        ERROR;
+
+        /**
+         * get the color to use for the specific console
+         * @return color to use for the text to write in the specific console
+         */
+        public @ColorRes int getColorID(){
+            switch (this){
+                case ERROR:
+                    return  R.color.ErrorMsg;
+                case OUTPUT:
+                    return  R.color.OutMsg;
+                case INPUT:
+                    return  R.color.InMsg;
+                default:
+                    return R.color.InMsg;
+            }//switch
+        }//getClassID
+
+        /**
+         * get the char to use as prefix fo the specific console
+         * @return prefix to use before write a string in the console
+         */
+        public char getPrefix(){
+            if (this != INPUT)
+                return  '<';
+            return  '>';
+        }//getPrefix
+
+    }//ConsoleType
 
     /**
      * listener for debug message, it will update the textview with received message
@@ -270,142 +389,83 @@ public class DebugConsoleActivity extends AppCompatActivity {
      * We avoid to print the date if 2 message from the same stream arrive in a short time frame
      * </p>
      */
-    private class UpdateConsole implements Debug.DebugOutputListener {
+    private class UpdateConsole implements Debug.DebugOutputListener{
+        //final DateFormat DATE_FORMAT = DateFormat.getDateTimeInstance();
+        final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyMMdd HH:mm:ss.SSS",
+                Locale.getDefault());
 
-        /**
-         * if 2 message with a distance below this value we avoid to reprint the date
-         */
-        private static final long PAUSE_DETECTION_TIME_MS = 100; //ms
+        /** console that we are using for print the message */
+        private ConsoleType mTargetConsole = null;
 
-        /**
-         * format used for print the date
-         */
-        private final SimpleDateFormat DATE_FORMAT =
-                new SimpleDateFormat("yyMMdd HH:mm:ss.SSS", Locale.getDefault());
-
-        /**
-         * true if we are receiving a message in the stdout stream
-         */
-        private boolean mStdOutReceiving = false;
-
-        /**
-         * true if we are receiving a message in the stdIn stream
-         */
-        private boolean mStdInReceiving = false;
-
-        /**
-         * true if we are receiving a message in the stdErr stream
-         */
-        private boolean mStdErrReceiving = false;
-
-        /**
-         * time when we receive the last message
-         */
+        /**time of the last received message */
         private Date mLastMessageReceived = new Date();
+        private  final long PAUSE_DETECTION_TIME_MS = 100; //ms
 
         /**
-         * color used for the stderr message
+         * create the prefix with the current time, it is create only if the last message was
+         * received more than PAUSE_DETECTION_TIME_MS ms ago
+         * @param append if true force to create the prefix string
+         * @return prefix string with the current time
          */
-        private int mErrorColor;
-
-        /**
-         * color used for the received message
-         */
-        private int mReceivedColor;
-
-        /**
-         * color used for the send message
-         */
-        private int mSendColor;
-
-        /**
-         * Set the color to use for the debug message
-         * <p>
-         * The color are in the form 0xAARRGGBB
-         * </p>
-         *
-         * @param sendColor     color to use for the send message
-         * @param receivedColor color to used for the received color
-         * @param errorColor    color to use for show error message
-         * @see android.graphics.Color
-         */
-        public UpdateConsole(int sendColor, int receivedColor, int errorColor) {
-            mErrorColor = errorColor;
-            mSendColor = sendColor;
-            mReceivedColor = receivedColor;
-        }//UpdateConsole
-
-        /**
-         * add the prefix with the date and the message direction to a message string
-         * @param append true if we want add timestamp
-         * @param dir message direction, <  the message arrive from the node, > the message is
-         *            send from the user
-         * @return string with the date and the direction appended
-         */
-        private String appendDateTime(boolean append, char dir) {
+        private String appendDateTime(Boolean append) {
             String str = "";
-            Date now = new Date();
+            Date  now = new Date();
             if (append || (now.getTime() - mLastMessageReceived.getTime() > PAUSE_DETECTION_TIME_MS)) {
-                str += "\n[" + DATE_FORMAT.format(now) + dir + "]";
-            }//if
+                str +="\n[" + DATE_FORMAT.format(now) + mTargetConsole.getPrefix() +"]";
+            }
             mLastMessageReceived = now;
 
             return str;
         }//appendDateTime
 
         /**
-         * append to the console a message and scroll it down
-         * @param message message to append
+         * append the message to the console
+         * @param message message to add
+         * @param std console to use for add the string
          */
-        private void updateConsole(final SpannableStringBuilder message){
+        private void appendMessage(String message, ConsoleType std)
+        {
+            boolean forceAppendPrefix = (mTargetConsole != std);
+            mTargetConsole = std;
+
+            final SpannableStringBuilder displayText = new SpannableStringBuilder();
+
+            displayText.append(appendDateTime(forceAppendPrefix));
+            displayText.append(message);
+
+            displayText.setSpan(
+                    new ForegroundColorSpan(getResources().getColor(mTargetConsole.getColorID())),
+                    0, displayText.length(),Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
             DebugConsoleActivity.this.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    mConsole.append(message);
+                    mConsole.append(displayText);
                     mConsoleView.fullScroll(View.FOCUS_DOWN);
                 }//run
             });
-        }//updateConsole
+        }//appendMessage
 
         @Override
         public void onStdOutReceived(Debug debug, final String message) {
-            final SpannableStringBuilder displayText = new SpannableStringBuilder();
-            displayText.append(appendDateTime(!mStdOutReceiving, '<'));
-            displayText.append(message);
-            mStdOutReceiving = true;
-            mStdInReceiving = false;
-            mStdErrReceiving = false;
-            displayText.setSpan(new ForegroundColorSpan(mReceivedColor), 0, displayText.length(),
-                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-            updateConsole(displayText);
+            appendMessage(message, ConsoleType.OUTPUT);
         }//onStdOutReceived
 
         @Override
         public void onStdErrReceived(Debug debug, String message) {
-            final SpannableStringBuilder displayText = new SpannableStringBuilder();
-            displayText.append(appendDateTime(!mStdErrReceiving, '<'));
-            displayText.append(message);
-            mStdOutReceiving = false;
-            mStdInReceiving = false;
-            mStdErrReceiving = true;
-            displayText.setSpan(new ForegroundColorSpan(mErrorColor), 0, displayText.length(),
-                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-            updateConsole(displayText);
+            appendMessage(message, ConsoleType.ERROR);
         }//onStdErrReceived
 
         @Override
         public void onStdInSent(Debug debug, String message, boolean writeResult) {
-            final SpannableStringBuilder displayText = new SpannableStringBuilder();
-            displayText.append(appendDateTime(!mStdInReceiving, '>'));
-            displayText.append(message);
-            mStdOutReceiving = false;
-            mStdInReceiving = true;
-            mStdErrReceiving = false;
-            displayText.setSpan(new ForegroundColorSpan(mSendColor), 0, displayText.length(),
-                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-            updateConsole(displayText);
+            if (!writeResult )
+                appendMessage(getResources().getString(R.string.ErrorSendMsg), ConsoleType.INPUT);
+            appendMessage(message, ConsoleType.INPUT);
+
+            //we finish to send a string -> send next message if present
+            writeNextMessage();
         }//onStdInSent
-    }
+    }//UpdateConsole
 
 }
 

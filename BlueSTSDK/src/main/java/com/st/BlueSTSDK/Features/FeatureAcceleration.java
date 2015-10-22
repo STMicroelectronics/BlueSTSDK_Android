@@ -158,6 +158,8 @@ public class FeatureAcceleration extends Feature {
         //create the string with the feature data
         StringBuilder sb = new StringBuilder();
         Sample sample = mLastSample; //keep a reference for be thread safe
+        if(sample==null)
+            return super.toString();
         sb.append(FEATURE_NAME).append(":\n\tTimestamp:").append(sample.timestamp).append('\n');
         Number data[] = sample.data;
         Field dataDesc[] = getFieldsDesc();

@@ -89,6 +89,7 @@ If available, the configuration service must have the UUID <code>00000000-000F-1
 
 - <code>00000002-000F-11e1-ac36-0002a5d5c51b</code> (Read/Write/Notify): if available it is used to access the board configuration register that can be modified using the [ConfigControl](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Config/ConfigControl.html) class.
 
+
 ###Example
 The ST Bluemicrosystem1 firmware implements this protocol, you can find the project source here: [Bluemicrosystem1](http://www.st.com/bluemicrosystem1)
 
@@ -154,7 +155,7 @@ Available features can be retrieved from [Features package](https://stmicroelect
     1.	Create an array of [<code>Feature.Field</code>](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Features/Field.html) that will describe the data exported by the new feature
     2.	Create a constructor that accepts only the node as a parameter. From this constructor call the [super constructor](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Feature.html#Feature-java.lang.String-com.st.BlueSTSDK.Node-com.st.BlueSTSDK.Features.Field:A-), passing the feature name and the feature field.
     3.  Implement the method [<code> Feature.ExtractResult Feature.extractData(long,byte[],int)</code>](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Feature.html#extractData-long-byte:A-int-). 
-    3.  Create a utility static method that extracts the data from the Feature.Sample class 
+    4.  Create a utility static method that extracts the data from the Feature.Sample class 
  2. Before start the scanning register the new feature
  
     ```Java
@@ -198,3 +199,4 @@ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
