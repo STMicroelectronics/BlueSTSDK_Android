@@ -28,11 +28,11 @@ Currently, bits are mapped in the following way:
   
    |Bit|31|30|29|28|27|26|25|24|23|22|21|20|19|18|17|16|
    |:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-   |Feature|RFU|RFU|RFU|RFU|RFU|RFU|Proximity|Lux|Acc|Gyro|Mag|Pressure|Humidity|Temperature|Battery|RFU|
+   |Feature|RFU|RFU|RFU|RFU|RFU|MicLevel|Proximity|Lux|Acc|Gyro|Mag|Pressure|Humidity|Temperature|Battery|RFU|
    
    |Bit|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1|0|
    |:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-   |Feature|RFU|RFU|RFU|RFU|RFU|RFU|RFU|Sensor Fusion Compact|Sensor Fusion|RFU|RFU|Activity|Carry Position|RFU|RFU|RFU|
+   |Feature|RFU|RFU|RFU|RFU|RFU|RFU|RFU|Sensor Fusion Compact|Sensor Fusion|RFU|RFU|Activity|Carry Position|Gesture|RFU|RFU|
 You can use one of the RFU bits or define a new device and decide how to map the feature. 
 To see how the data is exported by pre-defined features, consult the export method [<code> Feature.ExtractResult Feature.extractData(long,byte[],int)</code>](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Feature.html#extractData-long-byte:A-int-).  within the feature class definition.
 
@@ -67,7 +67,7 @@ If available, the debug service must have the UUID <code>0000000-0000E-11e1-9ab4
 - <code>00000002-000E-11e1-ac36-0002a5d5c51b</code> (Notify) is used by the board to notify the user of an error message.
 
 ####Configuration
-If available, the configuration service must have the UUID <code>00000000-000F-11e1-ac36-0002a5d5c51b</code> and will contain 2 characteristics:
+If available, the configuration service must have the UUID <code>00000000-000F-11e1-9ab4-0002a5d5c51b</code> and will contain 2 characteristics:
 
 - <code>00000002-000F-11e1-ac36-0002a5d5c51b</code> (Notify/Write): it can be used to send command/data to a specific feature.
 
@@ -87,7 +87,8 @@ If available, the configuration service must have the UUID <code>00000000-000F-1
     
   From the SDK point of view the messages are sent using the method [Feature.sendCommand](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Feature.html#sendCommand-byte-byte:A-) and the answer is notified with a callback passed through the method [Feature.parseCommandResponse](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Feature.html#parseCommandResponse-int-byte-byte:A-).
 
-- <code>00000002-000F-11e1-ac36-0002a5d5c51b</code> (Read/Write/Notify): if available it is used to access the board configuration register that can be modified using the [ConfigControl](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Config/ConfigControl.html) class.
+- <code>00000001-000F-11e1-ac36-0002a5d5c51b</code> (Read/Write/Notify): if available it is used to access the board configuration register that can be modified using the [ConfigControl](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/ConfigControl.html) class.
+
 
 
 ###Example
@@ -171,9 +172,19 @@ Available features can be retrieved from [Features package](https://stmicroelect
     	e.printStackTrace();
     }
     ```
-    
+
+##Log
+The SDK defines some class that will log the feature data.
+Using the class [FeatureLogCSVFile](https://stmicroelectronics-centrallabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Log/FeatureLogCSVFile.html) each feature will have its file, and the data logged will be:
+- Node address (on Android) or name (on iOS)
+- Timestamp, the message id
+- RawData, the data received by the feature extractData method
+- one colunm for each data extracted by the feature
+
 ##Docs
 You can find the documentation at this link: [JavaDoc](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc)
+
+
 
 ##License
 COPYRIGHT(c) 2015 STMicroelectronics

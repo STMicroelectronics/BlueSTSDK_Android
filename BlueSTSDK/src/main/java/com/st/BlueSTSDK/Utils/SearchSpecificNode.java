@@ -27,10 +27,11 @@
 package com.st.BlueSTSDK.Utils;
 
 import android.os.AsyncTask;
-import android.util.Log;
 
 import com.st.BlueSTSDK.Manager;
 import com.st.BlueSTSDK.Node;
+
+import java.util.List;
 
 /**
  * This is a simple class that can be extended for search a node with a particular tag.
@@ -42,9 +43,9 @@ import com.st.BlueSTSDK.Node;
 public class SearchSpecificNode extends AsyncTask<String,Void, Node> {
 
     /**
-     * manager to use for search the node
+     * activity used for start/stop the bt scanning
      */
-    private Manager mManager;
+    private NodeScanActivity mActivity;
 
     /**
      * search time out
@@ -54,11 +55,11 @@ public class SearchSpecificNode extends AsyncTask<String,Void, Node> {
 
     /**
      * build the task
-     * @param m manager to use for search the node
+     * @param scannerActivity activity used for start/stop scanning
      * @param searchTimeMs search timeout
      */
-    public SearchSpecificNode(Manager m, int searchTimeMs){
-        mManager = m;
+    public SearchSpecificNode(NodeScanActivity scannerActivity, int searchTimeMs){
+        mActivity = scannerActivity;
         mSearchTimeoutMs=searchTimeMs;
     }
 
@@ -69,7 +70,8 @@ public class SearchSpecificNode extends AsyncTask<String,Void, Node> {
      * @return first node that match one tag or null if doesn't find anything
      */
     private Node searchOnAlreadyDiscoveredNodes(String... tags){
-        for(Node n : mManager.getNodes()){
+        List<Node> nodes = Manager.getSharedInstance().getNodes();
+        for(Node n : nodes){
             String nodeTag = n.getTag();
             for(String tag : tags){
                 if(nodeTag.equalsIgnoreCase(tag))
@@ -88,7 +90,7 @@ public class SearchSpecificNode extends AsyncTask<String,Void, Node> {
     private Node startNewSearch(final String... tags){
         foundNode=null;
         final Object barrier = new Object();
-        Manager.ManagerListener filterNode = new Manager.ManagerListener() {
+        final Manager.ManagerListener filterNode = new Manager.ManagerListener() {
             @Override
             public void onDiscoveryChange(Manager m, boolean enabled) {
                 if(!enabled) //when stop, unlock the barrier
@@ -108,24 +110,24 @@ public class SearchSpecificNode extends AsyncTask<String,Void, Node> {
                 for(String temp : tags){
                     if(foundTag.equalsIgnoreCase(temp)) {
                         foundNode = node;
-                        m.stopDiscovery();
+                        mActivity.stopNodeDiscovery();
                     }//if
                 }//for
             }//onNodeDiscovered
         };
 
-        mManager.addListener(filterNode);
+        Manager.getSharedInstance().addListener(filterNode);
 
         synchronized (barrier){
             //start the search and wait the end
-            mManager.startDiscovery(mSearchTimeoutMs);
+            mActivity.startNodeDiscovery(mSearchTimeoutMs);
             try {
                 barrier.wait();
             } catch (InterruptedException e) {
             }
         }
-
-        mManager.removeListener(filterNode);
+        //if we are here is because the discovery stops
+        Manager.getSharedInstance().removeListener(filterNode);
 
         return foundNode;
     }

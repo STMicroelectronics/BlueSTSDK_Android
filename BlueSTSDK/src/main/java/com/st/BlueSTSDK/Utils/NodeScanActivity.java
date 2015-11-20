@@ -28,10 +28,13 @@ import com.st.BlueSTSDK.R;
 
 /**
  * Extend this activity if you need to start a device scan using the {@link Manager}.
- * This class will check that the user has the bluetooth enabled and for api >23 it check that
+ * This class will check that the user has the bluetooth enabled and for api &gt; 23 it check that
  * the user granted the location and enable the location service
  */
 public class NodeScanActivity extends AppCompatActivity {
+    private final static String SCAN_TIMEOUT = NodeScanActivity.class.getCanonicalName() + "" +
+            ".SCAN_TIMEOUT";
+
     /**
      * request id for the activity that will ask to the user to enable the bt
      */
@@ -47,7 +50,7 @@ public class NodeScanActivity extends AppCompatActivity {
     protected Manager mManager;
 
     /**
-     * last timeout used for start the scanning
+     * !=0 if we have a start scanning request pending
      */
     private int mLastTimeOut=0;
 
@@ -56,6 +59,18 @@ public class NodeScanActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         mManager = Manager.getSharedInstance();
     }//onCreate
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
+        savedInstanceState.putInt(SCAN_TIMEOUT, mLastTimeOut);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        mLastTimeOut=savedInstanceState.getInt(SCAN_TIMEOUT, 0);
+    }
 
     /**
      * check that the bluetooth is enabled
@@ -88,7 +103,7 @@ public class NodeScanActivity extends AppCompatActivity {
         if(!providerEnabled) {
             Resources res = getResources();
             // notify user
-            AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+            final AlertDialog.Builder dialog = new AlertDialog.Builder(this);
             dialog.setMessage(res.getString(R.string.EnablePositionService));
             dialog.setPositiveButton(res.getString(android.R.string.ok),
                     new DialogInterface.OnClickListener() {
@@ -109,7 +124,13 @@ public class NodeScanActivity extends AppCompatActivity {
                             finish();
                         }//onClick
                     });
-            dialog.show();
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    dialog.show();
+                }
+            });
+
         }//if
         return providerEnabled;
     }//enableLocationService
@@ -166,13 +187,24 @@ public class NodeScanActivity extends AppCompatActivity {
         return false;
     }//checkAdapterAndPermission
 
+    @Override
+    protected  void onResume(){
+        super.onResume();
+        if(mLastTimeOut!=0)
+            startNodeDiscovery(mLastTimeOut);
+
+    }//onResume
+
     /**
      * method start a discovery and update the gui for the new state
+     * @param timeoutMs time to wait before stop the discovery
      */
     public void startNodeDiscovery(int timeoutMs) {
         mLastTimeOut=timeoutMs;
-        if(checkAdapterAndPermission())
+        if(checkAdapterAndPermission()) {
             mManager.startDiscovery(timeoutMs);
+            mLastTimeOut=0;
+        }
     }
 
     /**

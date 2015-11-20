@@ -152,6 +152,7 @@ public abstract class LogFeatureActivity extends AppCompatActivity {
 
     /**
      * stop the previous logger and star a new one
+     * @param n node where add the logger
      */
     protected void startLogging(Node n) {
         if (mCurrentLogger!=null)
@@ -207,6 +208,7 @@ public abstract class LogFeatureActivity extends AppCompatActivity {
 
     /**
      * stop a logger
+     * @param n node where stop the logger
      * <p>
      * in case we are running the {@link com.st.BlueSTSDK.Log.FeatureLogDB} logger the data will be
      * dumped on a csv files

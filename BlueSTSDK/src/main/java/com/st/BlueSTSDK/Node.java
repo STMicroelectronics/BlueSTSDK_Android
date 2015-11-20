@@ -65,6 +65,7 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /** Represent an object that can export some data (feature) using the ble connection
  *
@@ -166,21 +167,33 @@ public class Node{
      * @return true if we can read it
      */
     private static boolean charCanBeRead(BluetoothGattCharacteristic characteristic){
-        return (characteristic.getProperties() &
-                BluetoothGattCharacteristic.PROPERTY_READ )!=0;
+        return characteristic!=null &&
+                (characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_READ )!=0;
     }//charCanBeRead
 
     /**
-     *
      * test if a characteristics can be write
      * @param characteristic characteristic to write
      * @return true if we can write it
      */
     private static boolean charCanBeWrite(BluetoothGattCharacteristic characteristic){
-        return (characteristic.getProperties() &
+        return characteristic!=null &&
+                (characteristic.getProperties() &
                 (BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE |
                         BluetoothGattCharacteristic.PROPERTY_WRITE))!=0;
     }//charCanBeWrite
+
+    /**
+     *
+     * test if a characteristics can be notify
+     * @param characteristic characteristic to notify
+     * @return true if we can receive notification from it
+     */
+    private static boolean charCanBeNotify(BluetoothGattCharacteristic characteristic){
+        return characteristic!=null &&
+                (characteristic.getProperties() &
+                        (BluetoothGattCharacteristic.PROPERTY_NOTIFY))!=0;
+    }//charCanBeNotify
 
     /** callback method to use when we send ble commands */
     private class GattNodeConnection extends BluetoothGattCallback {
@@ -205,7 +218,7 @@ public class Node{
                     ""+newState+" boundState:"+mDevice.getBondState());
             if(status==BluetoothGatt.GATT_SUCCESS){
                 if(newState==BluetoothGatt.STATE_CONNECTED){
-                    mBleThread.post(mScanServicesTask);
+                        mBleThread.post(mScanServicesTask);
                 }else if (newState == BluetoothGatt.STATE_DISCONNECTED){
                     if(mConnection!=null) {
                         mConnection.close();
@@ -343,13 +356,16 @@ public class Node{
             if(status == BluetoothGatt.GATT_FAILURE) {
                 Log.e(TAG, "onServicesDiscovered: Error discovering Service list");
                 Node.this.updateNodeStatus(State.Dead);
+                mNScanRequest.decrementAndGet();
                 return;
             }//if
 
             //for avoid to update the data after that we connect
             //we can have an auto connect -> return if the previous status is unreachable
-            if(Node.this.mState!=State.Connecting && Node.this.mState!=State.Unreachable)
+            if(Node.this.mState!=State.Connecting && Node.this.mState!=State.Unreachable) {
+                mNScanRequest.decrementAndGet();
                 return;
+            }
 
             //List<BluetoothGattService> knowServices = filterKnowServices(gatt.getServices());
             List<BluetoothGattService> nodeServices = gatt.getServices();
@@ -360,6 +376,7 @@ public class Node{
                     Log.e(TAG, "onServicesDiscovered: Empty Service list");
                     Node.this.updateNodeStatus(State.Dead);
                 }//if
+                mNScanRequest.decrementAndGet();
                 return;
             }//if
 
@@ -392,18 +409,12 @@ public class Node{
 
                 }//if-else
             }//for each service
-            //we have collected all the data from the node, now we are fully connected
-            if(mDevice.getBondState()==BluetoothDevice.BOND_BONDED)
+
+
+           //move on the connected state only if all the discover services are finished
+            if(mNScanRequest.decrementAndGet()==0)
                 Node.this.updateNodeStatus(State.Connected);
-            else
-                Node.this.updateNodeStatus(State.Connected);
-            /*
-            //TODO: DEBUG REMOVE ME
-            Log.d(TAG,"Know char:\n");
-            for(BluetoothGattCharacteristic temp : mCharFeatureMap.keySet()){
-                Log.d(TAG,"Add Char: "+temp.getUuid().toString()+"\n");
-            }
-            */
+
         }//onServicesDiscovered
 
         /**
@@ -496,13 +507,14 @@ public class Node{
 
         @Override
         public void onDescriptorWrite(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status) {
-            //Log.d(TAG,"DescriptorWrite: "+status);
+            Log.d(TAG,"DescriptorWrite: "+status);
             //descriptor write -> remove from the queue
             if(status == BluetoothGatt.GATT_SUCCESS)
                 dequeueWriteDesc(descriptor);
             else{
                 if(mDevice.getBondState()!=BluetoothDevice.BOND_BONDING) {
-                    Log.e(TAG,"onDescriptorWrite Error writing the descriptor: "+descriptor);
+                    Log.e(TAG,"onDescriptorWrite Error writing the descriptor: "+descriptor
+                            .getCharacteristic());
                     Node.this.updateNodeStatus(State.Dead);
                 }//if
             }//if-else
@@ -555,6 +567,13 @@ public class Node{
         }
     };
 
+
+    /**
+     * count the number of discover service call, we move in the connected state only if we
+     * finish all the call
+     */
+    private AtomicInteger mNScanRequest = new AtomicInteger(0);
+
     /**
      * task for ask to discover the device service, if the call fail this command will auto
      * submit itself after {@code RETRY_COMMAND_DELAY_MS}
@@ -562,9 +581,13 @@ public class Node{
     private Runnable mScanServicesTask = new Runnable() {
         @Override
         public void run() {
-            if(mConnection!=null &&
-               !mConnection.discoverServices())
-                mBleThread.postDelayed(this, RETRY_COMMAND_DELAY_MS);
+            if (mConnection != null){
+                if (mConnection.discoverServices())
+                    mNScanRequest.incrementAndGet();
+                else
+                    mBleThread.postDelayed(this, RETRY_COMMAND_DELAY_MS);
+                //if-else
+            }//if connection
         }//run
     };
 
@@ -703,7 +726,7 @@ public class Node{
 
 
     /** ms to wait before declare a node as lost */
-    private static long NODE_LOST_TIMEOUT_MS=2000;
+    private static long NODE_LOST_TIMEOUT_MS=4000;
     /** thread where wait the timeout */
     private Handler mHandler;  //NOTE: since the handler is crate in a thread,
     // is better check that the class is not null in the case we try to use it before the thread
@@ -823,11 +846,11 @@ public class Node{
      * @throws  InvalidBleAdvertiseFormat if the advertise is not well formed
      */
     public Node(BluetoothDevice device,int rssi,byte advertise[]) throws InvalidBleAdvertiseFormat{
+        mAdvertise = new BleAdvertiseParser(advertise);
         mDevice = device;
         updateRssi(rssi);
         updateNodeStatus(State.Idle);
         initHandler();
-        mAdvertise = new BleAdvertiseParser(advertise);
         buildAvailableFeatures();
         addNodeStateListener(mNotifyCommandChange);
         Log.i(TAG, mAdvertise.toString());
@@ -905,11 +928,11 @@ public class Node{
                     BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice
                             .EXTRA_DEVICE);
                     Node n = Manager.getSharedInstance().getNodeWithTag(device.getAddress());
-                    if(n!=null && mState==State.Connected) // is one of our devices and is
-                    // already connected
+                    if(n!=null && mState==State.Connected) { // is one of our devices and is
+                        // already connected
                         //mBleThread.post(mScanServicesTask);
                         updateNodeStatus(State.Connected);
-                    //if
+                    }//if
                 }//if
             }//onReceive
         };
@@ -1071,33 +1094,30 @@ public class Node{
         if(!feature.isEnabled())
             return false;
         final BluetoothGattCharacteristic characteristic = getCorrespondingChar(feature);
-        if(characteristic!=null){
-            if(!charCanBeRead(characteristic))
-                return false;
-            //since we have to wait that the write description are done, we have to wait a thread -> we
-            //can not run directly in the bleThread, so we use the handler for the rssi, since the
-            // load on that thread will be low
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    final Runnable readChar = this;
-                    if (mConnection != null && isConnected()) {
-                        //wait that the queue is empty and write the characteristics, if an error
-                        // happen we enqueue again the command
-                        waitCompleteAllDescriptorWriteRequest(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (!mConnection.readCharacteristic(characteristic))
-                                    mHandler.postDelayed(readChar, RETRY_COMMAND_DELAY_MS);
-                            }//run
-                        });
-                    }//if
-                }//run
-            });
-
-            return true;
-        }else
+        if(!charCanBeRead(characteristic))
             return false;
+        //since we have to wait that the write description are done, we have to wait a thread -> we
+        //can not run directly in the bleThread, so we use the handler for the rssi, since the
+        // load on that thread will be low
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+            final Runnable readChar = this;
+            if (mConnection != null && isConnected()) {
+                //wait that the queue is empty and write the characteristics, if an error
+                // happen we enqueue again the command
+                waitCompleteAllDescriptorWriteRequest(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (!mConnection.readCharacteristic(characteristic))
+                            mHandler.postDelayed(readChar, RETRY_COMMAND_DELAY_MS);
+                    }//run
+                });
+            }//if
+        }//run
+    });
+
+        return true;
     }//readFeature
 
     /* standard descriptor id used for enable/disable the notification */
@@ -1134,7 +1154,7 @@ public class Node{
         public void run() {
         if(mConnection!=null &&  (isConnected() || mState==State.Disconnecting)) {
             synchronized (mWriteDescQueue) {
-                if(mWriteDescQueue.size()>=1) {
+                if(!mWriteDescQueue.isEmpty()) {
                     BluetoothGattDescriptor desc = mWriteDescQueue.peek();
                     if (Arrays.equals(desc.getValue(), BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE))
                         mConnection.setCharacteristicNotification(desc.getCharacteristic(), true);
@@ -1185,10 +1205,12 @@ public class Node{
      */
     boolean changeNotificationStatus(BluetoothGattCharacteristic characteristic,
                                           boolean enable){
-        if(characteristic!=null && mConnection!=null && isConnected()){
+
+        if(charCanBeNotify(characteristic) && mConnection!=null && isConnected()){
             BluetoothGattDescriptor descriptor = characteristic.getDescriptor(NOTIFY_CHAR_DESC_UUID);
             if(descriptor==null)
                 return false;
+
             if(enable)
                 descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
             else
@@ -1207,8 +1229,12 @@ public class Node{
     public boolean disableNotification(Feature feature){
         if(!feature.isEnabled() && feature.getParentNode()!=this)
             return false;
-        mNotifyFeature.remove(feature);
-       return changeNotificationStatus(getCorrespondingChar(feature),false);
+        BluetoothGattCharacteristic featureChar =getCorrespondingChar(feature);
+        if(charCanBeNotify(featureChar)) {
+            mNotifyFeature.remove(feature);
+            return changeNotificationStatus(getCorrespondingChar(feature),false);
+        }//
+        return false;
     }//disableNotification
 
     /**
@@ -1219,8 +1245,12 @@ public class Node{
     public boolean enableNotification(Feature feature){
         if(!feature.isEnabled() && feature.getParentNode()!=this)
             return false;
-        mNotifyFeature.add(feature);
-        return changeNotificationStatus(getCorrespondingChar(feature), true);
+        BluetoothGattCharacteristic featureChar =getCorrespondingChar(feature);
+        if(charCanBeNotify(featureChar)) {
+            mNotifyFeature.add(feature);
+            return changeNotificationStatus(featureChar, true);
+        }
+        return false;
     }//enableNotification
 
     /**
@@ -1271,8 +1301,6 @@ public class Node{
      */
     boolean writeFeatureData(Feature feature,byte data[]){
         final BluetoothGattCharacteristic characteristic = getCorrespondingChar(feature);
-        if(characteristic==null)
-            return false;
         //not enable or not exist or not in write mode -> return false
         if(!charCanBeWrite(characteristic) || !feature.isEnabled())
             return false;

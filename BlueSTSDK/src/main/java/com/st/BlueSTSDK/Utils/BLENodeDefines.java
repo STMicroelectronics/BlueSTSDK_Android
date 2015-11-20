@@ -34,6 +34,7 @@ import com.st.BlueSTSDK.Features.FeatureActivity;
 import com.st.BlueSTSDK.Features.FeatureBattery;
 import com.st.BlueSTSDK.Features.FeatureCarryPosition;
 import com.st.BlueSTSDK.Features.FeatureFreeFall;
+import com.st.BlueSTSDK.Features.FeatureGesture;
 import com.st.BlueSTSDK.Features.FeatureGyroscope;
 import com.st.BlueSTSDK.Features.FeatureHumidity;
 import com.st.BlueSTSDK.Features.FeatureLuminosity;
@@ -278,6 +279,7 @@ public class BLENodeDefines {
             Nucleo_0_Features.put(0x00000080, FeatureMemsSensorFusion.class);
             Nucleo_0_Features.put(0x00000010, FeatureActivity.class);
             Nucleo_0_Features.put(0x00000008, FeatureCarryPosition.class);
+            Nucleo_0_Features.put(0x00000004, FeatureGesture.class);
 
         }//static
 

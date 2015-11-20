@@ -101,7 +101,7 @@ public class FeatureLogCSVFile implements Feature.FeatureLoggerListener {
      */
     private void storeBlobData(Writer out,byte data[]) throws IOException {
         for(byte b: data) {
-            out.append(String.format("%X",b));
+            out.append( String.format("%02X", b));
         }//for
     }//storeBlobData
 

@@ -30,10 +30,12 @@ import android.bluetooth.BluetoothGattCharacteristic;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.annotation.Nullable;
 
 import com.st.BlueSTSDK.Config.Command;
 import com.st.BlueSTSDK.Config.Register;
 import com.st.BlueSTSDK.Features.emul.FeatureRandomAcceleration;
+import com.st.BlueSTSDK.Features.emul.FeatureRandomGesture;
 import com.st.BlueSTSDK.Features.emul.FeatureRandomGyroscope;
 import com.st.BlueSTSDK.Features.emul.FeatureRandomHumidity;
 import com.st.BlueSTSDK.Features.emul.FeatureRandomLuminosity;
@@ -87,7 +89,8 @@ public class NodeEmulator extends Node {
             FeatureRandomHumidity.class,
             FeatureRandomMagnetometer.class,
             FeatureRandomHumidity.class,
-            FeatureRandomMicLevel.class
+            FeatureRandomMicLevel.class,
+            FeatureRandomGesture.class
     };
 
     /**
@@ -187,7 +190,8 @@ public class NodeEmulator extends Node {
      */
     public NodeEmulator(Class<? extends Feature> emulFeature[]) throws InvalidBleAdvertiseFormat {
         //byte{size=5+1,type=vendor_data,data={v1.0,GENERIC board + 4x 0xFF } }
-        super(null, 10, new byte[]{0x07, (byte) 0xFF, (byte) 0x01, (byte) 0x00, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF,
+        super(null, 10, new byte[]{0x07, (byte) 0xFF, (byte) 0x01, (byte) 0x00, (byte) 0xFF,
+                (byte) 0xFF, (byte) 0xFF,
                 (byte) 0xFF});
         initHandler();
         buildAvailableFeatures(emulFeature);
@@ -238,6 +242,22 @@ public class NodeEmulator extends Node {
         return java.util.Collections.unmodifiableList(mAvailableFeature);
     }
 
+    /**
+     * search for a specific feature
+     * @param type type of feature that we want search
+     * @param <T> class that will want search
+     * @return the feature of type {@code type} exported by this node, or null if not present
+     */
+    @SuppressWarnings("unchecked")
+    public @Nullable
+    <T extends Feature> T getFeature(Class<T> type){
+        for (Feature f : mAvailableFeature) {
+            if (type.isInstance(f)) {
+                return (T) f;
+            }
+        }// for list
+        return null;
+    }//getFeature
 
     @Override
     public boolean readFeature(Feature feature) {
