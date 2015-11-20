@@ -87,8 +87,7 @@ If available, the configuration service must have the UUID <code>00000000-000F-1
     
   From the SDK point of view the messages are sent using the method [Feature.sendCommand](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Feature.html#sendCommand-byte-byte:A-) and the answer is notified with a callback passed through the method [Feature.parseCommandResponse](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Feature.html#parseCommandResponse-int-byte-byte:A-).
 
-- <code>00000001-000F-11e1-ac36-0002a5d5c51b</code> (Read/Write/Notify): if available it is used to access the board configuration register that can be modified using the [ConfigControl](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/ConfigControl.html) class.
-
+- <code>00000001-000F-11e1-ac36-0002a5d5c51b</code> (Read/Write/Notify): if available it is used to access the board configuration register that can be modified using the [ConfigControl](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Config/ConfigControl.html) class.
 
 
 ###Example
