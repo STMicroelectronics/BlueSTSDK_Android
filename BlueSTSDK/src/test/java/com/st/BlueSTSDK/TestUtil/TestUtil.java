@@ -32,6 +32,8 @@ import android.util.SparseArray;
 import org.robolectric.Robolectric;
 import org.robolectric.util.Scheduler;
 
+import java.util.Arrays;
+
 public class TestUtil {
 
     static  public <T> boolean sparseArrayEqual(SparseArray<T> a,SparseArray<T> b){
@@ -60,10 +62,18 @@ public class TestUtil {
         while (fgTask.size()!=0 || bgTask.size()!=0){
             Robolectric.flushBackgroundThreadScheduler();
             Robolectric.flushForegroundThreadScheduler();
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
+    }
 
-
-
+    public static byte[] mergeArray(byte[] first, byte[] second) {
+        byte[] result = Arrays.copyOf(first, first.length + second.length);
+        System.arraycopy(second, 0, result, first.length, second.length);
+        return result;
     }
 
 }

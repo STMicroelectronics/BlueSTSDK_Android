@@ -219,7 +219,7 @@ public class NodeContainerFragment extends Fragment {
         }//if
 
         super.onDestroy();
-    }//onDestory
+    }//onDestroy
 
 }
 

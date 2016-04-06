@@ -36,6 +36,11 @@ import org.junit.Test;
 public class TestPressureFunction {
 
     @Test
+    public void testNullSamplePressure(){
+        Assert.assertEquals(Float.NaN, FeaturePressure.getPressure(null), 0.0f);
+    }
+
+    @Test
     public void testInvalidSamplePressure(){
         Feature.Sample s = new Feature.Sample(100,new Number[]{});
         Assert.assertEquals(Float.NaN, FeaturePressure.getPressure(s), 0.0f);

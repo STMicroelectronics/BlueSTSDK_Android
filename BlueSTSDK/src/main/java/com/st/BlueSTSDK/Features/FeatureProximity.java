@@ -77,10 +77,11 @@ public class FeatureProximity extends Feature {
      * @return proximity value or -1 if the data array is not valid
      */
     public static int getProximityDistance(Sample sample) {
-        if(sample.data.length>0)
-            if (sample.data[0] != null)
-                return sample.data[0].intValue();
-            //else
+        if(sample!=null)
+            if(sample.data.length>0)
+                if (sample.data[0] != null)
+                    return sample.data[0].intValue();
+        //else
         return -1; // the luminosity is always positive
     }//getProximityDistance
 

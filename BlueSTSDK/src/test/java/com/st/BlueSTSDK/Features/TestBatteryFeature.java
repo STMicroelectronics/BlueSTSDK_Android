@@ -36,6 +36,11 @@ import org.junit.Test;
 public class TestBatteryFeature {
 
     @Test
+    public void testNullSampleBatteryLevel(){
+        Assert.assertEquals(Float.NaN, FeatureBattery.getBatteryLevel(null), 0.0f);
+    }
+
+    @Test
     public void testInvalidSampleBatteryLevel(){
         Feature.Sample s = new Feature.Sample(100,new Number[]{});
         Assert.assertEquals(Float.NaN, FeatureBattery.getBatteryLevel(s), 0.0f);
@@ -46,6 +51,11 @@ public class TestBatteryFeature {
         float x = 20.0f;
         Feature.Sample s = new Feature.Sample(100,new Number[]{x});
         Assert.assertEquals(x, FeatureBattery.getBatteryLevel(s), 0.0f);
+    }
+
+    @Test
+    public void testNullSampleVoltage(){
+        Assert.assertEquals(Float.NaN,FeatureBattery.getVoltage(null),0.0f);
     }
 
     @Test
@@ -62,6 +72,11 @@ public class TestBatteryFeature {
     }
 
     @Test
+    public void testNullSampleCurrent(){
+        Assert.assertEquals(Float.NaN,FeatureBattery.getCurrent(null),0.0f);
+    }
+
+    @Test
     public void testInvalidSampleCurrent(){
         Feature.Sample s = new Feature.Sample(100,new Number[]{0,0});
         Assert.assertEquals(Float.NaN,FeatureBattery.getCurrent(s),0.0f);
@@ -72,6 +87,12 @@ public class TestBatteryFeature {
         float z = 1.0f;
         Feature.Sample s = new Feature.Sample(100,new Number[]{0,0,z});
         Assert.assertEquals(z, FeatureBattery.getCurrent(s), 0.0f);
+    }
+
+    @Test
+    public void testNullSampleStatus(){
+        Assert.assertEquals(FeatureBattery.BatteryStatus.Error,
+                FeatureBattery.getBatteryStatus(null));
     }
 
     @Test

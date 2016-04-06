@@ -35,16 +35,23 @@ import android.support.annotation.Nullable;
 import com.st.BlueSTSDK.Config.Command;
 import com.st.BlueSTSDK.Config.Register;
 import com.st.BlueSTSDK.Features.emul.FeatureRandomAcceleration;
-import com.st.BlueSTSDK.Features.emul.FeatureRandomGesture;
+import com.st.BlueSTSDK.Features.emul.FeatureRandomAccelerationEvent;
+import com.st.BlueSTSDK.Features.emul.FeatureRandomActivityRecognition;
+import com.st.BlueSTSDK.Features.emul.FeatureRandomBattery;
+import com.st.BlueSTSDK.Features.emul.FeatureRandomCarryPosition;
+import com.st.BlueSTSDK.Features.emul.FeatureRandomFreeFall;
 import com.st.BlueSTSDK.Features.emul.FeatureRandomGyroscope;
 import com.st.BlueSTSDK.Features.emul.FeatureRandomHumidity;
 import com.st.BlueSTSDK.Features.emul.FeatureRandomLuminosity;
 import com.st.BlueSTSDK.Features.emul.FeatureRandomMagnetometer;
+import com.st.BlueSTSDK.Features.emul.FeatureRandomMemsGesture;
 import com.st.BlueSTSDK.Features.emul.FeatureRandomMemsSensorFusion;
 import com.st.BlueSTSDK.Features.emul.FeatureRandomMemsSensorFusionCompact;
 import com.st.BlueSTSDK.Features.emul.FeatureRandomMicLevel;
+import com.st.BlueSTSDK.Features.emul.FeatureRandomPedometer;
 import com.st.BlueSTSDK.Features.emul.FeatureRandomPressure;
 import com.st.BlueSTSDK.Features.emul.FeatureRandomProximity;
+import com.st.BlueSTSDK.Features.emul.FeatureRandomProximityGesture;
 import com.st.BlueSTSDK.Features.emul.FeatureRandomTemperature;
 import com.st.BlueSTSDK.Utils.BLENodeDefines;
 import com.st.BlueSTSDK.Utils.InvalidBleAdvertiseFormat;
@@ -90,7 +97,15 @@ public class NodeEmulator extends Node {
             FeatureRandomMagnetometer.class,
             FeatureRandomHumidity.class,
             FeatureRandomMicLevel.class,
-            FeatureRandomGesture.class
+            FeatureRandomProximityGesture.class,
+            FeatureRandomMemsGesture.class,
+            FeatureRandomPedometer.class,
+            FeatureRandomAccelerationEvent.class,
+            FeatureRandomBattery.class,
+            FeatureRandomFreeFall.class,
+            FeatureRandomActivityRecognition.class,
+            FeatureRandomCarryPosition.class
+
     };
 
     /**
@@ -229,7 +244,7 @@ public class NodeEmulator extends Node {
 
     @Override
     public String getTag() {
-        return "Virtual Tag " + mEmulatorId;
+        return "Virtual Tag " + String.format("%02X:",mEmulatorId);
     }//getTag
 
     @Override
@@ -329,7 +344,7 @@ public class NodeEmulator extends Node {
     }
 
     @Override
-    int getTxPowerLevel() {
+    public int getTxPowerLevel() {
         return 10;
     }//getTxPowerLevel
 
@@ -369,7 +384,7 @@ public class NodeEmulator extends Node {
     }
 
     /**
-     * interface that the emulated feature have to implement
+     * Interface that the emulated feature have to implement
      */
     public interface EmulableFeature {
         /**

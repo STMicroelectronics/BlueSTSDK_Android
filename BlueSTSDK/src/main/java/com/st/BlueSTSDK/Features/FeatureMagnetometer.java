@@ -64,9 +64,11 @@ public class FeatureMagnetometer extends Feature {
      * @return magnetometer in the X axis, or Nan if the array doesn't contain data
      */
     public static float getMagX(Sample s) {
-        if (s.data.length > MAG_X_INDEX)
-            if (s.data[MAG_X_INDEX] != null)
-                return s.data[MAG_X_INDEX].floatValue();
+        if(s!=null)
+            if(s.data!=null)
+                if (s.data.length > MAG_X_INDEX)
+                    if (s.data[MAG_X_INDEX] != null)
+                        return s.data[MAG_X_INDEX].floatValue();
         //else
         return Float.NaN;
     }//getMagX
@@ -78,9 +80,11 @@ public class FeatureMagnetometer extends Feature {
      * @return magnetometer in the Y axis, or Nan if the array doesn't contain data
      */
     public static float getMagY(Sample s) {
-        if (s.data.length > MAG_Y_INDEX)
-            if (s.data[MAG_Y_INDEX] != null)
-                return s.data[MAG_Y_INDEX].floatValue();
+        if(s!=null)
+            if(s.data!=null)
+                if (s.data.length > MAG_Y_INDEX)
+                    if (s.data[MAG_Y_INDEX] != null)
+                        return s.data[MAG_Y_INDEX].floatValue();
         //else
         return Float.NaN;
     }//getMagY
@@ -92,9 +96,11 @@ public class FeatureMagnetometer extends Feature {
      * @return magnetometer in the Z axis, or Nan if the array doesn't contain data
      */
     public static float getMagZ(Sample s) {
-        if (s.data.length > MAG_Z_INDEX)
-            if (s.data[MAG_Z_INDEX] != null)
-                return s.data[MAG_Z_INDEX].floatValue();
+        if(s!=null)
+            if(s.data!=null)
+                if (s.data.length > MAG_Z_INDEX)
+                    if (s.data[MAG_Z_INDEX] != null)
+                        return s.data[MAG_Z_INDEX].floatValue();
         //else
         return Float.NaN;
     }//getMagZ

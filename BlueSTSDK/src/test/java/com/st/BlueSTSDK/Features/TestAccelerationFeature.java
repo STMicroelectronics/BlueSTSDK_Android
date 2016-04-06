@@ -35,6 +35,12 @@ import org.junit.Test;
 
 public class TestAccelerationFeature {
 
+
+    @Test
+    public void testNullSampleX(){
+        Assert.assertEquals(Float.NaN, FeatureAcceleration.getAccX(null), 0.0f);
+    }
+
     @Test
     public void testInvalidSampleX(){
         Feature.Sample s = new Feature.Sample(100,new Number[]{});
@@ -49,6 +55,11 @@ public class TestAccelerationFeature {
     }
 
     @Test
+    public void testNullSampleY(){
+        Assert.assertEquals(Float.NaN, FeatureAcceleration.getAccY(null), 0.0f);
+    }
+
+    @Test
     public void testInvalidSampleY(){
         Feature.Sample s = new Feature.Sample(100,new Number[]{0});
         Assert.assertEquals(Float.NaN,FeatureAcceleration.getAccY(s),0.0f);
@@ -59,6 +70,11 @@ public class TestAccelerationFeature {
         float y = 1.0f;
         Feature.Sample s = new Feature.Sample(100,new Number[]{0,y});
         Assert.assertEquals(y, FeatureAcceleration.getAccY(s), 0.0f);
+    }
+
+    @Test
+    public void testNullSampleZ(){
+        Assert.assertEquals(Float.NaN, FeatureAcceleration.getAccZ(null), 0.0f);
     }
 
     @Test

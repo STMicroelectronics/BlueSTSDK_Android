@@ -35,6 +35,11 @@ import org.junit.Test;
 public class TestFreeFallFeature {
 
     @Test
+    public void testNullFreeFallStatus(){
+        Assert.assertEquals(false, FeatureFreeFall.getFreeFallStatus(null));
+    }
+
+    @Test
     public void testInvalidFreeFallStatus(){
         Feature.Sample s = new Feature.Sample(100,new Number[]{});
         Assert.assertEquals(false, FeatureFreeFall.getFreeFallStatus(s));

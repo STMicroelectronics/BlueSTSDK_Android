@@ -38,6 +38,12 @@ import java.util.Date;
 public class TestActivityFeature {
 
     @Test
+    public void testNullSampleActivityId(){
+        Assert.assertEquals(FeatureActivity.ActivityType.ERROR,
+                FeatureActivity.getActivityStatus(null));
+    }
+
+    @Test
     public void testInvalidSampleActivityId(){
         Feature.Sample s = new Feature.Sample(100,new Number[]{});
         Assert.assertEquals(FeatureActivity.ActivityType.ERROR,
@@ -50,6 +56,11 @@ public class TestActivityFeature {
         Feature.Sample s = new Feature.Sample(100,new Number[]{activityId});
         Assert.assertEquals(FeatureActivity.ActivityType.WALKING,
                 FeatureActivity.getActivityStatus(s));
+    }
+
+    @Test
+    public void testNullSampleTime(){
+        Assert.assertEquals(null,FeatureActivity.getActivityDate(null));
     }
 
     @Test

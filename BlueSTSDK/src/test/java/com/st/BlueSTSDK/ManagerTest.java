@@ -61,11 +61,6 @@ public class ManagerTest {
     private Manager mManager;
 
 
-    private static void execAsyncTask() {
-        Robolectric.flushBackgroundThreadScheduler();
-        Robolectric.flushForegroundThreadScheduler();
-    }
-
     @Before
     public void setUp() {
         mBtAdapter = Shadows.shadowOf(BluetoothAdapter.getDefaultAdapter());

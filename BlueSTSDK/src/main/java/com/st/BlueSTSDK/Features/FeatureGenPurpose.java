@@ -77,8 +77,10 @@ public class FeatureGenPurpose extends Feature {
      * @return array of byte
      */
     public static byte[] getRawData(Sample s){
-        byte rawData[] = new byte[s.data.length];
+        if(s==null)
+            return null;
 
+        byte rawData[] = new byte[s.data.length];
         for(int i=0;i<s.data.length;i++){
             rawData[i]=s.data[i].byteValue();
         }//for i

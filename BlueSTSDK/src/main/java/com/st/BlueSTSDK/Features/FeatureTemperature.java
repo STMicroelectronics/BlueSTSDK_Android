@@ -30,6 +30,8 @@ import com.st.BlueSTSDK.Feature;
 import com.st.BlueSTSDK.Node;
 import com.st.BlueSTSDK.Utils.NumberConversion;
 
+import java.util.Arrays;
+
 /**
  * Feature that contains the data comes form a temperature sensor.
  * <p>
@@ -47,15 +49,24 @@ public class FeatureTemperature extends Feature {
     public static final float DATA_MAX = 100;
     public static final float DATA_MIN = 0;
 
+    protected static final Field TEMPERATURE_FILED =
+            new Field(FEATURE_DATA_NAME, FEATURE_UNIT, Field.Type.Float, DATA_MAX, DATA_MIN);
+
     /**
      * build a temperature feature
      *
      * @param n node that will send data to this feature
      */
     public FeatureTemperature(Node n) {
-        super(FEATURE_NAME, n, new Field[]{
-                new Field(FEATURE_DATA_NAME, FEATURE_UNIT, Field.Type.Float, DATA_MAX, DATA_MIN)
-        });
+        super(FEATURE_NAME, n, new Field[]{ TEMPERATURE_FILED });
+    }
+
+    protected FeatureTemperature(String name, Node n,Field data[]) {
+        super(name,n,data);
+        if(data[0]!=TEMPERATURE_FILED){
+            throw new IllegalArgumentException("First data[0] must be FeatureTemperature" +
+                    ".TEMPERATURE_FILED");
+        }//if
     }
 
     /**
@@ -65,9 +76,10 @@ public class FeatureTemperature extends Feature {
      * @return temperature value or nan if the data array is not valid
      */
     public static float getTemperature(Sample sample) {
-        if(sample.data.length>0)
-            if (sample.data[0] != null)
-                return sample.data[0].floatValue();
+        if(sample!=null)
+            if(sample.data.length>0)
+                if (sample.data[0] != null)
+                    return sample.data[0].floatValue();
         //else
         return Float.NaN;
     }

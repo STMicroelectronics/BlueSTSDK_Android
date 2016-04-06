@@ -32,6 +32,8 @@ import android.util.Log;
 import com.st.BlueSTSDK.Feature;
 import com.st.BlueSTSDK.Features.Field;
 
+import java.util.Date;
+
 /**
  * Log the feature data using the Android logcat console
  *
@@ -41,6 +43,11 @@ import com.st.BlueSTSDK.Features.Field;
 public class FeatureLogLogCat implements Feature.FeatureLoggerListener {
 
     public static final int DEFAULT_LOG_PRIORITY = Log.DEBUG;
+
+    /**
+     * Start log date time
+     */
+    private  Date mStartLog;
 
     /**
      * check that the priority value is valid (one of the priority defined in the Log class or
@@ -67,6 +74,7 @@ public class FeatureLogLogCat implements Feature.FeatureLoggerListener {
     /** build a class using the class name as tag and the default message priority */
     public FeatureLogLogCat(){
         this(FeatureLogLogCat.class.getCanonicalName());
+        mStartLog = new Date();
     }
 
     /**
@@ -90,17 +98,20 @@ public class FeatureLogLogCat implements Feature.FeatureLoggerListener {
     @Override
     public void logFeatureUpdate(Feature feature,byte[] rawData,Feature.Sample sample){
         StringBuilder sb = new StringBuilder();
-        sb.append(feature.getName()).append(' ');
+        sb.append(Long.toString(System.currentTimeMillis() - mStartLog.getTime())).append(' ')
+          .append(feature.getParentNode().getFriendlyName().replace(" @", "_")).append(' ')
+          .append(Long.toString(sample.timestamp)).append(' ')
+          .append(feature.getName()).append(' ');
         if(rawData!=null) {
             for (byte b : rawData) {
-                sb.append(String.format("%X", b));
+                sb.append(String.format("%02X", b));
             }//for
-            Log.println(mPriority,mTag,sb.toString());
+            //Log.println(mPriority,mTag,sb.toString());
         }
 
 
-        sb.delete(0,sb.length());
-        sb.append(feature.getName()).append('\n');
+        //sb.delete(0,sb.length());
+        //sb.append(feature.getName()).append('\n');
         Field f[] = feature.getFieldsDesc();
         for(int i =0;i<f.length;i++){
             sb.append('\t').append(f[i].getName()).append(' ');

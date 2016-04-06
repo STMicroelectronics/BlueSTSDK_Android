@@ -31,9 +31,6 @@ import android.bluetooth.BluetoothGattCharacteristic;
 
 import com.st.BlueSTSDK.Config.Command;
 import com.st.BlueSTSDK.Config.Register;
-import com.st.BlueSTSDK.Config.RegisterDefines;
-import com.st.BlueSTSDK.Features.Field;
-import com.st.BlueSTSDK.Node;
 
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
@@ -192,22 +189,5 @@ public class ConfigControl {
             mRegChar.setValue(cmd.ToWritePacket());
             mConnection.writeCharacteristic(mRegChar);
         }
-    }
-    public void setMode(Node.Mode mode){
-        int valToSend = 0;
-        switch (mode) {
-            case Application:
-                valToSend = 0;
-                break;
-            case USB_DFU:
-                valToSend = 1;
-                break;
-            case OTA_BLE_DFU:
-                valToSend = 2;
-                break;
-        }
-
-        Command cmd = new Command(RegisterDefines.RegistersName.DFU_REBOOT, Register.Target.SESSION, valToSend, Field.Type.Int16);
-        write(cmd);
     }
 }

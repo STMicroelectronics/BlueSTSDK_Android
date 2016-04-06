@@ -33,10 +33,12 @@ import com.st.BlueSTSDK.Node;
 
 /**
  * Feature used for notify the free fall event from the accelerometer
- *
+ * @deprecated use {@link FeatureAccelerationEvent} enabling {@link
+ * com.st.BlueSTSDK.Features.FeatureAccelerationEvent.AccelerationEvent#FREE_FALL}
  * @author STMicroelectronics - Central Labs.
  * @version 1.0
  */
+@Deprecated
 public class FeatureFreeFall extends Feature {
 
     public static final String FEATURE_NAME="FreeFall";
@@ -63,10 +65,10 @@ public class FeatureFreeFall extends Feature {
      * @return true if there was a free fall event
      */
     public static boolean getFreeFallStatus(Sample sample) {
-        if(sample.data.length>0)
-            if (sample.data[0] != null) {
-                return sample.data[0].byteValue()!=0;
-            }
+        if(sample!=null)
+            if(sample.data.length>0)
+                if (sample.data[0] != null)
+                    return sample.data[0].byteValue()!=0;
         //else
         return false;
     }//getActivity

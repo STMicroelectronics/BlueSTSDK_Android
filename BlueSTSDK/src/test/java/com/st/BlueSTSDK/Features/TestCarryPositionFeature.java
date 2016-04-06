@@ -37,6 +37,12 @@ import java.util.Date;
 public class TestCarryPositionFeature {
 
     @Test
+    public void testNullSamplePositionId(){
+        Assert.assertEquals(FeatureCarryPosition.Position.ERROR,
+                FeatureCarryPosition.getPosition(null));
+    }
+
+    @Test
     public void testInvalidSamplePositionId(){
         Feature.Sample s = new Feature.Sample(100,new Number[]{});
         Assert.assertEquals(FeatureCarryPosition.Position.ERROR,

@@ -30,11 +30,16 @@ import android.util.SparseArray;
 
 import com.st.BlueSTSDK.Feature;
 import com.st.BlueSTSDK.Features.FeatureAcceleration;
+import com.st.BlueSTSDK.Features.FeatureAccelerationEvent;
 import com.st.BlueSTSDK.Features.FeatureActivity;
 import com.st.BlueSTSDK.Features.FeatureBattery;
 import com.st.BlueSTSDK.Features.FeatureCarryPosition;
+import com.st.BlueSTSDK.Features.FeatureDirectionOfArrival;
 import com.st.BlueSTSDK.Features.FeatureFreeFall;
-import com.st.BlueSTSDK.Features.FeatureGesture;
+import com.st.BlueSTSDK.Features.FeatureSwitch;
+import com.st.BlueSTSDK.Features.FeatureMemsGesture;
+import com.st.BlueSTSDK.Features.FeaturePedometer;
+import com.st.BlueSTSDK.Features.FeatureProximityGesture;
 import com.st.BlueSTSDK.Features.FeatureGyroscope;
 import com.st.BlueSTSDK.Features.FeatureHumidity;
 import com.st.BlueSTSDK.Features.FeatureLuminosity;
@@ -45,6 +50,10 @@ import com.st.BlueSTSDK.Features.FeatureMicLevel;
 import com.st.BlueSTSDK.Features.FeaturePressure;
 import com.st.BlueSTSDK.Features.FeatureProximity;
 import com.st.BlueSTSDK.Features.FeatureTemperature;
+import com.st.BlueSTSDK.Features.remote.RemoteFeatureHumidity;
+import com.st.BlueSTSDK.Features.remote.RemoteFeatureSwitch;
+import com.st.BlueSTSDK.Features.remote.RemoteFeaturePressure;
+import com.st.BlueSTSDK.Features.remote.RemoteFeatureTemperature;
 
 
 import java.util.UUID;
@@ -249,7 +258,13 @@ public class BLENodeDefines {
         /**
          * array that map a feature mask with a feature class, for a nucleo devices
          */
-        public static final SparseArray<Class<? extends Feature>> Nucleo_0_Features =
+        public static final SparseArray<Class<? extends Feature>> Nucleo_Generic_Features =
+                new SparseArray<>();
+
+        /**
+         * array that map a feature mask with a feature class, for a nucleo devices
+         */
+        public static final SparseArray<Class<? extends Feature>> Nucleo_Remote_Features =
                 new SparseArray<>();
 
         static {
@@ -257,29 +272,53 @@ public class BLENodeDefines {
             STEVAL_WESU1_DeviceFeatures.put(0x00800000, FeatureAcceleration.class);
             STEVAL_WESU1_DeviceFeatures.put(0x00400000, FeatureGyroscope.class);
             STEVAL_WESU1_DeviceFeatures.put(0x00200000, FeatureMagnetometer.class);
-            STEVAL_WESU1_DeviceFeatures.put(0x00100000, FeaturePressure.class);
-            STEVAL_WESU1_DeviceFeatures.put(0x00080000, FeatureHumidity.class);
+            //STEVAL_WESU1_DeviceFeatures.put(0x00080000, FeatureHumidity.class);
             STEVAL_WESU1_DeviceFeatures.put(0x00040000, FeatureTemperature.class);
+            STEVAL_WESU1_DeviceFeatures.put(0x00100000, FeaturePressure.class);
+            //STEVAL_WESU1_DeviceFeatures.put(0x01000000, FeatureLuminosity.class);
+            //STEVAL_WESU1_DeviceFeatures.put(0x02000000, FeatureProximity.class);
+            //STEVAL_WESU1_DeviceFeatures.put(0x04000000, FeatureMicLevel.class);
             STEVAL_WESU1_DeviceFeatures.put(0x00020000, FeatureBattery.class);
+            STEVAL_WESU1_DeviceFeatures.put(0x00000400, FeatureAccelerationEvent.class);
+            STEVAL_WESU1_DeviceFeatures.put(0x00000200, FeatureFreeFall.class);
+            //STEVAL_WESU1_DeviceFeatures.put(0x00000100, FeatureMemsSensorFusionCompact.class);
             STEVAL_WESU1_DeviceFeatures.put(0x00000080, FeatureMemsSensorFusion.class);
-//            STEVAL_WESU1_DeviceFeatures.put(0x00000100, FeatureMemsSensorFusionCompact.class);
+            STEVAL_WESU1_DeviceFeatures.put(0x00000010, FeatureActivity.class);
+            STEVAL_WESU1_DeviceFeatures.put(0x00000008, FeatureCarryPosition.class);
+            //STEVAL_WESU1_DeviceFeatures.put(0x00000004, FeatureProximityGesture.class);
+            STEVAL_WESU1_DeviceFeatures.put(0x00000002, FeatureMemsGesture.class);
+            STEVAL_WESU1_DeviceFeatures.put(0x00000001, FeaturePedometer.class);
 
-            Nucleo_0_Features.put(0x00800000, FeatureAcceleration.class);
-            Nucleo_0_Features.put(0x00400000, FeatureGyroscope.class);
-            Nucleo_0_Features.put(0x00200000, FeatureMagnetometer.class);
-            Nucleo_0_Features.put(0x00080000, FeatureHumidity.class);
-            Nucleo_0_Features.put(0x00040000, FeatureTemperature.class);
-            Nucleo_0_Features.put(0x00100000, FeaturePressure.class);
-            Nucleo_0_Features.put(0x01000000, FeatureLuminosity.class);
-            Nucleo_0_Features.put(0x02000000, FeatureProximity.class);
-            Nucleo_0_Features.put(0x04000000, FeatureMicLevel.class);
-            Nucleo_0_Features.put(0x00020000, FeatureBattery.class);
-            Nucleo_0_Features.put(0x00000200, FeatureFreeFall.class);
-            Nucleo_0_Features.put(0x00000100, FeatureMemsSensorFusionCompact.class);
-            Nucleo_0_Features.put(0x00000080, FeatureMemsSensorFusion.class);
-            Nucleo_0_Features.put(0x00000010, FeatureActivity.class);
-            Nucleo_0_Features.put(0x00000008, FeatureCarryPosition.class);
-            Nucleo_0_Features.put(0x00000004, FeatureGesture.class);
+
+            Nucleo_Generic_Features.put(0x20000000, FeatureSwitch.class);
+            Nucleo_Generic_Features.put(0x10000000, FeatureDirectionOfArrival.class);
+            //Nucleo_Generic_Features.put(0x02000000, FeatureAudio.class);
+            Nucleo_Generic_Features.put(0x04000000, FeatureMicLevel.class);
+            Nucleo_Generic_Features.put(0x02000000, FeatureProximity.class);
+            Nucleo_Generic_Features.put(0x01000000, FeatureLuminosity.class);
+            Nucleo_Generic_Features.put(0x00800000, FeatureAcceleration.class);
+            Nucleo_Generic_Features.put(0x00400000, FeatureGyroscope.class);
+            Nucleo_Generic_Features.put(0x00200000, FeatureMagnetometer.class);
+            Nucleo_Generic_Features.put(0x00100000, FeaturePressure.class);
+            Nucleo_Generic_Features.put(0x00080000, FeatureHumidity.class);
+            Nucleo_Generic_Features.put(0x00040000, FeatureTemperature.class);
+            Nucleo_Generic_Features.put(0x00020000, FeatureBattery.class);
+            Nucleo_Generic_Features.put(0x00010000, FeatureTemperature.class);
+            Nucleo_Generic_Features.put(0x00000400, FeatureAccelerationEvent.class);
+            Nucleo_Generic_Features.put(0x00000200, FeatureFreeFall.class);
+            Nucleo_Generic_Features.put(0x00000100, FeatureMemsSensorFusionCompact.class);
+            Nucleo_Generic_Features.put(0x00000080, FeatureMemsSensorFusion.class);
+            Nucleo_Generic_Features.put(0x00000010, FeatureActivity.class);
+            Nucleo_Generic_Features.put(0x00000008, FeatureCarryPosition.class);
+            Nucleo_Generic_Features.put(0x00000004, FeatureProximityGesture.class);
+            Nucleo_Generic_Features.put(0x00000002, FeatureMemsGesture.class);
+            Nucleo_Generic_Features.put(0x00000001, FeaturePedometer.class);
+
+            Nucleo_Remote_Features.put(0x20000000, RemoteFeatureSwitch.class);
+            Nucleo_Remote_Features.put(0x00100000, RemoteFeaturePressure.class);
+            Nucleo_Remote_Features.put(0x00080000, RemoteFeatureHumidity.class);
+            Nucleo_Remote_Features.put(0x00040000, RemoteFeatureTemperature.class);
+
 
         }//static
 

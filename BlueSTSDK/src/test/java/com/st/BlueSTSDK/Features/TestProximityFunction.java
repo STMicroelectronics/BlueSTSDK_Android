@@ -36,6 +36,11 @@ import org.junit.Test;
 public class TestProximityFunction {
 
     @Test
+    public void testNullSampleProximity(){
+        Assert.assertEquals(-1, FeatureProximity.getProximityDistance(null));
+    }
+
+    @Test
     public void testInvalidSampleProximity(){
         Feature.Sample s = new Feature.Sample(100,new Number[]{});
         Assert.assertEquals(-1, FeatureProximity.getProximityDistance(s));

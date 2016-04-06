@@ -36,6 +36,11 @@ import org.junit.Test;
 public class TestGyroscopeFeature {
 
     @Test
+    public void testNullSampleX(){
+        Assert.assertEquals(Float.NaN, FeatureGyroscope.getGyroX(null), 0.0f);
+    }
+
+    @Test
     public void testInvalidSampleX(){
         Feature.Sample s = new Feature.Sample(100,new Number[]{});
         Assert.assertEquals(Float.NaN, FeatureGyroscope.getGyroX(s), 0.0f);
@@ -44,8 +49,13 @@ public class TestGyroscopeFeature {
     @Test
     public void testGetSampleX(){
         float x = 1.0f;
-        Feature.Sample s = new Feature.Sample(100,new Number[]{x});
+        Feature.Sample s = new Feature.Sample(100,new Number[]{x*10});
         Assert.assertEquals(x, FeatureGyroscope.getGyroX(s), 0.0f);
+    }
+
+    @Test
+    public void testNullSampleY(){
+        Assert.assertEquals(Float.NaN, FeatureGyroscope.getGyroY(null), 0.0f);
     }
 
     @Test
@@ -57,8 +67,13 @@ public class TestGyroscopeFeature {
     @Test
     public void testGetSampleY(){
         float y = 1.0f;
-        Feature.Sample s = new Feature.Sample(100,new Number[]{0,y});
+        Feature.Sample s = new Feature.Sample(100,new Number[]{0,y*10});
         Assert.assertEquals(y, FeatureGyroscope.getGyroY(s), 0.0f);
+    }
+
+    @Test
+    public void testNullSampleZ(){
+        Assert.assertEquals(Float.NaN, FeatureGyroscope.getGyroZ(null), 0.0f);
     }
 
     @Test
@@ -70,11 +85,9 @@ public class TestGyroscopeFeature {
     @Test
     public void testGetSampleZ(){
         float z = 1.0f;
-        Feature.Sample s = new Feature.Sample(100,new Number[]{0,0,z});
+        Feature.Sample s = new Feature.Sample(100,new Number[]{0,0,z*10});
         Assert.assertEquals(z, FeatureGyroscope.getGyroZ(s), 0.0f);
     }
-
-
 
     @Test(expected= IllegalArgumentException.class)
     public void updateWithInvalidSize() throws Throwable {
@@ -96,21 +109,21 @@ public class TestGyroscopeFeature {
 
         short x=10,y=-100,z=300;
 
-        byte temp[] = NumberConversion.LittleEndian.int16ToBytes(x);
+        byte temp[] = NumberConversion.LittleEndian.int16ToBytes((short)(x*10));
         data[0]=temp[0];
         data[1]=temp[1];
 
-        temp = NumberConversion.LittleEndian.int16ToBytes(y);
+        temp = NumberConversion.LittleEndian.int16ToBytes((short)(y*10));
         data[2]=temp[0];
         data[3]=temp[1];
 
-        temp = NumberConversion.LittleEndian.int16ToBytes(z);
+        temp = NumberConversion.LittleEndian.int16ToBytes((short)(z*10));
         data[4]=temp[0];
         data[5]=temp[1];
 
         UpdateFeatureUtil.callUpdate(f, 1, data, 0);
 
-        Assert.assertEquals(new Feature.Sample(1,new Short[]{x,y,z}),
+        Assert.assertEquals(new Feature.Sample(1,new Float[]{(float)x,(float)y,(float)z}),
                 f.getSample());
     }
 
@@ -122,21 +135,21 @@ public class TestGyroscopeFeature {
 
         short x=10,y=-100,z=300;
 
-        byte temp[] = NumberConversion.LittleEndian.int16ToBytes(x);
+        byte temp[] = NumberConversion.LittleEndian.int16ToBytes((short)(x*10));
         data[offset+0]=temp[0];
         data[offset+1]=temp[1];
 
-        temp = NumberConversion.LittleEndian.int16ToBytes(y);
+        temp = NumberConversion.LittleEndian.int16ToBytes((short)(y*10));
         data[offset+2]=temp[0];
         data[offset+3]=temp[1];
 
-        temp = NumberConversion.LittleEndian.int16ToBytes(z);
+        temp = NumberConversion.LittleEndian.int16ToBytes((short)(z*10));
         data[offset+4]=temp[0];
         data[offset+5]=temp[1];
 
         UpdateFeatureUtil.callUpdate(f, 2, data, offset);
 
-        Assert.assertEquals(new Feature.Sample(2,new Short[]{x,y,z}),
+        Assert.assertEquals(new Feature.Sample(2,new Float[]{(float)x,(float)y,(float)z}),
                 f.getSample());
     }
 

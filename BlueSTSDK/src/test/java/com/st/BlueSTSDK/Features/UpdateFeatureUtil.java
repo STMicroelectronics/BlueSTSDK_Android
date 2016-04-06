@@ -46,7 +46,7 @@ public class UpdateFeatureUtil {
 
         try {
 
-            Method update = Feature.class.getDeclaredMethod("update", int.class, byte[].class,
+            Method update = Feature.class.getDeclaredMethod("update", long.class, byte[].class,
                     int.class);
             update.setAccessible(true);
             return (Integer) update.invoke(f, timestamp, data, offset);

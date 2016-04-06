@@ -28,7 +28,6 @@ package com.st.BlueSTSDK.Config;
 
 import com.st.BlueSTSDK.Features.Field;
 import com.st.BlueSTSDK.Utils.NumberConversion;
-import com.st.BlueSTSDK.Config.RegisterDefines;
 
 /**
  * class that represent an abstraction of the device command to set/get the proper register
@@ -60,30 +59,11 @@ public class Command implements Cloneable{
 
     /**
      * Constructor for Command class
-     * @param name RegisterName to manage with this command
-     * @param t Memory target for the register
-     * @param d value as byte array to set
-     */
-    public Command(RegisterDefines.RegistersName name, Register.Target t, byte[] d) {
-        this(RegisterDefines.lookUp(name), t,d);
-    }
-
-    /**
-     * Constructor for Command class
      * @param r Register to manage with this command
      * @param t Memory target for the register
      */
     public Command(Register r, Register.Target t) {
         this(r, t, (byte [])null);
-    }
-
-    /**
-     * Constructor for Command class
-     * @param name Register to manage with this command
-     * @param t Memory target for the register
-     */
-    public Command(RegisterDefines.RegistersName name, Register.Target t) {
-        this(name, t, (byte [])null);
     }
 
     /**
@@ -129,16 +109,6 @@ public class Command implements Cloneable{
 
         data = dataReg;
     }
-    /**
-     * Constructor for Command class
-     * @param n RegisterName to manage with this command
-     * @param t Memory target for the register
-     * @param val long value to set
-     * @param type the type of the val parameter
-     */
-    public Command(RegisterDefines.RegistersName n, Register.Target t, long val, Field.Type type) {
-        this(RegisterDefines.lookUp(n), t, val, type);
-    }
 
     /**
      * Constructor for Command class
@@ -148,15 +118,6 @@ public class Command implements Cloneable{
      */
     public Command(Register r, Register.Target t, float f) {
         this(r, t, NumberConversion.LittleEndian.floatToBytes(f));
-    }
-    /**
-     * Constructor for Command class
-     * @param n Register name to manage with this command
-     * @param t Memory target for the register
-     * @param f float value to set
-     */
-    public Command(RegisterDefines.RegistersName n, Register.Target t, float f) {
-        this(n, t, NumberConversion.LittleEndian.floatToBytes(f));
     }
 
     /**
@@ -168,15 +129,6 @@ public class Command implements Cloneable{
     public Command(Register r, Register.Target t, String s) {
         this(r, t, s.getBytes());
     }
-    /**
-     * Constructor for Command class
-     * @param n Register to manage with this command
-     * @param t Memory target for the register
-     * @param s String value to set
-     */
-    public Command(RegisterDefines.RegistersName n, Register.Target t, String s) {
-        this(n, t, s.getBytes());
-    }
 
     /**
      * Constructor for Command class
@@ -184,16 +136,6 @@ public class Command implements Cloneable{
      */
     public Command(byte[] dataReceived) {
         this(new Register(dataReceived), Register.getTarget(dataReceived), Register.getPayload(dataReceived));
-    }
-
-    /**
-     * This function checks the register command
-     * @param reg  register to tests
-     *
-     * @return true if the Register is the same of the command else false
-     */
-    public boolean isRegister(RegisterDefines.RegistersName reg) {
-        return getRegister().equals(RegisterDefines.lookUp(reg));
     }
 
     /**
@@ -233,10 +175,11 @@ public class Command implements Cloneable{
      */
     public char[] getDataChar() {
         char [] cRet = null;
-        if (data != null && data.length > 0)
+        if (data != null) {
             cRet = new char[data.length];
-        for(int i = 0; i <cRet.length; i++)
-            cRet[i] = (char)data[i];
+            for (int i = 0; i < data.length; i++)
+                cRet[i] = (char) data[i];
+        }//if
         return cRet;
     }
 
@@ -315,4 +258,5 @@ public class Command implements Cloneable{
         }
         return bRet;
     }
+
 }

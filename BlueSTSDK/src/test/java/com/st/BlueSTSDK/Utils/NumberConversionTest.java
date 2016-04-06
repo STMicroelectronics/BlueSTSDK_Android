@@ -35,16 +35,16 @@ public class NumberConversionTest {
 
     @Test
     public void testByteToUInt8() throws Exception {
-        short number = NumberConversion.bytesToUInt8(new byte[]{0x00});
+        short number = NumberConversion.byteToUInt8(new byte[]{0x00});
         Assert.assertEquals(0, number);
 
-        number = NumberConversion.bytesToUInt8(new byte[]{14});
+        number = NumberConversion.byteToUInt8(new byte[]{14});
         Assert.assertEquals(14, number);
 
-        number = NumberConversion.bytesToUInt8(new byte[]{(byte) 0x7F});
+        number = NumberConversion.byteToUInt8(new byte[]{(byte) 0x7F});
         Assert.assertEquals(127, number);
 
-        number = NumberConversion.bytesToUInt8(new byte[]{(byte) 0xFF});
+        number = NumberConversion.byteToUInt8(new byte[]{(byte) 0xFF});
         Assert.assertEquals(255, number);
     }
 

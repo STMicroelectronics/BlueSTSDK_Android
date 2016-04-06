@@ -33,7 +33,7 @@ import com.st.BlueSTSDK.Utils.NumberConversion;
 /**
  * Feature that contains the data comes form a luminosity sensor.
  * <p>
- * Node: since the sensor is the same ,it is possible that you can not have data from a
+ * Node: since the sensor is the same, it is possible that you can not have data from a
  * proximity sensor and from a luminosity sensor at the same time
  * </p>
  *
@@ -68,9 +68,11 @@ public class FeatureLuminosity extends Feature {
      * @return luminosity value or -1 if the data array is not valid
      */
     public static int getLuminosity(Sample s) {
-        if(s.data.length>0)
-            if (s.data[0] != null)
-                return s.data[0].intValue();
+        if(s!=null)
+            if(s.data!=null)
+                if(s.data.length>0)
+                    if (s.data[0] != null)
+                        return s.data[0].intValue();
         //else
         return -1; // the luminosity is always positive
     }

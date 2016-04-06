@@ -36,6 +36,11 @@ import org.junit.Test;
 public class TestTemperatureFunction {
 
     @Test
+    public void testNullSampleTemperature(){
+        Assert.assertEquals(Float.NaN, FeatureTemperature.getTemperature(null), 0.0f);
+    }
+
+    @Test
     public void testInvalidSampleTemperature(){
         Feature.Sample s = new Feature.Sample(100,new Number[]{});
         Assert.assertEquals(Float.NaN, FeatureTemperature.getTemperature(s), 0.0f);

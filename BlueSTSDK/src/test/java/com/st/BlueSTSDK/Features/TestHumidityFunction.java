@@ -36,6 +36,11 @@ import org.junit.Test;
 public class TestHumidityFunction {
 
     @Test
+    public void testNullSampleHumidity(){
+        Assert.assertEquals(Float.NaN, FeatureHumidity.getHumidity(null), 0.0f);
+    }
+
+    @Test
     public void testInvalidSampleHumidity(){
         Feature.Sample s = new Feature.Sample(100,new Number[]{});
         Assert.assertEquals(Float.NaN, FeatureHumidity.getHumidity(s), 0.0f);

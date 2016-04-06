@@ -1,9 +1,36 @@
+/*******************************************************************************
+ * COPYRIGHT(c) 2015 STMicroelectronics
+ *
+ * Redistribution and use in source and binary forms, with or without modification,
+ * are permitted provided that the following conditions are met:
+ *   1. Redistributions of source code must retain the above copyright notice,
+ *      this list of conditions and the following disclaimer.
+ *   2. Redistributions in binary form must reproduce the above copyright notice,
+ *      this list of conditions and the following disclaimer in the documentation
+ *      and/or other materials provided with the distribution.
+ *   3. Neither the name of STMicroelectronics nor the names of its contributors
+ *      may be used to endorse or promote products derived from this software
+ *      without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ ******************************************************************************/
 package com.st.BlueSTSDK.Utils;
 
 import android.Manifest;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
@@ -12,11 +39,11 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.st.BlueSTSDK.Feature;
 import com.st.BlueSTSDK.Log.FeatureLogCSVFile;
@@ -32,8 +59,12 @@ import java.util.List;
  * Helper class for an activity that have to log the feature data, this code manage the permission
  * required for store file on the disk and send the collected data by mail
  * the activity will instantiate a menu item for start/stop the log activity
+ *
+ * @author STMicroelectronics - Central Labs.
+ * @version 1.0
  */
 public abstract class LogFeatureActivity extends AppCompatActivity {
+    private final static String TAG = LogFeatureActivity.class.getCanonicalName();
 
     /**
      * id used for request the write permission
@@ -43,13 +74,13 @@ public abstract class LogFeatureActivity extends AppCompatActivity {
     /**
      * object used for log the data
      */
-    private Feature.FeatureLoggerListener mCurrentLogger;
+    private static Feature.FeatureLoggerListener mCurrentLogger;
 
     /**
-     * return the node to log
+     * return the list of nodes to log
      * @return node that we want to log
      */
-    protected abstract Node getNodeToLog();
+    protected abstract List<Node> getNodesToLog();
 
     /**
      * return the directory path where we will store the log file if generated
@@ -64,9 +95,23 @@ public abstract class LogFeatureActivity extends AppCompatActivity {
     protected abstract Feature.FeatureLoggerListener getLogger();
 
     /**
+     * Take care of popping the fragment back stack or finishing the activity
+     * as appropriate.
+     */
+    @Override
+    public void onBackPressed() {
+        if (isLogging()) {
+            stopLogging(true);
+        }
+        else {
+            super.onBackPressed();
+        }
+    }
+
+    /**
      * create a menu item for start/stop the logging
      * @param menu menu where add out item
-     * @return
+     * @return true if the menu is created
      */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -128,9 +173,12 @@ public abstract class LogFeatureActivity extends AppCompatActivity {
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     //we have the permission try start logging
-                    registerLoggerListener(getNodeToLog());
+                    for(Node n : getNodesToLog()) {
+                        registerLoggerListener(n);
+                    }
                 } else {
-                    Toast.makeText(this, R.string.WriteSDNotGranted, Toast.LENGTH_SHORT).show();
+                    Snackbar.make(this.getCurrentFocus(), R.string.WriteSDNotGranted,
+                            Snackbar.LENGTH_SHORT).show();
                     mCurrentLogger=null;
                     invalidateOptionsMenu();
                 }//if-else
@@ -150,14 +198,71 @@ public abstract class LogFeatureActivity extends AppCompatActivity {
         }//for
     }//registerLoggerListener
 
+
+    protected void startLogging()
+    {
+        if (mCurrentLogger!=null)
+            stopLogging();
+
+        if (mCurrentLogger == null)
+            mCurrentLogger = getLogger();
+
+        for(Node n : getNodesToLog()) {
+            startLogging(n);
+        }
+
+    }
+    protected void stopLogging(){stopLogging(false);}
+
+    protected void stopLogging(boolean forceClose)
+    {
+        if (mCurrentLogger==null)
+            return;
+        for(Node n : getNodesToLog()) {
+            stopLogging(n);
+        }
+
+        final String directoryPath =getLogDirectory();
+        File exportFiles[] = null;
+        if (mCurrentLogger instanceof FeatureLogCSVFile) {
+            ((FeatureLogCSVFile) mCurrentLogger).closeFiles();
+            exportFiles = FeatureLogCSVFile.getLogFiles(directoryPath);
+        }//if
+
+        if (mCurrentLogger instanceof FeatureLogDB) {
+            FeatureLogDB db = (FeatureLogDB) mCurrentLogger;
+            exportFiles = db.dumpToFile(directoryPath);
+        }
+
+        //if we have something to export
+        if(exportFiles!=null && exportFiles.length>0) {
+            exportFiles = removeEmptyFile(exportFiles);
+            if(exportFiles.length>0) //if we have a non empty
+            exportDataByMail(exportFiles,forceClose);
+            for(File f : exportFiles){
+                sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE,
+                        Uri.fromFile(f)));
+            }//for
+        }//if !=null
+
+        mCurrentLogger=null;
+
+    }
+
+    /**
+     * true if the user is logging some data
+     * @return * true if the user is logging some data
+     */
+    public boolean isLogging(){
+        return mCurrentLogger!=null;
+    }
+
     /**
      * stop the previous logger and star a new one
      * @param n node where add the logger
      */
-    protected void startLogging(Node n) {
-        if (mCurrentLogger!=null)
-            stopLogging(n);
-        mCurrentLogger = getLogger();
+    private void startLogging(Node n) {
+
         //if api >23 and we will store on disk
         if((mCurrentLogger instanceof FeatureLogCSVFile ||
                 mCurrentLogger instanceof FeatureLogDB) &&
@@ -179,12 +284,12 @@ public abstract class LogFeatureActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.startLog) {
-            startLogging(getNodeToLog());
+            startLogging();
             invalidateOptionsMenu();
             return true;
         }
         if (id == R.id.stopLog) {
-            stopLogging(getNodeToLog());
+            stopLogging();
             invalidateOptionsMenu();
             return true;
         }
@@ -215,56 +320,54 @@ public abstract class LogFeatureActivity extends AppCompatActivity {
      * </p>
      */
     protected void stopLogging(Node n) {
-        if (mCurrentLogger==null)
-            return;
+
         List<Feature> features = n.getFeatures();
         for (Feature f : features) {
             f.removeFeatureLoggerListener(mCurrentLogger);
         }//for
-
-        final String directoryPath =getLogDirectory();
-        File exportFiles[] = null;
-        if (mCurrentLogger instanceof FeatureLogCSVFile) {
-            ((FeatureLogCSVFile) mCurrentLogger).closeFiles();
-            exportFiles = FeatureLogCSVFile.getLogFiles(directoryPath);
-        }//if
-
-        if (mCurrentLogger instanceof FeatureLogDB) {
-            FeatureLogDB db = (FeatureLogDB) mCurrentLogger;
-            exportFiles = db.dumpToFile(directoryPath);
-        }
-
-        //if we have something to export
-        if(exportFiles!=null && exportFiles.length>0) {
-            exportFiles = removeEmptyFile(exportFiles);
-            if(exportFiles.length>0) //if we have a non empty
-                exportDataByMail(exportFiles);
-        }//if !=null
-
-        mCurrentLogger=null;
     }
 
-    private final static String EMAIL_TITLE = "BlueSTSDK Data";
+    private final static String EMAIL_TITLE = "BlueSTSDK Log Data";
 
     /**
      * create a mail with the log files as attached
      * @param logFiles file to attach
      */
     private void sendLogByMail(File[] logFiles) {
-
+        Log.d(TAG, "sendLogByMail");
         final Intent emailIntent =
                 new Intent(android.content.Intent.ACTION_SEND_MULTIPLE);
         emailIntent.setType("message/rfc822");
-        emailIntent.putExtra(Intent.EXTRA_SUBJECT, EMAIL_TITLE);
+
+        String[] strAppNameSplitted = getApplication().getApplicationInfo().processName.split("\\.");
+        String strAppName = "Unknown";
+        if (strAppNameSplitted.length > 0)
+            strAppName = strAppNameSplitted[strAppNameSplitted.length -1];
+
+        emailIntent.putExtra(Intent.EXTRA_SUBJECT, "[" +strAppName + "] "+EMAIL_TITLE);
+
+        Log.d(TAG, strAppName);
+        try {
+            PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+            strAppName += " " + pInfo.versionName + " (" +pInfo.versionCode+")";
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }//try-catch
+
+        String strEmail = "\nThis is an auto generated message from the " + strAppName +" application running on:";
+        strEmail += "\n\tDevice manufacturer :" + Build.MANUFACTURER.toUpperCase();
+        strEmail += "\n\tDevice model :"+ Build.MODEL;
+        strEmail += "\n\tAndroid version :" + Build.VERSION.RELEASE + " ("+Build.VERSION.SDK_INT + ")";
+        strEmail += ".\n\nIn attach the log data files available from " + getLogDirectory() + ".\n";
+
+        emailIntent.putExtra(Intent.EXTRA_TEXT, strEmail);
 
         ArrayList<Uri> uris = new ArrayList<>();
         // convert from paths to Android friendly Parcelable Uri's
         for (File file : logFiles) {
             uris.add(Uri.fromFile(file));
         }
-        emailIntent.putParcelableArrayListExtra
-                (Intent.EXTRA_STREAM, uris);
-
+        emailIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
         startActivity(Intent.createChooser(emailIntent, "Sent mail"));
     }//sendLogByMail
 
@@ -272,19 +375,24 @@ public abstract class LogFeatureActivity extends AppCompatActivity {
      * ask if we want export the data by mail
      * @param logs file to export
      */
-    private void exportDataByMail(final File[] logs) {
+    private void exportDataByMail(final File[] logs, final boolean forceClose) {
         // Use the Builder class for convenient dialog construction
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(R.string.askExprotByMailTitle)
+        builder.setTitle(forceClose?R.string.askExprotByMailForceStop:R.string.askExprotByMailTitle)
                 .setMessage(R.string.askExprotByMailMessage)
                 .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         sendLogByMail(logs);
+                        if (forceClose)
+                            LogFeatureActivity.this.onBackPressed();
                     }//onClick
                 })
                 .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         // User cancelled the dialog
+                        if (forceClose)
+                            LogFeatureActivity.this.onBackPressed();
+
                     }
                 });
         // Create the AlertDialog object and return it

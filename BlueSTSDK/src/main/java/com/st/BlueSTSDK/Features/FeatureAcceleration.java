@@ -92,9 +92,10 @@ public class FeatureAcceleration extends Feature {
      * @return acceleration in the X axis, or Nan if the array doesn't contain data
      */
     public static float getAccX(Sample s) {
-        if (s.data.length > ACC_X_INDEX)
-            if (s.data[ACC_X_INDEX] != null)
-                return s.data[ACC_X_INDEX].floatValue();
+        if(s!=null)
+            if (s.data.length > ACC_X_INDEX)
+                if (s.data[ACC_X_INDEX] != null)
+                    return s.data[ACC_X_INDEX].floatValue();
         //else
         return Float.NaN;
     }//getAccX
@@ -106,9 +107,10 @@ public class FeatureAcceleration extends Feature {
      * @return acceleration in the Y axis, or Nan if the array doesn't contain data
      */
     public static float getAccY(Sample s) {
-        if (s.data.length > ACC_Y_INDEX)
-            if (s.data[ACC_Y_INDEX] != null)
-                return s.data[ACC_Y_INDEX].floatValue();
+        if(s!=null)
+            if (s.data.length > ACC_Y_INDEX)
+                if (s.data[ACC_Y_INDEX] != null)
+                    return s.data[ACC_Y_INDEX].floatValue();
         //else
         return Float.NaN;
     }//getAccY
@@ -120,9 +122,10 @@ public class FeatureAcceleration extends Feature {
      * @return acceleration in the Z axis, or Nan if the array doesn't contain data
      */
     public static float getAccZ(Sample s) {
-        if (s.data.length > ACC_Z_INDEX)
-            if (s.data[ACC_Z_INDEX] != null)
-                return s.data[ACC_Z_INDEX].floatValue();
+        if(s!=null)
+            if (s.data.length > ACC_Z_INDEX)
+                if (s.data[ACC_Z_INDEX] != null)
+                    return s.data[ACC_Z_INDEX].floatValue();
         //else
         return Float.NaN;
     }//getAccZ

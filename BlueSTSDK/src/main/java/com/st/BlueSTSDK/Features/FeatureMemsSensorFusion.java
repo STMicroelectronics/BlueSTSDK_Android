@@ -108,10 +108,11 @@ public class FeatureMemsSensorFusion extends FeatureAutoConfigurable {
      * @return quaternion qs component, or Nan if the array doesn't contain data
      */
      public static float getQi(Sample sample) {
-        if (sample.data.length > QI_INDEX)
-            if (sample.data[QI_INDEX] != null)
-                return sample.data[QI_INDEX].floatValue();
-        //else
+         if(sample!=null)
+            if (sample.data.length > QI_INDEX)
+                if (sample.data[QI_INDEX] != null)
+                    return sample.data[QI_INDEX].floatValue();
+         //else
         return Float.NaN;
     }
 
@@ -122,9 +123,10 @@ public class FeatureMemsSensorFusion extends FeatureAutoConfigurable {
      * @return quaternion qi component, or Nan if the array doesn't contain data
      */
     public static float getQj(Sample sample) {
-        if (sample.data.length > QJ_INDEX)
-            if (sample.data[QJ_INDEX] != null)
-                return sample.data[QJ_INDEX].floatValue();
+        if(sample!=null)
+            if (sample.data.length > QJ_INDEX)
+                if (sample.data[QJ_INDEX] != null)
+                    return sample.data[QJ_INDEX].floatValue();
         //else
         return Float.NaN;
     }
@@ -136,9 +138,10 @@ public class FeatureMemsSensorFusion extends FeatureAutoConfigurable {
      * @return quaternion qj component, or Nan if the array doesn't contain data
      */
     public static float getQk(Sample sample) {
-        if (sample.data.length > QK_INDEX)
-            if (sample.data[QK_INDEX] != null)
-                return sample.data[QK_INDEX].floatValue();
+        if(sample!=null)
+            if (sample.data.length > QK_INDEX)
+                if (sample.data[QK_INDEX] != null)
+                    return sample.data[QK_INDEX].floatValue();
         //else
         return Float.NaN;
     }
@@ -150,9 +153,10 @@ public class FeatureMemsSensorFusion extends FeatureAutoConfigurable {
      * @return quaternion qk component, or Nan if the array doesn't contain data
      */
     public static float getQs(Sample sample) {
-        if (sample.data.length > QS_INDEX)
-            if (sample.data[QS_INDEX] != null)
-                return sample.data[QS_INDEX].floatValue();
+        if(sample!=null)
+            if (sample.data.length > QS_INDEX)
+                if (sample.data[QS_INDEX] != null)
+                    return sample.data[QS_INDEX].floatValue();
         //else
         return Float.NaN;
     }

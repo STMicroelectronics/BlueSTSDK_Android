@@ -10,6 +10,13 @@ import org.junit.Test;
 public class TestMicLevelFeature {
 
     @Test
+    public void testNullInvalidSample(){
+        Assert.assertTrue(FeatureMicLevel.getMicLevel(null,0)<0);
+        Assert.assertTrue(FeatureMicLevel.getMicLevel(null,10)<0);
+    }
+
+
+    @Test
     public void testInvalidSample(){
         Feature.Sample s = new Feature.Sample(100,new Number[]{});
         Assert.assertTrue(FeatureMicLevel.getMicLevel(s,0)<0);

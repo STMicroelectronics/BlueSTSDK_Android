@@ -46,10 +46,9 @@ public class FeatureGyroscope extends Feature {
     public static final String[] FEATURE_DATA_NAME = {"X", "Y", "Z"};
 
     /** max value of one component*/
-    public static final short DATA_MAX = Short.MAX_VALUE;
+    public static final float DATA_MAX = ((float)(1 << 15))/10.0f;
     /** min value of one component*/
-    public static final short DATA_MIN = Short.MIN_VALUE;
-    //TODO min max, not setted understand the sensor max value
+    public static final float DATA_MIN = -DATA_MAX;
 
     /** index where you can find gyroscope value/description in the x direction */
     public static final int GYRO_X_INDEX = 0;
@@ -65,11 +64,11 @@ public class FeatureGyroscope extends Feature {
     public FeatureGyroscope(Node node) {
         super(FEATURE_NAME, node,
                 new Field[]{
-                        new Field(FEATURE_DATA_NAME[GYRO_X_INDEX], FEATURE_UNIT, Field.Type.Int16,
+                        new Field(FEATURE_DATA_NAME[GYRO_X_INDEX], FEATURE_UNIT, Field.Type.Float,
                                 DATA_MAX, DATA_MIN),
-                        new Field(FEATURE_DATA_NAME[GYRO_Y_INDEX], FEATURE_UNIT, Field.Type.Int16,
+                        new Field(FEATURE_DATA_NAME[GYRO_Y_INDEX], FEATURE_UNIT, Field.Type.Float,
                                 DATA_MAX, DATA_MIN),
-                        new Field(FEATURE_DATA_NAME[GYRO_Z_INDEX], FEATURE_UNIT, Field.Type.Int16,
+                        new Field(FEATURE_DATA_NAME[GYRO_Z_INDEX], FEATURE_UNIT, Field.Type.Float,
                                 DATA_MAX, DATA_MIN)
                 });
     }//FeatureGyroscope
@@ -81,9 +80,10 @@ public class FeatureGyroscope extends Feature {
      * @return gyroscope in the X axis, or Nan if the array doesn't contain data
      */
     public static float getGyroX(Sample s) {
-        if (s.data.length > GYRO_X_INDEX)
-            if (s.data[GYRO_X_INDEX] != null)
-                return s.data[GYRO_X_INDEX].floatValue();
+        if(s!=null)
+            if (s.data.length > GYRO_X_INDEX)
+                if (s.data[GYRO_X_INDEX] != null)
+                    return s.data[GYRO_X_INDEX].floatValue();
         //else
         return Float.NaN;
     }//getGyroX
@@ -95,9 +95,10 @@ public class FeatureGyroscope extends Feature {
      * @return gyroscope in the Y axis, or Nan if the array doesn't contain data
      */
     public static float getGyroY(Sample s) {
-        if (s.data.length > GYRO_Y_INDEX)
-            if (s.data[GYRO_Y_INDEX] != null)
-                return s.data[GYRO_Y_INDEX].floatValue();
+        if(s!=null)
+            if (s.data.length > GYRO_Y_INDEX)
+                if (s.data[GYRO_Y_INDEX] != null)
+                    return s.data[GYRO_Y_INDEX].floatValue();
         //else
         return Float.NaN;
     }//getGyroY
@@ -109,9 +110,10 @@ public class FeatureGyroscope extends Feature {
      * @return gyroscope in the Z axis, or Nan if the array doesn't contain data
      */
     public static float getGyroZ(Sample s) {
-        if (s.data.length > GYRO_Z_INDEX)
-            if (s.data[GYRO_Z_INDEX] != null)
-                return s.data[GYRO_Z_INDEX].floatValue();
+        if(s!=null)
+            if (s.data.length > GYRO_Z_INDEX)
+                if (s.data[GYRO_Z_INDEX] != null)
+                    return s.data[GYRO_Z_INDEX].floatValue();
         //else
         return Float.NaN;
     }//getGyroZ
@@ -131,11 +133,11 @@ public class FeatureGyroscope extends Feature {
 
         Sample temp = new Sample(timestamp, new Number[]{
                 //x
-                (NumberConversion.LittleEndian.bytesToInt16(data, dataOffset + 0)),
+                (NumberConversion.LittleEndian.bytesToInt16(data, dataOffset + 0))/10.0f,
                 //y
-                (NumberConversion.LittleEndian.bytesToInt16(data, dataOffset + 2)),
+                (NumberConversion.LittleEndian.bytesToInt16(data, dataOffset + 2))/10.0f,
                 //z
-                (NumberConversion.LittleEndian.bytesToInt16(data, dataOffset + 4))
+                (NumberConversion.LittleEndian.bytesToInt16(data, dataOffset + 4))/10.0f
         });
 
         return new ExtractResult(temp,6);
@@ -153,7 +155,7 @@ public class FeatureGyroscope extends Feature {
         Field dataDesc[] = getFieldsDesc();
         sb.append("\tData: ( ");
         for (int i = 0; i < data.length; i++) {
-            sb.append(String.format("%s: %d ",dataDesc[i].getName(),data[i].intValue()));
+            sb.append(String.format("%s: %.1f ",dataDesc[i].getName(),data[i].floatValue()));
         }//for
         sb.append(')');
         return sb.toString();

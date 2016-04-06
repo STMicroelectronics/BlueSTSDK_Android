@@ -104,29 +104,31 @@ public class FeatureActivity extends Feature {
      * @return type of activity detected by the node
      */
     public static ActivityType getActivityStatus(Sample sample){
-        if(sample.data.length>0)
-            if (sample.data[0] != null){
-                int activityId = sample.data[0].byteValue();
-                switch (activityId){
-                    case 0x00:
-                        return ActivityType.NO_ACTIVITY;
-                    case 0x01:
-                        return ActivityType.STATIONARY;
-                    case 0x02:
-                        return ActivityType.WALKING;
-                    case 0x03:
-                        return ActivityType.FASTWALKING;
-                    case 0x04:
-                        return ActivityType.JOGGING;
-                    case 0x05:
-                        return ActivityType.BIKING;
-                    case 0x06:
-                        return ActivityType.DRIVING;
-                    default:
-                        return ActivityType.ERROR;
-                }//switch
-            }//if
-        //if
+        if(sample!=null)
+            if(sample.data.length>0)
+                if (sample.data[0] != null){
+                    int activityId = sample.data[0].byteValue();
+                    switch (activityId){
+                        case 0x00:
+                            return ActivityType.NO_ACTIVITY;
+                        case 0x01:
+                            return ActivityType.STATIONARY;
+                        case 0x02:
+                            return ActivityType.WALKING;
+                        case 0x03:
+                            return ActivityType.FASTWALKING;
+                        case 0x04:
+                            return ActivityType.JOGGING;
+                        case 0x05:
+                            return ActivityType.BIKING;
+                        case 0x06:
+                            return ActivityType.DRIVING;
+                        default:
+                            return ActivityType.ERROR;
+                    }//switch
+                }//if
+            //if data.length
+        //if sample!=null
         return ActivityType.ERROR;
     }//getActivityStatus
 
@@ -136,9 +138,11 @@ public class FeatureActivity extends Feature {
      * @return local time when we receive the data, or null if it is an invalid sample
      */
     public static @Nullable Date getActivityDate(Sample sample){
-        if(sample.data.length>1)
-            if (sample.data[1] != null)
-                return new Date(sample.data[1].longValue());
+        if(sample!=null)
+            if (sample.data.length > 1)
+                if (sample.data[1] != null)
+                    return new Date(sample.data[1].longValue());
+
         //else
         return null;
     }//getActivityDate

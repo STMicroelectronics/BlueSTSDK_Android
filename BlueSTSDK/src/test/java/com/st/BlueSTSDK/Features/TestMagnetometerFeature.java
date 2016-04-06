@@ -36,6 +36,11 @@ import org.junit.Test;
 public class TestMagnetometerFeature {
 
     @Test
+    public void testNullSampleX(){
+        Assert.assertEquals(Float.NaN, FeatureMagnetometer.getMagX(null), 0.0f);
+    }
+
+    @Test
     public void testInvalidSampleX(){
         Feature.Sample s = new Feature.Sample(100,new Number[]{});
         Assert.assertEquals(Float.NaN, FeatureMagnetometer.getMagX(s), 0.0f);
@@ -49,6 +54,11 @@ public class TestMagnetometerFeature {
     }
 
     @Test
+    public void testNullSampleY(){
+        Assert.assertEquals(Float.NaN, FeatureMagnetometer.getMagY(null), 0.0f);
+    }
+
+    @Test
     public void testInvalidSampleY(){
         Feature.Sample s = new Feature.Sample(100,new Number[]{0});
         Assert.assertEquals(Float.NaN,FeatureMagnetometer.getMagY(s), 0.0f);
@@ -59,6 +69,11 @@ public class TestMagnetometerFeature {
         float y = 1.0f;
         Feature.Sample s = new Feature.Sample(100,new Number[]{0,y});
         Assert.assertEquals(y,FeatureMagnetometer.getMagY(s), 0.0f);
+    }
+
+    @Test
+    public void testNullSampleZ(){
+        Assert.assertEquals(Float.NaN, FeatureMagnetometer.getMagZ(null), 0.0f);
     }
 
     @Test

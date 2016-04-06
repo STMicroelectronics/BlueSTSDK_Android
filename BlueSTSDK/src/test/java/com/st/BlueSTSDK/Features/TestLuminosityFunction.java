@@ -36,6 +36,12 @@ import org.junit.Test;
 public class TestLuminosityFunction {
 
     @Test
+    public void testNullSampleLuminosity(){
+        Assert.assertEquals(-1, FeatureLuminosity.getLuminosity(null));
+    }
+
+
+    @Test
     public void testInvalidSampleLuminosity(){
         Feature.Sample s = new Feature.Sample(100,new Number[]{});
         Assert.assertEquals(-1, FeatureLuminosity.getLuminosity(s));

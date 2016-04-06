@@ -51,10 +51,10 @@ public class FeatureRandomGyroscope extends FeatureGyroscope implements NodeEmul
     public byte[] generateFakeData() {
 
         byte data[] = new byte[6];
-        int delta = DATA_MAX - DATA_MIN;
+        int delta = (int)DATA_MAX - (int)DATA_MIN;
 
         for (int i = 0; i < 3; i++) {
-            short rndData = (short) (DATA_MIN + mRnd.nextInt(delta));
+            short rndData = (short) ((DATA_MIN + mRnd.nextInt(delta)) * 10); //DATA MAX is 3276.8 DATA_MIN is -3276.8
             byte temp[] = NumberConversion.LittleEndian.int16ToBytes(rndData);
             System.arraycopy(temp, 0, data, 2 * i, 2);
         }

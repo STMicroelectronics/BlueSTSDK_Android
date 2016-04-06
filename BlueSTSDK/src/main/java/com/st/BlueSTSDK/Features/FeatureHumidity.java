@@ -40,10 +40,14 @@ import com.st.BlueSTSDK.Utils.NumberConversion;
 public class FeatureHumidity extends Feature {
 
     public static final String FEATURE_NAME = "Humidity";
+
     public static final String FEATURE_UNIT = "%";
     public static final String FEATURE_DATA_NAME = "Humidity";
     public static final float DATA_MAX = 100;
     public static final float DATA_MIN = 0;
+
+    protected static final Field HUMIDITY_FILED =
+            new Field(FEATURE_DATA_NAME, FEATURE_UNIT, Field.Type.Float, DATA_MAX, DATA_MIN);
 
     /**
      * build a Feature of type FeatureHumidity
@@ -51,10 +55,16 @@ public class FeatureHumidity extends Feature {
      * @param n node that will send data to this feature
      */
     public FeatureHumidity(Node n) {
-        super(FEATURE_NAME, n, new Field[]{
-                new Field(FEATURE_DATA_NAME, FEATURE_UNIT, Field.Type.Float, DATA_MAX, DATA_MIN)
-        });
+        super(FEATURE_NAME, n, new Field[]{ HUMIDITY_FILED });
     }//FeatureHumidity
+
+    protected FeatureHumidity(String name, Node n,Field data[]) {
+        super(name,n,data);
+        if(data[0]!=HUMIDITY_FILED){
+            throw new IllegalArgumentException("First data[0] must be FeatureHumidity" +
+                    ".HUMIDITY_FILED");
+        }//if
+    }
 
     /**
      * extract the humidity value from the sensor raw data
@@ -63,9 +73,10 @@ public class FeatureHumidity extends Feature {
      * @return humidity value or nan if the data array is not valid
      */
     public static float getHumidity(Sample s) {
-        if(s.data.length>0)
-            if (s.data[0] != null)
-                return s.data[0].floatValue();
+        if(s!=null)
+            if(s.data.length>0)
+                if (s.data[0] != null)
+                    return s.data[0].floatValue();
         //else
         return Float.NaN;
     }//getHumidity

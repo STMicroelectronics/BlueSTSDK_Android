@@ -36,6 +36,11 @@ import org.junit.Test;
 public class TestSensorFusionFunction {
 
     @Test
+    public void testNullSampleQi(){
+        Assert.assertEquals(Float.NaN, FeatureMemsSensorFusion.getQi(null), 0.0f);
+    }
+
+    @Test
     public void testInvalidSampleQi(){
         Feature.Sample s = new Feature.Sample(100,new Number[]{});
         Assert.assertEquals(Float.NaN, FeatureMemsSensorFusion.getQi(s), 0.0f);
@@ -46,6 +51,11 @@ public class TestSensorFusionFunction {
         float x = 1.0f;
         Feature.Sample s = new Feature.Sample(100,new Number[]{x});
         Assert.assertEquals(x, FeatureMemsSensorFusion.getQi(s), 0.0f);
+    }
+
+    @Test
+    public void testNullSampleQj(){
+        Assert.assertEquals(Float.NaN, FeatureMemsSensorFusion.getQj(null), 0.0f);
     }
 
     @Test
@@ -62,6 +72,12 @@ public class TestSensorFusionFunction {
     }
 
     @Test
+    public void testNullSampleQk(){
+        Assert.assertEquals(Float.NaN, FeatureMemsSensorFusion.getQk(null), 0.0f);
+    }
+
+
+    @Test
     public void testInvalidSampleQk(){
         Feature.Sample s = new Feature.Sample(100,new Number[]{0.0f,0.0f});
         Assert.assertEquals(Float.NaN, FeatureMemsSensorFusion.getQk(s), 0.0f);
@@ -72,6 +88,11 @@ public class TestSensorFusionFunction {
         float z = 1.0f;
         Feature.Sample s = new Feature.Sample(100,new Number[]{0.0f,0.0f,z});
         Assert.assertEquals(z, FeatureMemsSensorFusion.getQk(s), 0.0f);
+    }
+
+    @Test
+    public void testNullSampleQs(){
+        Assert.assertEquals(Float.NaN, FeatureMemsSensorFusion.getQs(null), 0.0f);
     }
 
     @Test

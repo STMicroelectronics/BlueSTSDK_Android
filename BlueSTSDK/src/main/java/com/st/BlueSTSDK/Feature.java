@@ -240,7 +240,7 @@ public abstract class Feature {
      * Feature.Sample)} for each listener that subscribe to this feature.
      * <p> each call will be run in a different thread</p>
      * <p>
-     * If you extend the method overwrite the method {@link Feature#update_priv(int, byte[], int)}
+     * If you extend the method overwrite the method {@link Feature#update_priv(long, byte[], int)}
      * you have to call this method for notify to the user the new sample
      * </p>
      * @param sample new data that we have to notify to the listener
@@ -261,7 +261,7 @@ public abstract class Feature {
      * <p> each {@link com.st.BlueSTSDK.Feature.FeatureLoggerListener#logFeatureUpdate(byte[], Sample)}
      * will run in a different thread </p>
      * <p>
-     * if you overwrite the method {@link com.st.BlueSTSDK.Feature#update_priv(int, byte[],
+     * if you overwrite the method {@link com.st.BlueSTSDK.Feature#update_priv(long, byte[],
      * int)} you have to call this method after that you update the data,
      * if you want that your feature can be logged
      * </p>
@@ -296,7 +296,7 @@ public abstract class Feature {
      * @param dataOffset data offset fo the data array where we have to read
      * @return number of read byte
      */
-    protected int update_priv(int timeStamp, byte[] data, int dataOffset) {
+    protected int update_priv(long timeStamp, byte[] data, int dataOffset) {
         //acquire the write permission
         Sample newSample; //keep a reference for the notification
         mWriteLock.lock(); // made the update atomic
@@ -322,7 +322,7 @@ public abstract class Feature {
      * @param dataOffset data offset fo the data array where we have to read
      * @return number of read byte
      */
-    int update(int timeStamp,@NonNull byte[] data, int dataOffset) {
+    int update(long timeStamp,@NonNull byte[] data, int dataOffset) {
         return update_priv(timeStamp,data,dataOffset);
     }
 

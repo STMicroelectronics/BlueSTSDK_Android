@@ -90,9 +90,10 @@ public class FeatureBattery extends Feature {
      * @return percentage of charge inside the battery, or nan if the data are not valid
      */
     public static float getBatteryLevel(Sample s) {
-        if (s.data.length > PERCENTAGE_INDEX)
-            if (s.data[PERCENTAGE_INDEX] != null)
-                return s.data[PERCENTAGE_INDEX].floatValue();
+        if(s!=null)
+            if (s.data.length > PERCENTAGE_INDEX)
+                if (s.data[PERCENTAGE_INDEX] != null)
+                    return s.data[PERCENTAGE_INDEX].floatValue();
         //else
         return Float.NaN;
     }//getBatteryLevel
@@ -103,10 +104,11 @@ public class FeatureBattery extends Feature {
      * @return battery voltage , or nan if the data are not valid
      */
     public static float getVoltage(Sample s) {
-        if (s.data.length > VOLTAGE_INDEX)
-            if (s.data[VOLTAGE_INDEX] != null)
-                return s.data[VOLTAGE_INDEX].floatValue();
-        //else
+        if(s!=null)
+            if (s.data.length > VOLTAGE_INDEX)
+                if (s.data[VOLTAGE_INDEX] != null)
+                    return s.data[VOLTAGE_INDEX].floatValue();
+            //else
         return Float.NaN;
     }//getVoltage
 
@@ -116,9 +118,10 @@ public class FeatureBattery extends Feature {
      * @return current used by the system , or nan if the data are not valid
      */
     public static float getCurrent(Sample s) {
-        if (s.data.length > CURRENT_INDEX)
-            if (s.data[CURRENT_INDEX] != null)
-                return s.data[CURRENT_INDEX].floatValue();
+        if(s!=null)
+            if (s.data.length > CURRENT_INDEX)
+                if (s.data[CURRENT_INDEX] != null)
+                    return s.data[CURRENT_INDEX].floatValue();
         //else
         return Float.NaN;
     }//getCurrent
@@ -130,6 +133,9 @@ public class FeatureBattery extends Feature {
      */
     public static BatteryStatus getBatteryStatus(Sample s) {
         int status = 0xFF;
+        if(s==null)
+            return BatteryStatus.Error;
+
         if (s.data.length > STATUS_INDEX)
             if (s.data[STATUS_INDEX] != null)
                 status = s.data[STATUS_INDEX].byteValue();

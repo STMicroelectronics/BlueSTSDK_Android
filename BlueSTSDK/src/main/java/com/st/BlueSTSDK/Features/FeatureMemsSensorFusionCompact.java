@@ -110,11 +110,10 @@ public class FeatureMemsSensorFusionCompact extends FeatureMemsSensorFusion {
             float qj = NumberConversion.LittleEndian.bytesToInt16(data, dataOffset + 2) / SCALE_FACTOR;
             float qk = NumberConversion.LittleEndian.bytesToInt16(data, dataOffset + 4) / SCALE_FACTOR;
             if(i==0)
-                mDelayNotifier.postDelayed(new DelayUpdate(timestamp,qi, qj, qk, getQs(qi, qj, qk),
-                             parsedData),  i * quatDelay);
+                notifySample(timestamp,qi,qj,qk, getQs(qi, qj, qk),parsedData);
             else
-                mDelayNotifier.postDelayed(new DelayUpdate(timestamp,qi, qj, qk, getQs(qi, qj,
-                                qk),null),  i * quatDelay);
+                mDelayNotifier.postDelayed(new DelayUpdate(timestamp, qi, qj, qk, getQs(qi, qj,
+                        qk)), i * quatDelay);
             dataOffset += 6;
         }//for
         return new ExtractResult(null,nQuat * 6);
@@ -129,7 +128,7 @@ public class FeatureMemsSensorFusionCompact extends FeatureMemsSensorFusion {
      * @return number of read byte
      */
     @Override
-    protected int update_priv(int timeStamp, byte[] data, int dataOffset) {
+    protected int update_priv(long timeStamp, byte[] data, int dataOffset) {
         /*this function is like the Feature ones but doesn't notify the data since all quaternion
          will be enque in the handler, in this way we minimize the possibility to notify the quaternion in
         a different order respect the arrival order */
@@ -141,6 +140,16 @@ public class FeatureMemsSensorFusionCompact extends FeatureMemsSensorFusion {
         return nReadByte;
     }//
 
+    private void notifySample(long timestamp, float qi,float qj,float qk,float qs,byte rawData[]){
+        Sample newSample;
+        mWriteLock.lock();
+            mLastSample = new Sample(timestamp,new Number[]{qi,qj,qk,qs});
+            newSample = mLastSample;
+        mWriteLock.unlock();
+        notifyUpdate(newSample);
+        logFeatureUpdate(rawData,newSample);
+    }
+
     /**
      * runnable that update the feature internal data
      */
@@ -149,23 +158,19 @@ public class FeatureMemsSensorFusionCompact extends FeatureMemsSensorFusion {
         /** quaternion that will be notify */
         private long mTimestamp;
         private float mQi, mQj, mQk, mQs;
-        private byte mRawData[];
-
         /**
          * create the runnable that will update the feature quaternion component
          * @param qi new qi component
          * @param qj new qj component
          * @param qk new qk component
          * @param qs new qs component
-         * @param rawData raw data used for extract
          */
-        public DelayUpdate(long timestamp,float qi, float qj, float qk, float qs, byte rawData[]) {
+        public DelayUpdate(long timestamp,float qi, float qj, float qk, float qs) {
             mTimestamp = timestamp;
             mQi = qi;
             mQj = qj;
             mQk = qk;
             mQs = qs;
-            mRawData=rawData;
         }//DelayUpdate
 
         /**
@@ -174,13 +179,7 @@ public class FeatureMemsSensorFusionCompact extends FeatureMemsSensorFusion {
          */
         @Override
         public void run() {
-            Sample newSample;
-            mWriteLock.lock();
-                mLastSample = new Sample(mTimestamp,new Number[]{mQi,mQj,mQk,mQs});
-                newSample = mLastSample;
-            mWriteLock.unlock();
-            notifyUpdate(newSample);
-            logFeatureUpdate(mRawData,newSample);
+           notifySample(mTimestamp,mQi,mQj,mQk,mQs,null);
         }
     }
 }

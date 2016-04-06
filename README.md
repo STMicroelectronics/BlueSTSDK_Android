@@ -20,6 +20,7 @@ Currently used values are:
     - 0x00 for a generic device
     - 0x01 is reserved for the STEVAL-WESU1 board
     - 0x80 for a generic Nucleo board
+    - 0x81 for a Nucleo board exporting remote feature
 
   You should use a value between 0x02 and 0x7F for your custom board, as values between 0x80 and 0xFF are reserved for ST Nucleo boards.
  
@@ -28,11 +29,12 @@ Currently, bits are mapped in the following way:
   
    |Bit|31|30|29|28|27|26|25|24|23|22|21|20|19|18|17|16|
    |:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-   |Feature|RFU|RFU|RFU|RFU|RFU|MicLevel|Proximity|Lux|Acc|Gyro|Mag|Pressure|Humidity|Temperature|Battery|RFU|
+   |Feature|RFU|RFU|Switch|Direction of arrival|RFU|MicLevel|Proximity|Lux|Acc|Gyro|Mag|Pressure
+   |Humidity|Temperature|Battery|Second Temperature|
    
    |Bit|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1|0|
    |:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-   |Feature|RFU|RFU|RFU|RFU|RFU|RFU|RFU|Sensor Fusion Compact|Sensor Fusion|RFU|RFU|Activity|Carry Position|Gesture|RFU|RFU|
+   |Feature|RFU|RFU|RFU|RFU|RFU|AccEvent|FreeFall|Sensor Fusion Compact|Sensor Fusion|RFU|RFU|Activity|Carry Position|ProximityGesture|MemsGesture|Pedometer|
 You can use one of the RFU bits or define a new device and decide how to map the feature. 
 To see how the data is exported by pre-defined features, consult the export method [<code> Feature.ExtractResult Feature.extractData(long,byte[],int)</code>](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Feature.html#extractData-long-byte:A-int-).  within the feature class definition.
 
@@ -58,6 +60,18 @@ To see how the data is exported by pre-defined features, consult the export meth
  
  Since the BLE packet max length is 20 bytes, the max size for a feature data field is 18 bytes.
  
+#### Remote Feature
+This type of Feature are created for handle the case when the node collect information from 
+other boards the user want to know also how produced the data.
+
+For this type of feature a node ID is attach at the beginning of a standard feature update message.
+
+For this type of feature the characteristic data format must be:
+ 
+| Length |     2     |        2         |      >1       |       |
+|:------:|:---------:|:----------------:|:-------------:|:-----:|
+|  Name  |  NodeID   | Remote timestamp | Feature Data  | ..... |
+
 
 ###Special Services
 ####[Debug](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Debug.html)
@@ -87,11 +101,16 @@ If available, the configuration service must have the UUID <code>00000000-000F-1
     
   From the SDK point of view the messages are sent using the method [Feature.sendCommand](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Feature.html#sendCommand-byte-byte:A-) and the answer is notified with a callback passed through the method [Feature.parseCommandResponse](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Feature.html#parseCommandResponse-int-byte-byte:A-).
 
-- <code>00000001-000F-11e1-ac36-0002a5d5c51b</code> (Read/Write/Notify): if available it is used to access the board configuration register that can be modified using the [ConfigControl](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Config/ConfigControl.html) class.
+  If this characteristic does not exist, but the characteristics that export the feature is in 
+  write mode, the *command id* and the *command data* are sending directly to the feature 
+  characteristics. In this case is not possible answer to the command.
+
+- <code>00000001-000F-11e1-ac36-0002a5d5c51b</code> (Read/Write/Notify): if available it is used to access the board configuration register that can be modified using the [ConfigControl](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/ConfigControl.html) class.
 
 
 ###Example
-The ST Bluemicrosystem1 firmware implements this protocol, you can find the project source here: [Bluemicrosystem1](http://www.st.com/bluemicrosystem1)
+The ST Bluemicrosystem1 and ST Bluemicrosystem3 firmware implements this protocol, you can find 
+the project source here: [Bluemicrosystem](http://www.st.com/bluemicrosystem)
 
 ##How to install the library
 ###As an external library
@@ -147,7 +166,7 @@ The data exported by the Sample can be extracted using the static utility method
 
 Note that each callback is performed asynchronously by a background thread.
 
-Available features can be retrieved from [Features package](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Features/package-frame.html).
+Available features can be retrieved from [Features package](https://stmicroelectronics-centrallabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Features/package-summary.html).
 
 ####How to add a new Feature
 

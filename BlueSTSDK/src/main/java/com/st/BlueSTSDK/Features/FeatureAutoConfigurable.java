@@ -191,7 +191,7 @@ public abstract class FeatureAutoConfigurable extends Feature {
     }
 
     /**
-     * stop the auto configuration procedure
+     * Stop the auto configuration procedure
      * <p>the node will notify to the user that the procedure stops with a call back on the
      * method {@link com.st.BlueSTSDK.Features.FeatureAutoConfigurable.FeatureAutoConfigurationListener#onConfigurationFinished(FeatureAutoConfigurable, int)}</p>
      *
@@ -202,7 +202,7 @@ public abstract class FeatureAutoConfigurable extends Feature {
     }//stop calibration
 
     /**
-     * request to know the current status of the auto configuration procedure
+     * Request to know the current status of the auto configuration procedure
      * <p>the status will be notify by a callback to
      * {@link com.st.BlueSTSDK.Features.FeatureAutoConfigurable.FeatureAutoConfigurationListener#notifyAutoConfigurationStatus(int)}</p>
      *
@@ -222,7 +222,7 @@ public abstract class FeatureAutoConfigurable extends Feature {
     }
 
     /**
-     * true if a feature is configured
+     * True if a feature is configured
      *
      * @return true if the feature is configured, false otherwise
      */
@@ -237,14 +237,14 @@ public abstract class FeatureAutoConfigurable extends Feature {
     public interface FeatureAutoConfigurationListener extends Feature.FeatureListener {
 
         /**
-         * the feature has start a process for self configuration
+         * The feature has start a process for self configuration
          *
          * @param f feature that start the configuration process
          */
         void onAutoConfigurationStarting(FeatureAutoConfigurable f);
 
         /**
-         * notify that the process of configuration has a new state
+         * Notify that the process of configuration has a new state
          *
          * @param f      feature that change its configuration status
          * @param status new calibration status when reach 100 the configuration is completed

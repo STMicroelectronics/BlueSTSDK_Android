@@ -59,10 +59,7 @@ public class Register {
      * @param access register mode access
      */
     public Register(int address, int size, Access access) {
-        this.setAddress(address);
-        this.setAccess(access);
-        this.setSize(size);
-        this.setTarget(Target.BOTH);
+        this(address,size,access,Target.BOTH);
     }
 
     /**
@@ -72,10 +69,7 @@ public class Register {
      * @param target register target
      */
     public Register(int address, int size,  Target target) {
-        this.setAddress(address);
-        this.setAccess(Access.RW);
-        this.setSize(size);
-        this.setTarget(target);
+        this(address,size,Access.RW,target);
     }
     /**
      * Constructor for Register class starting
@@ -223,7 +217,7 @@ public class Register {
      * @return the address of the register read or write operation
      */
     public static int getAddress(byte [] buffer){
-        return buffer[1];
+        return buffer[1] & 0xFF;
     }
 
     /**
@@ -233,7 +227,7 @@ public class Register {
      * @return the error code of the register read or write operation
      */
     public  static int getError(byte [] buffer){
-        return buffer[2];
+        return buffer[2] & 0xFF;
     }
 
     /**
@@ -243,7 +237,7 @@ public class Register {
      * @return the size of the register read or write operation
      */
     public  static int getSize(byte [] buffer){
-        return buffer[3];
+        return buffer[3] & 0xFF;
     }
 
     /**

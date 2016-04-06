@@ -75,7 +75,9 @@ public class Manager {
     static{
         sFeatureMapDecoder.put((byte) 0x00, BLENodeDefines.FeatureCharacteristics.genericDeviceFeatures);
         sFeatureMapDecoder.put((byte) 0x01, BLENodeDefines.FeatureCharacteristics.STEVAL_WESU1_DeviceFeatures);
-        sFeatureMapDecoder.put((byte) 0x80, BLENodeDefines.FeatureCharacteristics.Nucleo_0_Features);
+        sFeatureMapDecoder.put((byte) 0x80, BLENodeDefines.FeatureCharacteristics.Nucleo_Generic_Features);
+        sFeatureMapDecoder.put((byte) 0x81, BLENodeDefines.FeatureCharacteristics
+                .Nucleo_Remote_Features);
     }
 
     /**

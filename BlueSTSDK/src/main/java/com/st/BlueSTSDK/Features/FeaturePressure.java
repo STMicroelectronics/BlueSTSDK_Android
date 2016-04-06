@@ -47,6 +47,9 @@ public class FeaturePressure extends Feature {
     public static final float DATA_MAX = 2000;
     public static final float DATA_MIN = 0;
 
+    protected static final Field PRESSURE_FIELD = new Field(FEATURE_DATA_NAME, FEATURE_UNIT,
+            Field.Type.Float, DATA_MAX, DATA_MIN);
+
     /**
      * build a pressure feature
      *
@@ -54,9 +57,17 @@ public class FeaturePressure extends Feature {
      */
     public FeaturePressure(Node n) {
         super(FEATURE_NAME, n, new Field[]{
-                new Field(FEATURE_DATA_NAME, FEATURE_UNIT, Field.Type.Float, DATA_MAX, DATA_MIN)
+                PRESSURE_FIELD
         });
     }//FeaturePressure
+
+    protected FeaturePressure(String name, Node n,Field data[]) {
+        super(name,n,data);
+        if(data[0]!=PRESSURE_FIELD){
+            throw new IllegalArgumentException("First data[0] must be FeaturePressure" +
+                    ".PRESSURE_FIELD");
+        }//if
+    }
 
     /**
      * extract the pressure value from the sensor raw data
@@ -65,9 +76,10 @@ public class FeaturePressure extends Feature {
      * @return pressure value or nan if the data array is not valid
      */
     public static float getPressure(Sample sample) {
-        if(sample.data.length>0)
-            if (sample.data[0] != null)
-                return sample.data[0].floatValue();
+        if(sample!=null)
+            if(sample.data.length>0)
+                if (sample.data[0] != null)
+                    return sample.data[0].floatValue();
         //else
         return Float.NaN;
     }

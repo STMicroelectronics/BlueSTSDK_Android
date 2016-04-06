@@ -39,6 +39,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.WorkerThread;
 import android.util.Log;
@@ -49,6 +50,7 @@ import com.st.BlueSTSDK.Utils.BLENodeDefines;
 import com.st.BlueSTSDK.Utils.BleAdvertiseParser;
 import com.st.BlueSTSDK.Utils.InvalidBleAdvertiseFormat;
 import com.st.BlueSTSDK.Utils.NumberConversion;
+import com.st.BlueSTSDK.Utils.UnwrapTimestamp;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -195,14 +197,19 @@ public class Node{
                         (BluetoothGattCharacteristic.PROPERTY_NOTIFY))!=0;
     }//charCanBeNotify
 
+
+    /**
+     * check if the node is doing the pairing and set the mNodeWillPair variable
+     * @return true if the node is doing the bonding, false otherwise
+     */
+    private boolean isPairing(){
+        return mDevice.getBondState()==BluetoothDevice.BOND_BONDING;
+    }
+
     /** callback method to use when we send ble commands */
     private class GattNodeConnection extends BluetoothGattCallback {
 
-        /** number of time that the ts has reset, the timestamp is reseted when we receive a ts with
-         * a  value > 65435 and than a package with a smaller value */
-        private int mNReset=0;
-        /** last raw ts received from the board, it is a number between 0 and 2^16-1 */
-        private int mLastTs=0;
+        private UnwrapTimestamp mUnwrapTimestamp = new UnwrapTimestamp();
 
         /**
          * if we are connecting it start to scan the device service/characteristics otherwise it
@@ -218,11 +225,16 @@ public class Node{
                     ""+newState+" boundState:"+mDevice.getBondState());
             if(status==BluetoothGatt.GATT_SUCCESS){
                 if(newState==BluetoothGatt.STATE_CONNECTED){
-                        mBleThread.post(mScanServicesTask);
+                    if(!isPairing()) { //if it is pairing we do it when it finish
+                        //wait a bit for see if we will do the secure pairing or not,
+                        //if the device will be in pair status the scan is aborted and will be
+                        //done when the pairing will be completed
+                        mBleThread.postDelayed(mScanServicesTask, RETRY_COMMAND_DELAY_MS);
+                    }//if !pairing
                 }else if (newState == BluetoothGatt.STATE_DISCONNECTED){
                     if(mConnection!=null) {
                         mConnection.close();
-                        mConnection = null;
+                        cleanConnectionData();
                     }//if
                     if (mUserAskToDisconnect){
                         //disconnect completed
@@ -236,7 +248,7 @@ public class Node{
                 Node.this.updateNodeStatus(State.Dead);
                 if(mConnection!=null) {
                     mConnection.close();
-                    mConnection = null;
+                    cleanConnectionData();
                 }//if
             }//if status
         }//onConnectionStateChange
@@ -253,26 +265,9 @@ public class Node{
             if(status == BluetoothGatt.GATT_SUCCESS){
                 Node.this.updateRssi(rssi);
             }else{
-                Log.e(TAG,"Impossible retrieve the rssi value");
+                Log.e(TAG, "Impossible retrieve the rssi value");
             }//if-else
         }//onReadRemoteRssi
-
-        /**
-         * filter the list of all the service for keep only the known services
-         * @param allServices list of all the service returned by the node
-         * @return list of services handle by the sdk
-         * @see com.st.BlueSTSDK.Utils.BLENodeDefines.Services
-         */
-        private List<BluetoothGattService> filterKnowServices(List<BluetoothGattService>
-                                                                     allServices){
-            List<BluetoothGattService> knowServices = new ArrayList<>(allServices.size());
-            for(BluetoothGattService service : allServices){
-                if(BLENodeDefines.Services.isKnowService(service.getUuid())){
-                    knowServices.add(service);
-                }//if
-            }//for
-            return knowServices;
-        }//filterKnowServices
 
         /**
          * if present we build the debug service for be able to send/receive the debug information
@@ -320,8 +315,8 @@ public class Node{
                     if (f != null) {
                         f.setEnable(true);
                         temp.add(f);
-                    }
-                }
+                    }//if
+                }//if
                 mask = mask>>1;
             }//for
 
@@ -353,9 +348,15 @@ public class Node{
         public void onServicesDiscovered(BluetoothGatt gatt, int status){
             Log.d(TAG,"onServicesDiscovered status:"+status+" boundState:" + mDevice.getBondState());
 
+
             if(status == BluetoothGatt.GATT_FAILURE) {
-                Log.e(TAG, "onServicesDiscovered: Error discovering Service list");
                 Node.this.updateNodeStatus(State.Dead);
+                mNScanRequest.decrementAndGet();
+                return;
+            }//if
+
+            //we are pairing -> avoid to do the scanning and wait to be paired
+            if(isPairing()){
                 mNScanRequest.decrementAndGet();
                 return;
             }//if
@@ -365,17 +366,12 @@ public class Node{
             if(Node.this.mState!=State.Connecting && Node.this.mState!=State.Unreachable) {
                 mNScanRequest.decrementAndGet();
                 return;
-            }
+            }//if
 
             //List<BluetoothGattService> knowServices = filterKnowServices(gatt.getServices());
             List<BluetoothGattService> nodeServices = gatt.getServices();
             if(nodeServices.size()==0) { // the list is empty -> exit
-                //if we are bonded or we don't need to be bounded there is a real problem
-                //otherwise we simply wait the next call without notify an error
-                if(mDevice.getBondState()!=BluetoothDevice.BOND_BONDING) {
-                    Log.e(TAG, "onServicesDiscovered: Empty Service list");
-                    Node.this.updateNodeStatus(State.Dead);
-                }//if
+                Node.this.updateNodeStatus(State.Dead);
                 mNScanRequest.decrementAndGet();
                 return;
             }//if
@@ -389,27 +385,25 @@ public class Node{
                     List<BluetoothGattCharacteristic> controlChar = service.getCharacteristics();
                     //check for the initialization characteristics
                     for(BluetoothGattCharacteristic characteristic : controlChar) {
-                        Log.d(TAG, "UUID :" +characteristic.getUuid() + " >>>>> "+ BLENodeDefines.Services.Config.REGISTERS_ACCESS_UUID);
                         if (characteristic.getUuid().equals(BLENodeDefines.Services.Config.FEATURE_COMMAND_UUID))
-                            mInitialization = characteristic;
+                            mFeatureCommand = characteristic;
                         if (characteristic.getUuid().equals(BLENodeDefines.Services.Config.REGISTERS_ACCESS_UUID))
                             mConfigControl = new ConfigControl(Node.this, characteristic,mConnection);
                     }//for
-                }else{ //otherwise will contains feature characteristics
+                }else {//otherwise will contains feature characteristics
 
-                    for(BluetoothGattCharacteristic characteristic : service.getCharacteristics()){
+                    for (BluetoothGattCharacteristic characteristic : service.getCharacteristics()) {
                         UUID uuid = characteristic.getUuid();
-                        if(BLENodeDefines.FeatureCharacteristics.isFeatureCharacteristics(uuid))
+                        if (BLENodeDefines.FeatureCharacteristics.isFeatureCharacteristics(uuid))
                             buildFeature(characteristic);
                         else if (BLENodeDefines.FeatureCharacteristics
-                                .isGeneralPurposeCharacteristics(uuid)){
+                                .isGeneralPurposeCharacteristics(uuid)) {
                             buildGenericFeature(characteristic);
                         }//if-else
                     }//for
 
-                }//if-else
+                }//if-else-if-else
             }//for each service
-
 
            //move on the connected state only if all the discover services are finished
             if(mNScanRequest.decrementAndGet()==0)
@@ -417,25 +411,39 @@ public class Node{
 
         }//onServicesDiscovered
 
+
+        /**
+         * we have to do a linear search into the hash map since the BluetoothGattCharacteristic
+         * keep in account the char values, and this can be different if are different
+         * characteristics with the same uuid, this happen when the node is bounded and not
+         * recreated afer a disconnection
+         * @param c characteristic to search
+         * @return list of feature send with this characteristics or null if it doesn't exist
+         */
+        List<Feature> getCorrespondingFeatures(BluetoothGattCharacteristic c) {
+            for (Map.Entry<BluetoothGattCharacteristic, List<Feature>> e : mCharFeatureMap.entrySet()) {
+                if(e.getKey().getUuid().equals(c.getUuid())){
+                    return e.getValue();
+                }//if
+            }//for
+            return null;
+        }//getCorrespondingFeatures
+
         /**
          * update all the feature inside this characteristic
          * @param characteristic updated characteristic
          * @return true if the characteristic is associated to some feature
          */
         boolean updateFeature(BluetoothGattCharacteristic characteristic){
-            List<Feature> features = mCharFeatureMap.get(characteristic);
+            List<Feature> features = getCorrespondingFeatures(characteristic);
             if(features!=null){
                 byte data[] = characteristic.getValue();
                 int timeStamp = NumberConversion.LittleEndian.bytesToUInt16(data);
-
-                if(mLastTs>((1<<16)-100) && mLastTs > timeStamp)
-                    mNReset++;
-                mLastTs=timeStamp;
-                timeStamp = mNReset * (1<<16) + timeStamp;
+                long timeStampLong = mUnwrapTimestamp.unwrap(timeStamp);
 
                 int dataOffset =2;
                 for(Feature f: features){
-                    dataOffset += f.update(timeStamp,data,dataOffset);
+                    dataOffset += f.update(timeStampLong,data,dataOffset);
                 }//for features
                 return true;
             }else
@@ -471,7 +479,7 @@ public class Node{
             if(mDebugConsole!=null &&
                     BLENodeDefines.Services.Debug.isDebugCharacteristics(characteristic.getUuid()))
                 mDebugConsole.receiveCharacteristicsUpdate(characteristic);
-            else if(characteristic.equals(mInitialization)) //if it is the commandCharacteristics
+            else if(characteristic.equals(mFeatureCommand)) //if it is the commandCharacteristics
                 dispatchCommandResponseData(characteristic);
             else if (mConfigControl != null && characteristic.getUuid().equals(BLENodeDefines.Services.Config.REGISTERS_ACCESS_UUID))
                 mConfigControl.characteristicsUpdate(characteristic);
@@ -497,7 +505,7 @@ public class Node{
                 else
                     updateFeature(characteristic);
             }else{
-                if(mDevice.getBondState()!=BluetoothDevice.BOND_BONDING) {
+                if(!isPairing()) {
                     Log.e(TAG,"Error reading the characteristics: "+characteristic);
                     Node.this.updateNodeStatus(State.Dead);
                 }//if
@@ -507,12 +515,11 @@ public class Node{
 
         @Override
         public void onDescriptorWrite(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status) {
-            Log.d(TAG,"DescriptorWrite: "+status);
             //descriptor write -> remove from the queue
             if(status == BluetoothGatt.GATT_SUCCESS)
-                dequeueWriteDesc(descriptor);
+                dequeueWriteDesc(new WriteDescCommand(descriptor,descriptor.getValue()));
             else{
-                if(mDevice.getBondState()!=BluetoothDevice.BOND_BONDING) {
+                if(!isPairing()) {
                     Log.e(TAG,"onDescriptorWrite Error writing the descriptor: "+descriptor
                             .getCharacteristic());
                     Node.this.updateNodeStatus(State.Dead);
@@ -529,7 +536,10 @@ public class Node{
                 mDebugConsole.receiveCharacteristicsWriteUpdate(characteristic, status == BluetoothGatt.GATT_SUCCESS);
             else if (mConfigControl != null && characteristic.getUuid().equals(BLENodeDefines.Services.Config.REGISTERS_ACCESS_UUID))
                 mConfigControl.characteristicsWriteUpdate(characteristic, status == BluetoothGatt.GATT_SUCCESS);
-
+            else {
+                WriteCharCommand writeOp = new WriteCharCommand(characteristic,characteristic.getValue());
+                dequeueFeatureWrite(writeOp);
+            }
         }
     }//GattNodeConnection
 
@@ -538,9 +548,24 @@ public class Node{
     /** gatt connection with the device */
     private BluetoothGatt mConnection;
     /** characteristics used for send command to a feature */
-    private BluetoothGattCharacteristic mInitialization =null;
+    private BluetoothGattCharacteristic mFeatureCommand =null;
     /** thread where we do all the ble commands */
     private Handler mBleThread;
+
+    /**
+     * clear the data that are created during the connection
+     */
+    private void cleanConnectionData(){
+        mConnection=null;
+        mWriteDescQueue.clear();
+        mFeatureWriteQueue.clear();
+        mCharFeatureMap.clear();
+        //we stop the connection -> we have not notification enabled
+        mNotifyFeature.clear();
+        mFeatureCommand=null;
+        mConfigControl=null;
+        mDebugConsole=null;
+    }
 
     /**
      * task that will disconnect the device
@@ -550,8 +575,7 @@ public class Node{
         public void run() {
             if(mState==State.Disconnecting) {
                 mConnection.disconnect();
-                //we stop the connection -> we have not notification enabled
-                mNotifyFeature.clear();
+                //the data will be free in the onConnectionStateChange
             }// if
         } //run
     };
@@ -572,19 +596,23 @@ public class Node{
      * count the number of discover service call, we move in the connected state only if we
      * finish all the call
      */
+    //TODO now the scanning is not request if the device is doing the pairing -> this variable
+    //should be used
     private AtomicInteger mNScanRequest = new AtomicInteger(0);
 
     /**
      * task for ask to discover the device service, if the call fail this command will auto
      * submit itself after {@code RETRY_COMMAND_DELAY_MS}
+     * if the device is doing a pairing the function will not run, reschedule it when the bonding
+     * is complete
      */
     private Runnable mScanServicesTask = new Runnable() {
         @Override
         public void run() {
-            if (mConnection != null){
-                if (mConnection.discoverServices())
+            if (mConnection != null && !isPairing()){
+                if (mConnection.discoverServices()) {
                     mNScanRequest.incrementAndGet();
-                else
+                }else
                     mBleThread.postDelayed(this, RETRY_COMMAND_DELAY_MS);
                 //if-else
             }//if connection
@@ -652,20 +680,23 @@ public class Node{
 
         @Override
         public void onStateChange(Node node, State newState, State prevState) {
-            if(newState == State.Connected && mInitialization !=null) {
-                changeNotificationStatus(mInitialization,true);
+            if(newState == State.Connected && mFeatureCommand !=null) {
+                changeNotificationStatus(mFeatureCommand,true);
             }//if
             //error during connection (connecting ->dead or connected -> dead )
             if((prevState == State.Connecting || prevState== State.Connected ) && newState==State
                     .Dead){
                 Log.e(TAG,"Error connecting to the node:"+node.getName());
                 //we disconnect -> free the gatt resource and connect again
-                if(mConnection!=null){ mConnection.close(); mConnection=null;}
+                if(mConnection!=null){ mConnection.close();cleanConnectionData();}
                 //we stop the connection -> we have not notification enabled
                 mNotifyFeature.clear();
                 //remove the pending write request
                 synchronized (mWriteDescQueue) {
                     mWriteDescQueue.clear();
+                }
+                synchronized (mFeatureWriteQueue) {
+                    mFeatureWriteQueue.clear();
                 }
             }
             if(newState==State.Dead  || newState==State.Disconnecting){
@@ -679,10 +710,70 @@ public class Node{
     };
 
     /**
+     * Helper class that contains the characteristic and the data that we have write on it
+     */
+    private class WriteCharCommand {
+        public BluetoothGattCharacteristic characteristic;
+        public byte data[];
+
+        WriteCharCommand(BluetoothGattCharacteristic c, byte d[]){
+            characteristic=c;
+            data=d;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if(!(o instanceof WriteCharCommand))
+                return false;
+            WriteCharCommand other =(WriteCharCommand)o;
+            return characteristic.getUuid().equals(other.characteristic.getUuid()) &&
+                    Arrays.equals(data,other.data);
+        }//equals
+    }//WriteCharCommand
+
+    /**
+     * helper class that contains the descriptor and the data that we have to write on it
+     */
+    private class WriteDescCommand{
+        public BluetoothGattDescriptor desc;
+        public byte data[];
+
+        WriteDescCommand(BluetoothGattDescriptor desc ,byte data[]){
+            this.desc=desc;
+            this.data=data;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (!(o instanceof WriteDescCommand))
+                return false;
+            WriteDescCommand other = (WriteDescCommand) o;
+            boolean dataEqual;
+            //if the other data is null we keep it as equal
+            /**
+             * in the samsung device sometime the onDescriptorWrite callback as a descriptor with
+             * null data.. so the descriptor is not dequeue
+             */
+            dataEqual = other.data == null || data==null || Arrays.equals(data, other.data);
+
+            //compare the desc uuid and the char uuid
+            return desc.getUuid().equals(other.desc.getUuid()) &&
+                    desc.getCharacteristic().getUuid().equals(
+                            other.desc.getCharacteristic().getUuid()) &&
+                    dataEqual;
+        }//equals
+    }
+
+    /**
      * we have to serialize the descriptor write, -> create a queue
      * + use the enqueueWriteDesc/dequeueWriteDesc for insert element on it
      */
-    final private Queue<BluetoothGattDescriptor> mWriteDescQueue = new LinkedList<>();
+    final private Queue<WriteDescCommand> mWriteDescQueue = new LinkedList<>();
+
+    /** we have to serialize also the write in the characteristic for avoid to lost
+     * some message you have to use enqueueWriteChar for add element to this queue
+     */
+    final private Queue<WriteCharCommand> mFeatureWriteQueue = new LinkedList<>();
 
     /** node state */
     private State mState = State.Init;
@@ -874,7 +965,7 @@ public class Node{
         initHandler();
         buildAvailableFeatures();
         addNodeStateListener(mNotifyCommandChange);
-        Log.i(TAG,mAdvertise.toString());
+        Log.i(TAG, mAdvertise.toString());
     }
 
     /**
@@ -923,16 +1014,16 @@ public class Node{
                 Log.d(TAG,intent.getAction());
                 Log.d(TAG,"OnReceive change:"+intent.getIntExtra(BluetoothDevice
                         .EXTRA_BOND_STATE,-1));
-                if(intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE,BluetoothDevice.BOND_NONE)
-                        == BluetoothDevice.BOND_BONDED){
+                int boundSate =intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE,
+                        BluetoothDevice.BOND_NONE);
+                if(boundSate == BluetoothDevice.BOND_BONDED){
                     BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice
                             .EXTRA_DEVICE);
+                    //it is needed for check that the paired device is an our device
                     Node n = Manager.getSharedInstance().getNodeWithTag(device.getAddress());
-                    if(n!=null && mState==State.Connected) { // is one of our devices and is
-                        // already connected
-                        //mBleThread.post(mScanServicesTask);
-                        updateNodeStatus(State.Connected);
-                    }//if
+                    if(n!=null) {
+                        mBleThread.post(mScanServicesTask);
+                    }//if n
                 }//if
             }//onReceive
         };
@@ -970,6 +1061,8 @@ public class Node{
         return mAdvertise.getBoardType();
     }//getType
 
+    public short getTypeId(){return mAdvertise.getDeviceId();}//getTypeId
+
     /**
      * tell if the node is connected
      * @return true if the internal state is equal to connected
@@ -1002,6 +1095,17 @@ public class Node{
     }//getName
 
     /**
+     * get the device name with some product tag info (BLE Address)
+     * @return the device friendly Name
+     */
+    public String getFriendlyName(){
+        String strTagClean = "NA";
+        if (getTag() != null && getTag().length() > 0)
+            strTagClean = getTag().replace(":","");
+        return getName() + " @" + strTagClean.substring(strTagClean.length()-Math.min(6, strTagClean.length()), strTagClean.length());
+    }//getFriendlyName
+
+    /**
      * get the device Protocol Version
      * @return the device Protocol Version
      */
@@ -1019,18 +1123,34 @@ public class Node{
     }
 
     /**
+     * return a list of feature of a specific type
+     * @param type type of feature that we want search
+     * @param <T> class that will want search
+     * @return all the features of type {@code type} exported by this node, or an empty list
+     */
+    public @NonNull <T extends Feature> List<T> getFeatures(Class<T> type){
+        List<T> temp = new ArrayList<>();
+        for (Feature f : mAvailableFeature) {
+            if (f.getClass().isAssignableFrom(type)) {
+                @SuppressWarnings("unchecked") //we just  check that we can do the assign
+                T feature = (T)f; //needed for suppress the warnings
+                temp.add(feature);
+            }//if
+        }// for list
+        return java.util.Collections.unmodifiableList(temp);
+    }//getFeatures
+
+    /**
      * search for a specific feature
      * @param type type of feature that we want search
      * @param <T> class that will want search
      * @return the feature of type {@code type} exported by this node, or null if not present
      */
-    @SuppressWarnings("unchecked")
     public @Nullable <T extends Feature> T getFeature(Class<T> type){
-        for (Feature f : mAvailableFeature) {
-            if (type.isInstance(f)) {
-                return (T) f;
-            }
-        }// for list
+        List <T> allFeature = getFeatures(type);
+        if(!allFeature.isEmpty())
+            return allFeature.get(0);
+        //else
         return null;
     }//getFeature
 
@@ -1068,7 +1188,7 @@ public class Node{
             return null;
         else if(candidateChar.size()==1){
             return candidateChar.get(0);
-        }else{ //we have to select the feature that permit us to have more datas
+        }else{ //we have to select the feature that permit us to have more data
             int maxNFeature=0;
             BluetoothGattCharacteristic bestChar=null;
             for(BluetoothGattCharacteristic characteristic: candidateChar){
@@ -1081,8 +1201,6 @@ public class Node{
             return bestChar;
         }//if-else
     }
-
-
 
     /**
      * async request for read a feature, the new value will be notify thought the feature listener
@@ -1103,7 +1221,7 @@ public class Node{
             @Override
             public void run() {
             final Runnable readChar = this;
-            if (mConnection != null && isConnected()) {
+            if (mConnection != null && isConnected() && !isPairing()) {
                 //wait that the queue is empty and write the characteristics, if an error
                 // happen we enqueue again the command
                 waitCompleteAllDescriptorWriteRequest(new Runnable() {
@@ -1113,7 +1231,9 @@ public class Node{
                             mHandler.postDelayed(readChar, RETRY_COMMAND_DELAY_MS);
                     }//run
                 });
-            }//if
+            }else{
+                mHandler.postDelayed(readChar, RETRY_COMMAND_DELAY_MS);
+            }
         }//run
     });
 
@@ -1152,10 +1272,12 @@ public class Node{
     private Runnable mWriteDescriptorTask = new Runnable() {
         @Override
         public void run() {
-        if(mConnection!=null &&  (isConnected() || mState==State.Disconnecting)) {
+        if(mConnection!=null &&  (isConnected() || mState==State.Disconnecting) && !isPairing()) {
             synchronized (mWriteDescQueue) {
                 if(!mWriteDescQueue.isEmpty()) {
-                    BluetoothGattDescriptor desc = mWriteDescQueue.peek();
+                    WriteDescCommand command = mWriteDescQueue.peek();
+                    BluetoothGattDescriptor desc = command.desc;
+                    desc.setValue(command.data);
                     if (Arrays.equals(desc.getValue(), BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE))
                         mConnection.setCharacteristicNotification(desc.getCharacteristic(), true);
                     if (Arrays.equals(desc.getValue(), BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE))
@@ -1164,17 +1286,22 @@ public class Node{
                         mBleThread.postDelayed(this, RETRY_COMMAND_DELAY_MS);
                 }//if size
             }//synchronized
-        }//if
+        }else{ //we can execute the task, postpone it
+            mBleThread.postDelayed(this, RETRY_COMMAND_DELAY_MS);
+        }
     }//run
 };
 
+
     /**
-     * add a descriptor to the queue for write it
-     * @param desc descriptor to write
+     * add a command to the queue of writes, this function automatically start to write the
+     * descriptor
+     * @param command descriptor and data to write, we have to keep it separate for avoid to
+     *                lost message writing multiple time in the same descriptor
      */
-    private void enqueueWriteDesc(final BluetoothGattDescriptor desc){
+    private void enqueueWriteDesc(final WriteDescCommand command){
         synchronized (mWriteDescQueue){
-            mWriteDescQueue.add(desc);
+            mWriteDescQueue.add(command);
             //if the queue contains only the element that we just add
             if(mWriteDescQueue.size()==1) {
                 mBleThread.post(mWriteDescriptorTask);
@@ -1184,11 +1311,12 @@ public class Node{
 
     /**
      * remove the descriptor from the queue and if present start a new write
-     * @param desc descriptor that we finis to write
+     * @param command that is completed
      */
-    private void dequeueWriteDesc(BluetoothGattDescriptor desc){
+    private void dequeueWriteDesc(WriteDescCommand command){
         synchronized (mWriteDescQueue){
-            mWriteDescQueue.remove(desc);
+            if(!mWriteDescQueue.remove(command))
+                Log.e(TAG,"No WriteDescCommand removed");
             //if there still element in the queue, start write the head
             if(!mWriteDescQueue.isEmpty()) {
                 mBleThread.post(mWriteDescriptorTask);
@@ -1196,6 +1324,62 @@ public class Node{
                 mWriteDescQueue.notifyAll();
         }//synchronized
     }//dequeueWriteDesc
+
+
+    /**
+     * take the fist element in the mFeatureWriteQueue and call the writeCharacteristics
+     * note that the characteristic are write only when we write all the descriptor
+     */
+    private Runnable mWriteFeatureCommandTask = new Runnable() {
+        @Override
+        public void run() {
+            if(mConnection!=null &&  isConnected() && !isPairing()) {
+                synchronized (mFeatureWriteQueue) {
+                    if(!mFeatureWriteQueue.isEmpty()) {
+                        WriteCharCommand command = mFeatureWriteQueue.peek();
+                        command.characteristic.setValue(command.data);
+                        writeCharacteristics(command.characteristic);
+                    }//if size
+                }//synchronized
+            }else{ //we can execute the task, postpone it
+                mBleThread.postDelayed(this, RETRY_COMMAND_DELAY_MS);
+            }
+        }//run
+    };
+
+
+    /**
+     * ad a command to the queue of work to do
+     * @param command characteristic and data to write
+     */
+    private void enqueueFeatureWrite(final WriteCharCommand command){
+        synchronized (mFeatureWriteQueue){
+            mFeatureWriteQueue.add(command);
+            //if the queue contains only the element that we just add
+            if(mFeatureWriteQueue.size()==1) {
+                mBleThread.post(mWriteFeatureCommandTask);
+            }//if
+        }//synchronized
+    }//enqueueWriteDesc
+
+
+    /**
+     * remove a command when complited
+     * @param writeOp command completed
+     */
+    private void dequeueFeatureWrite(final WriteCharCommand writeOp){
+        synchronized (mFeatureWriteQueue){
+            if(!mFeatureWriteQueue.contains(writeOp))
+                return;
+            mFeatureWriteQueue.remove(writeOp);
+            //if there still element in the queue, start write the head
+            if(!mFeatureWriteQueue.isEmpty()) {
+                mBleThread.post(mWriteFeatureCommandTask);
+            }
+        }//synchronized
+    }//dequeueWriteDesc
+
+
 
     /**
      * send a request for enable/disable the notification update on a specific characteristics
@@ -1208,14 +1392,16 @@ public class Node{
 
         if(charCanBeNotify(characteristic) && mConnection!=null && isConnected()){
             BluetoothGattDescriptor descriptor = characteristic.getDescriptor(NOTIFY_CHAR_DESC_UUID);
+
             if(descriptor==null)
                 return false;
 
-            if(enable)
-                descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
-            else
-                descriptor.setValue(BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE);
-            enqueueWriteDesc(descriptor);
+            WriteDescCommand command= new WriteDescCommand(descriptor,
+                    enable ? BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE :
+                        BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE);
+
+            enqueueWriteDesc(command);
+
             return true;
         }else
             return false;
@@ -1276,7 +1462,7 @@ public class Node{
             @Override
             public void run() {
                 final Runnable writeChar = this;
-                if(mConnection!=null &&  isConnected()) {
+                if(mConnection!=null &&  isConnected()&& ! isPairing()) {
                     //wait that the queue is empty and write the characteristics, if an error
                     // happen we enqueue again the command
                     waitCompleteAllDescriptorWriteRequest(new Runnable() {
@@ -1287,7 +1473,9 @@ public class Node{
                             }//if
                         }//run
                     });
-                }//if
+                }else{
+                    mHandler.postDelayed(writeChar, RETRY_COMMAND_DELAY_MS);
+                }//if-else
             }//run
         });
     }
@@ -1305,9 +1493,7 @@ public class Node{
         if(!charCanBeWrite(characteristic) || !feature.isEnabled())
             return false;
 
-        characteristic.setValue(data);
-
-        writeCharacteristics(characteristic);
+        enqueueFeatureWrite(new WriteCharCommand(characteristic, data));
 
         return true;
     }//writeFeatureData
@@ -1326,7 +1512,7 @@ public class Node{
      * the node transmission power, in mdb
      * @return transmission power in mdb
      */
-    int getTxPowerLevel(){
+    public int getTxPowerLevel(){
         return mAdvertise.getTxPower();
     }//getTxPowerLevel
 
@@ -1407,9 +1593,12 @@ public class Node{
     }
 
     /**
-     * send a command to a feature
-     *
-     * sending command to a general pourpose feature is not supported
+     * Send a command to a feature, the command will be write into the
+     * {@link com.st.BlueSTSDK.Utils.BLENodeDefines.Services.Config#FEATURE_COMMAND_UUID}
+     * If not present the data will be write into the characteristic that export the feature data.
+     * sending command to a general purpose feature is not supported
+     * The command format is [feature mask (4byte) + type + data], if the command is send directly
+     * to the feature the feature mask is omitted.
      *
      * @param feature destination feature
      * @param type command type
@@ -1419,22 +1608,27 @@ public class Node{
     boolean sendCommandMessage(Feature feature,byte type,byte data[]) {
         if (feature instanceof FeatureGenPurpose)
             return false;
+
         final BluetoothGattCharacteristic characteristic = getCorrespondingChar(feature);
-        if (mInitialization == null || characteristic == null)
+        final BluetoothGattCharacteristic writeTo = mFeatureCommand != null ? mFeatureCommand :
+                characteristic;
+
+        if (writeTo == null || characteristic == null || !charCanBeWrite(writeTo))
             return false;
-        int mask = BLENodeDefines.FeatureCharacteristics.extractFeatureMask(characteristic.getUuid());
-        //not enable or not exist or not in write mode -> return false
-        int charProp = mInitialization.getProperties();
-        if (!feature.isEnabled() ||
-                ((charProp & (BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE
-                        | BluetoothGattCharacteristic.PROPERTY_WRITE)) == 0)) {
-            return false;
-        }//else
-        mInitialization.setValue(packageCommandData(mask, type, data));
-        writeCharacteristics(mInitialization);
+
+        if(writeTo==mFeatureCommand) {
+            int mask = BLENodeDefines.FeatureCharacteristics.extractFeatureMask(characteristic.getUuid());
+            enqueueFeatureWrite(
+                    new WriteCharCommand(mFeatureCommand, packageCommandData(mask, type, data)));
+        }else{ //fail back write directly to the feature characteristics
+            byte dataToWrite[] = new byte[1+data.length];
+            dataToWrite[0]=type;
+            System.arraycopy(data,0,dataToWrite,1,data.length);
+            enqueueFeatureWrite( new WriteCharCommand(writeTo,dataToWrite));
+        }//if-else
 
         return true;
-    }
+    }//sendCommandMessage
 
 
     /***

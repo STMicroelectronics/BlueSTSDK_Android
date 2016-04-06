@@ -72,29 +72,31 @@ public class FeatureCarryPosition extends Feature {
      * @return position detected by the node
      */
     public static Position getPosition(Sample sample){
-        if(sample.data.length>0)
-            if (sample.data[0] != null){
-                int activityId = sample.data[0].byteValue();
-                switch (activityId){
-                    case 0x00:
-                        return Position.UNKNOWN;
-                    case 0x01:
-                        return Position.ON_DESK;
-                    case 0x02:
-                        return Position.IN_HAND;
-                    case 0x03:
-                        return Position.NEAR_HEAD;
-                    case 0x04:
-                        return Position.SHIRT_POCKET;
-                    case 0x05:
-                        return Position.TROUSERS_POCKET;
-                    case 0x06:
-                        return Position.ARM_SWING;
-                    default:
-                        return Position.ERROR;
-                }//switch
-            }//if
-        //if
+        if(sample!=null)
+            if(sample.data.length>0)
+                if (sample.data[0] != null){
+                    int activityId = sample.data[0].byteValue();
+                    switch (activityId){
+                        case 0x00:
+                            return Position.UNKNOWN;
+                        case 0x01:
+                            return Position.ON_DESK;
+                        case 0x02:
+                            return Position.IN_HAND;
+                        case 0x03:
+                            return Position.NEAR_HEAD;
+                        case 0x04:
+                            return Position.SHIRT_POCKET;
+                        case 0x05:
+                            return Position.TROUSERS_POCKET;
+                        case 0x06:
+                            return Position.ARM_SWING;
+                        default:
+                            return Position.ERROR;
+                    }//switch
+                }//if
+            //if
+        //if sample!=null
         return Position.ERROR;
     }//getActivityStatus
 
