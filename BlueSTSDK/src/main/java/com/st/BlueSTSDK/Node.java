@@ -271,12 +271,11 @@ public class Node{
 
         /**
          * if present we build the debug service for be able to send/receive the debug information
-         * @param connection device connection
          * @param debugService debug service
          * @return object that we can use for communicate with the debug console,
          * can be null if we didn't find all the needed characteristics
          */
-        private Debug buildDebugService(BluetoothGatt connection,BluetoothGattService debugService){
+        private Debug buildDebugService(BluetoothGattService debugService){
             List<BluetoothGattCharacteristic> charList = debugService.getCharacteristics();
             BluetoothGattCharacteristic term=null,err=null;
             //search the term and err characteristics
@@ -288,7 +287,7 @@ public class Node{
             }//for
             //if both are present we build the object
             if(term!=null && err!=null)
-                return new Debug(Node.this,connection,term,err);
+                return new Debug(Node.this,term,err);
             else
                 return null;
         }//buildDebugService
@@ -380,7 +379,7 @@ public class Node{
             for(BluetoothGattService service : nodeServices){
                 //check if it is a specific service
                 if(service.getUuid().equals(BLENodeDefines.Services.Debug.DEBUG_SERVICE_UUID))
-                    mDebugConsole = buildDebugService(gatt,service);
+                    mDebugConsole = buildDebugService(service);
                 else if(service.getUuid().equals(BLENodeDefines.Services.Config.CONFIG_CONTROL_SERVICE_UUID)) {
                     List<BluetoothGattCharacteristic> controlChar = service.getCharacteristics();
                     //check for the initialization characteristics
@@ -531,15 +530,14 @@ public class Node{
         public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
             super.onCharacteristicWrite(gatt, characteristic, status);
             //Log.d(TAG,"Characteristics Write "+status);
-            if(mDebugConsole!=null &&
+            if (mDebugConsole != null &&
                     BLENodeDefines.Services.Debug.isDebugCharacteristics(characteristic.getUuid()))
                 mDebugConsole.receiveCharacteristicsWriteUpdate(characteristic, status == BluetoothGatt.GATT_SUCCESS);
             else if (mConfigControl != null && characteristic.getUuid().equals(BLENodeDefines.Services.Config.REGISTERS_ACCESS_UUID))
                 mConfigControl.characteristicsWriteUpdate(characteristic, status == BluetoothGatt.GATT_SUCCESS);
-            else {
-                WriteCharCommand writeOp = new WriteCharCommand(characteristic,characteristic.getValue());
-                dequeueFeatureWrite(writeOp);
-            }
+
+            WriteCharCommand writeOp = new WriteCharCommand(characteristic,characteristic.getValue());
+            dequeueCharacteristicsWrite(writeOp);
         }
     }//GattNodeConnection
 
@@ -558,7 +556,7 @@ public class Node{
     private void cleanConnectionData(){
         mConnection=null;
         mWriteDescQueue.clear();
-        mFeatureWriteQueue.clear();
+        mCharacteristicWriteQueue.clear();
         mCharFeatureMap.clear();
         //we stop the connection -> we have not notification enabled
         mNotifyFeature.clear();
@@ -695,8 +693,8 @@ public class Node{
                 synchronized (mWriteDescQueue) {
                     mWriteDescQueue.clear();
                 }
-                synchronized (mFeatureWriteQueue) {
-                    mFeatureWriteQueue.clear();
+                synchronized (mCharacteristicWriteQueue) {
+                    mCharacteristicWriteQueue.clear();
                 }
             }
             if(newState==State.Dead  || newState==State.Disconnecting){
@@ -773,7 +771,7 @@ public class Node{
     /** we have to serialize also the write in the characteristic for avoid to lost
      * some message you have to use enqueueWriteChar for add element to this queue
      */
-    final private Queue<WriteCharCommand> mFeatureWriteQueue = new LinkedList<>();
+    final private Queue<WriteCharCommand> mCharacteristicWriteQueue = new LinkedList<>();
 
     /** node state */
     private State mState = State.Init;
@@ -1327,16 +1325,16 @@ public class Node{
 
 
     /**
-     * take the fist element in the mFeatureWriteQueue and call the writeCharacteristics
+     * take the fist element in the mCharacteristicWriteQueue and call the writeCharacteristics
      * note that the characteristic are write only when we write all the descriptor
      */
     private Runnable mWriteFeatureCommandTask = new Runnable() {
         @Override
         public void run() {
             if(mConnection!=null &&  isConnected() && !isPairing()) {
-                synchronized (mFeatureWriteQueue) {
-                    if(!mFeatureWriteQueue.isEmpty()) {
-                        WriteCharCommand command = mFeatureWriteQueue.peek();
+                synchronized (mCharacteristicWriteQueue) {
+                    if(!mCharacteristicWriteQueue.isEmpty()) {
+                        WriteCharCommand command = mCharacteristicWriteQueue.peek();
                         command.characteristic.setValue(command.data);
                         writeCharacteristics(command.characteristic);
                     }//if size
@@ -1352,28 +1350,32 @@ public class Node{
      * ad a command to the queue of work to do
      * @param command characteristic and data to write
      */
-    private void enqueueFeatureWrite(final WriteCharCommand command){
-        synchronized (mFeatureWriteQueue){
-            mFeatureWriteQueue.add(command);
+    private void enqueueCharacteristicsWrite(final WriteCharCommand command){
+        synchronized (mCharacteristicWriteQueue){
+            mCharacteristicWriteQueue.add(command);
             //if the queue contains only the element that we just add
-            if(mFeatureWriteQueue.size()==1) {
+            if(mCharacteristicWriteQueue.size()==1) {
                 mBleThread.post(mWriteFeatureCommandTask);
             }//if
         }//synchronized
     }//enqueueWriteDesc
 
+    void enqueueCharacteristicsWrite(BluetoothGattCharacteristic characteristic, byte
+            data[]){
+        enqueueCharacteristicsWrite(new WriteCharCommand(characteristic,data));
+    }
 
     /**
      * remove a command when complited
      * @param writeOp command completed
      */
-    private void dequeueFeatureWrite(final WriteCharCommand writeOp){
-        synchronized (mFeatureWriteQueue){
-            if(!mFeatureWriteQueue.contains(writeOp))
+    private void dequeueCharacteristicsWrite(final WriteCharCommand writeOp){
+        synchronized (mCharacteristicWriteQueue){
+            if(!mCharacteristicWriteQueue.contains(writeOp))
                 return;
-            mFeatureWriteQueue.remove(writeOp);
+            mCharacteristicWriteQueue.remove(writeOp);
             //if there still element in the queue, start write the head
-            if(!mFeatureWriteQueue.isEmpty()) {
+            if(!mCharacteristicWriteQueue.isEmpty()) {
                 mBleThread.post(mWriteFeatureCommandTask);
             }
         }//synchronized
@@ -1493,7 +1495,7 @@ public class Node{
         if(!charCanBeWrite(characteristic) || !feature.isEnabled())
             return false;
 
-        enqueueFeatureWrite(new WriteCharCommand(characteristic, data));
+        enqueueCharacteristicsWrite(new WriteCharCommand(characteristic, data));
 
         return true;
     }//writeFeatureData
@@ -1618,13 +1620,13 @@ public class Node{
 
         if(writeTo==mFeatureCommand) {
             int mask = BLENodeDefines.FeatureCharacteristics.extractFeatureMask(characteristic.getUuid());
-            enqueueFeatureWrite(
+            enqueueCharacteristicsWrite(
                     new WriteCharCommand(mFeatureCommand, packageCommandData(mask, type, data)));
         }else{ //fail back write directly to the feature characteristics
             byte dataToWrite[] = new byte[1+data.length];
             dataToWrite[0]=type;
             System.arraycopy(data,0,dataToWrite,1,data.length);
-            enqueueFeatureWrite( new WriteCharCommand(writeTo,dataToWrite));
+            enqueueCharacteristicsWrite(new WriteCharCommand(writeTo, dataToWrite));
         }//if-else
 
         return true;

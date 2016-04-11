@@ -36,7 +36,7 @@ import android.preference.PreferenceFragment;
 import com.st.BlueSTSDK.Config.Command;
 import com.st.BlueSTSDK.ConfigControl;
 import com.st.BlueSTSDK.Config.Register;
-import com.st.BlueSTSDK.Config.RegisterDefines;
+import com.st.BlueSTSDK.Config.STWeSU.RegisterDefines;
 import com.st.BlueSTSDK.Features.Field;
 import com.st.BlueSTSDK.Manager;
 import com.st.BlueSTSDK.Node;
@@ -83,7 +83,7 @@ public class DevicePreferenceFragment extends PreferenceFragment {
                 mConfigService.addConfigListener(configControl);
             //if
 
-            //start the read after 100ms
+            //start the read after 500ms
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -94,7 +94,7 @@ public class DevicePreferenceFragment extends PreferenceFragment {
                         }
                     });
                 }
-            }, 100);
+            }, 500);
         }//if
     }
 
@@ -108,7 +108,7 @@ public class DevicePreferenceFragment extends PreferenceFragment {
     }
 
     private void getRegValueFromDevicePersistent(RegisterDefines.RegistersName reg){
-        Command cmdVer = new Command(reg, Register.Target.PERSISTENT);
+        Command cmdVer = new Command(reg.getRegister(), Register.Target.PERSISTENT);
         mConfigService.read(cmdVer);
     }
 
@@ -141,7 +141,8 @@ public class DevicePreferenceFragment extends PreferenceFragment {
                         byte[] toSend = new byte[16]; //to allign to two byte
                         toSend[0] = 0x09;
                         System.arraycopy(text.getBytes(), 0, toSend, 1, Math.min(text.length(), 15));
-                        Command cmd = new Command(RegisterDefines.RegistersName.BLE_LOC_NAME, Register.Target.PERSISTENT, toSend);
+                        Command cmd = new Command(RegisterDefines.RegistersName.BLE_LOC_NAME.getRegister(),
+                                Register.Target.PERSISTENT, toSend);
                         mConfigService.write(cmd);
                     }
                 }
@@ -162,7 +163,8 @@ public class DevicePreferenceFragment extends PreferenceFragment {
                         if (toSend.length > 0) {
                             for (int i = 0; i < toSend.length; i++)
                                 toSend[toSend.length -i-1] = (byte)(Short.parseShort(strArr[i],16) & 0xFF);
-                            Command cmd = new Command(RegisterDefines.RegistersName.BLE_PUB_ADDR, Register.Target.PERSISTENT, toSend);
+                            Command cmd = new Command(RegisterDefines.RegistersName.BLE_PUB_ADDR
+                                    .getRegister(), Register.Target.PERSISTENT, toSend);
                             mConfigService.write(cmd);
 
                         }
@@ -178,7 +180,8 @@ public class DevicePreferenceFragment extends PreferenceFragment {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
                 short val = Short.parseShort((String) newValue, 16);
-                Command cmd = new Command(RegisterDefines.RegistersName.LED_CONFIG, Register.Target.PERSISTENT, val, Field.Type.Int16);
+                Command cmd = new Command(RegisterDefines.RegistersName.LED_CONFIG.getRegister(),
+                        Register.Target.PERSISTENT, val, Field.Type.Int16);
                 mConfigService.write(cmd);
 
                 return false;
@@ -188,7 +191,8 @@ public class DevicePreferenceFragment extends PreferenceFragment {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
                 short val = Short.parseShort((String) newValue);
-                Command cmd = new Command(RegisterDefines.RegistersName.PWR_MODE_CONFIG, Register.Target.PERSISTENT, val, Field.Type.Int16);
+                Command cmd = new Command(RegisterDefines.RegistersName.PWR_MODE_CONFIG.getRegister(),
+                        Register.Target.PERSISTENT, val, Field.Type.Int16);
                 mConfigService.write(cmd);
 
                 return false;
@@ -198,7 +202,8 @@ public class DevicePreferenceFragment extends PreferenceFragment {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
                 short val = Short.parseShort((String) newValue);
-                Command cmd = new Command(RegisterDefines.RegistersName.DFU_REBOOT, Register.Target.SESSION, val, Field.Type.Int16);
+                Command cmd = new Command(RegisterDefines.RegistersName.DFU_REBOOT.getRegister(),
+                        Register.Target.SESSION, val, Field.Type.Int16);
                 mConfigService.write(cmd);
 
                 return false;
@@ -237,19 +242,23 @@ public class DevicePreferenceFragment extends PreferenceFragment {
         @Override
         public void onRegisterReadResult(Command cmd, int error) {
             if (error == 0) {
-                if (cmd.isRegister(RegisterDefines.RegistersName.FW_VER)) {
-                    //setUiText(mViewHolder.mTextVersion, "Ver: " + cmd.getData()[0] + "." + cmd.getData()[1]);
-                    setPreferenceSummaryText("DEVICE_FW_VERSION", "Version: " + cmd.getData()[0] + "." + cmd.getData()[1]);
+                if (cmd.getRegister().equals(RegisterDefines.RegistersName.FW_VER.getRegister())) {
+                    String strVer = String.format("Version: %X.%X.%02X",
+                            ((cmd.getData()[1] >> 4) & 0x0F),
+                            ((cmd.getData()[1]) & 0x0F),
+                            (cmd.getData()[0] & 0xFF));
+                    setPreferenceSummaryText("DEVICE_FW_VERSION", strVer);
 
                     getRegValueFromDevicePersistent(RegisterDefines.RegistersName.BLE_LOC_NAME);
                 }
-                if (cmd.isRegister(RegisterDefines.RegistersName.BLE_LOC_NAME)) {
+                if (cmd.getRegister().equals((RegisterDefines.RegistersName.BLE_LOC_NAME
+                        .getRegister()))) {
 
                     setPreferenceSummaryText("DEVICE_LOCAL_NAME", String.copyValueOf(cmd.getDataChar(), 1, Math.min(15, cmd.getDataChar().length)));
 
                     getRegValueFromDevicePersistent(RegisterDefines.RegistersName.BLE_PUB_ADDR);
                 }
-                if (cmd.isRegister(RegisterDefines.RegistersName.BLE_PUB_ADDR)) {
+                if (cmd.getRegister().equals((RegisterDefines.RegistersName.BLE_PUB_ADDR.getRegister()))) {
                     String strAddr = "";
                     for (int i = 0; i < cmd.getData().length; i++) {
                         strAddr += String.format(i < cmd.getData().length - 1 ? "%02X:" : "%02X", cmd.getData()[cmd.getData().length - i - 1]);

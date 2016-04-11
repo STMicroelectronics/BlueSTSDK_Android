@@ -53,10 +53,7 @@ public class Debug {
      * characteristics used for read the stdErr
      */
     private final BluetoothGattCharacteristic mErrChar;
-    /**
-     * connection that can be used for send data to the remote device
-     */
-    private final BluetoothGatt mConnection;
+
     /**
      * class where the notify that we receive a new data
      */
@@ -68,14 +65,12 @@ public class Debug {
 
     /**
      * @param n          node that will send the data
-     * @param connection connection that we can use for send data to the node
      * @param termChar   characteristic used for write/notify the stdin/out
      * @param errChar    characteristic used used for notify the stderr
      */
-    Debug(Node n, BluetoothGatt connection, BluetoothGattCharacteristic termChar,
+    Debug(Node n, BluetoothGattCharacteristic termChar,
           BluetoothGattCharacteristic errChar) {
         mNode = n;
-        mConnection = connection;
         mTermChar = termChar;
         mErrChar = errChar;
     }//Debug
@@ -89,11 +84,8 @@ public class Debug {
      * the message
      */
     public int write(String message) {
-        mTermChar.setValue(message);
-        if(mConnection.writeCharacteristic(mTermChar))
-            return (message.length() > MAX_STRING_SIZE_TO_SENT) ? MAX_STRING_SIZE_TO_SENT :message.length();
-        else
-            return -1;
+        mNode.enqueueCharacteristicsWrite(mTermChar,message.getBytes());
+        return (message.length() > MAX_STRING_SIZE_TO_SENT) ? MAX_STRING_SIZE_TO_SENT :message.length();
     }
 
     /**
