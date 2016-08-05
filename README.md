@@ -29,7 +29,7 @@ Currently, bits are mapped in the following way:
   
    |Bit|31|30|29|28|27|26|25|24|23|22|21|20|19|18|17|16|
    |:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-   |Feature|RFU|ADPCM Sync|Switch|Direction of arrival|ADPC Audio|MicLevel|Proximity|Lux|Acc|Gyro|Mag|Pressure|Humidity|Temperature|Battery|Second Temperature|
+   |Feature|RFU|ADPCM Sync|Switch|Direction of arrival|ADPCM Audio|MicLevel|Proximity|Lux|Acc|Gyro|Mag|Pressure|Humidity|Temperature|Battery|Second Temperature|
    
    |Bit|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1|0|
    |:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
@@ -197,7 +197,7 @@ Available features can be retrieved from [Features package](https://stmicroelect
     Node node=...
     UUIDToFeatureMap map = new UUIDToFeatureMap();
     map.put(UUID.fromString("00002a37-0000-1000-8000-00805f9b34fb"), FeatureHeartRate.class);
-    node.addExternalCharacteristics(map)
+    node.addExternalCharacteristics(map);
     ```
 
 ##Log

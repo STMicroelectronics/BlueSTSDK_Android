@@ -1155,26 +1155,6 @@ public class Node{
         return mAdvertise.getBoardHasGP();
     }//getType
 
-    public short getTypeId(){return mAdvertise.getDeviceId();}//getTypeId
-
-    /**
-     * node sleeping state
-     * @return false running, true device is sleeping
-     */
-    public boolean isSleeping(){
-        return mAdvertise.getBoardSleeping();
-    }//getType
-
-    /**
-     * node general purpose features available
-     * @return true if general purpsoe available else false.
-     */
-    public boolean hasGeneralPurpose(){
-        return mAdvertise.getBoardHasGP();
-    }//getType
-
-    public short getTypeId(){return mAdvertise.getDeviceId();}//getTypeId
-
     /**
      * tell if the node is connected
      * @return true if the internal state is equal to connected
