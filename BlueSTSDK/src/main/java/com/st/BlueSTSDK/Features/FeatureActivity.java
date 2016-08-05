@@ -38,7 +38,8 @@ import java.util.Date;
 import java.util.Locale;
 
 /**
- * Feature will containing the activity detect by the activity recognition code that run on the node
+ * Feature that will contain the activity detect by the activity recognition code that run on
+ * the node
  *<p>
  * the sample data will contain the activity detected by the sensor and the time of when we
  * receive the message.
@@ -49,7 +50,7 @@ import java.util.Locale;
 public class FeatureActivity extends Feature {
 
     public static final String FEATURE_NAME = "Activity";
-    public static final String FEATURE_UNIT[] = {"","ms"}; // census degree
+    public static final String FEATURE_UNIT[] = {null,"ms"};
     public static final String FEATURE_DATA_NAME[] = {"Activity","Date"};
     public static final float DATA_MAX = 6;
     public static final float DATA_MIN = 0;
@@ -61,7 +62,7 @@ public class FeatureActivity extends Feature {
             Locale.getDefault());
 
     /**
-     * enum containing the possible result of the activity recognition
+     * Enum containing the possible result of the activity recognition
      */
     public enum ActivityType {
         /**
@@ -177,7 +178,7 @@ public class FeatureActivity extends Feature {
         Sample temp = new Sample(timestamp,new Number[]{
                 data[dataOffset],
                 System.currentTimeMillis()
-        });
+        },getFieldsDesc());
         return new ExtractResult(temp,1);
     }//extractData
 
@@ -186,7 +187,7 @@ public class FeatureActivity extends Feature {
         Sample sample = mLastSample;
         if(sample!=null){
             return FEATURE_NAME+":\n"+
-                    "\tTimestamp:"+ sample.timestamp+"\n" +
+                    "\tTimestamp: "+ sample.timestamp+"\n" +
                     "\tActivity: "+ getActivityStatus(sample)+"\n" +
                     "\tDate: "+ DATA_FORMAT.format(getActivityDate(sample));
         }else{

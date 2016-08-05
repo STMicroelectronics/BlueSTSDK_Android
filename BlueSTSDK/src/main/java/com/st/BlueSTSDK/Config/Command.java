@@ -30,7 +30,7 @@ import com.st.BlueSTSDK.Features.Field;
 import com.st.BlueSTSDK.Utils.NumberConversion;
 
 /**
- * class that represent an abstraction of the device command to set/get the proper register
+ * Class that represent an abstraction of the device command to set/get the proper register
  * <p>
  * The class maintain the information  of the register {@link com.st.BlueSTSDK.Config.Register},
  * the target and the payload to write to the device or read from the device.

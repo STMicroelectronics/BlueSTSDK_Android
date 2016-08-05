@@ -18,27 +18,27 @@ public class TestMicLevelFeature {
 
     @Test
     public void testInvalidSample(){
-        Feature.Sample s = new Feature.Sample(100,new Number[]{});
+        Feature.Sample s = new Feature.Sample(100,new Number[]{}, new Field[]{});
         Assert.assertTrue(FeatureMicLevel.getMicLevel(s,0)<0);
     }
 
     @Test
     public void testGetSample(){
         byte level = 123;
-        Feature.Sample s = new Feature.Sample(100,new Number[]{level});
+        Feature.Sample s = new Feature.Sample(100,new Number[]{level}, new Field[]{});
         Assert.assertEquals(level, FeatureMicLevel.getMicLevel(s, 0));
     }
 
     @Test
     public void testInvalidSample2(){
-        Feature.Sample s = new Feature.Sample(100,new Number[]{0});
+        Feature.Sample s = new Feature.Sample(100,new Number[]{0}, new Field[]{});
         Assert.assertTrue(FeatureMicLevel.getMicLevel(s, 1) < 0);
     }
 
     @Test
     public void testGetSample2(){
         byte level = 123;
-        Feature.Sample s = new Feature.Sample(100,new Number[]{0,level});
+        Feature.Sample s = new Feature.Sample(100,new Number[]{0,level}, new Field[]{});
         Assert.assertEquals(level, FeatureMicLevel.getMicLevel(s, 1));
     }
 
@@ -61,8 +61,8 @@ public class TestMicLevelFeature {
 
         UpdateFeatureUtil.callUpdate(f, 1, data, 0);
 
-        Assert.assertEquals(new Feature.Sample(1, new Byte[]{data[0], data[1], data[2]}),
-                f.getSample());
+        Assert.assertEquals(new Feature.Sample(1, new Byte[]{data[0], data[1], data[2]},
+                new Field[]{}), f.getSample());
         Assert.assertEquals(data.length,f.getFieldsDesc().length);
     }
 
@@ -73,7 +73,7 @@ public class TestMicLevelFeature {
 
         UpdateFeatureUtil.callUpdate(f, 2, data, 3);
 
-        Assert.assertEquals(new Feature.Sample(2, new Byte[]{data[3], data[4], data[5]}),
+        Assert.assertEquals(new Feature.Sample(2, new Byte[]{data[3], data[4], data[5]}, new Field[]{}),
                 f.getSample());
         Assert.assertEquals(data.length-3, f.getFieldsDesc().length);
 

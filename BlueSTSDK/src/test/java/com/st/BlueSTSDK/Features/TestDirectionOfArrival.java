@@ -17,14 +17,14 @@ public class TestDirectionOfArrival {
 
     @Test
     public void testInvalidSampleDirectionOfArrival(){
-        Feature.Sample s = new Feature.Sample(100,new Number[]{});
+        Feature.Sample s = new Feature.Sample(100,new Number[]{}, new Field[]{});
         Assert.assertEquals(Short.MIN_VALUE, FeatureDirectionOfArrival.getSoundAngle(s));
     }
 
     @Test
     public void testGetSampleDirectionOfArrival(){
         short x = 50;
-        Feature.Sample s = new Feature.Sample(100,new Number[]{x});
+        Feature.Sample s = new Feature.Sample(100,new Number[]{x}, new Field[]{});
         Assert.assertEquals(x, FeatureDirectionOfArrival.getSoundAngle(s));
     }
 
@@ -51,7 +51,7 @@ public class TestDirectionOfArrival {
 
         UpdateFeatureUtil.callUpdate(f, 1, temp, 0);
 
-        Assert.assertEquals(new Feature.Sample(1, new Number[]{angle}),
+        Assert.assertEquals(new Feature.Sample(1, new Number[]{angle}, new Field[]{}),
                 f.getSample());
     }
 
@@ -65,7 +65,7 @@ public class TestDirectionOfArrival {
 
         UpdateFeatureUtil.callUpdate(f, 1, TestUtil.mergeArray(new byte[offset],temp), offset);
 
-        Assert.assertEquals(new Feature.Sample(1, new Number[]{angle}),
+        Assert.assertEquals(new Feature.Sample(1, new Number[]{angle}, new Field[]{}),
                 f.getSample());
     }
 

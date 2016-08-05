@@ -53,6 +53,7 @@ import com.st.BlueSTSDK.Features.emul.FeatureRandomPressure;
 import com.st.BlueSTSDK.Features.emul.FeatureRandomProximity;
 import com.st.BlueSTSDK.Features.emul.FeatureRandomProximityGesture;
 import com.st.BlueSTSDK.Features.emul.FeatureRandomTemperature;
+import com.st.BlueSTSDK.Features.emul.standardCharacateristics.FeatureRandomHeartRate;
 import com.st.BlueSTSDK.Utils.BLENodeDefines;
 import com.st.BlueSTSDK.Utils.InvalidBleAdvertiseFormat;
 
@@ -104,8 +105,8 @@ public class NodeEmulator extends Node {
             FeatureRandomBattery.class,
             FeatureRandomFreeFall.class,
             FeatureRandomActivityRecognition.class,
-            FeatureRandomCarryPosition.class
-
+            FeatureRandomCarryPosition.class,
+            FeatureRandomHeartRate.class
     };
 
     /**

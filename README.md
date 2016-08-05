@@ -29,7 +29,7 @@ Currently, bits are mapped in the following way:
   
    |Bit|31|30|29|28|27|26|25|24|23|22|21|20|19|18|17|16|
    |:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-   |Feature|RFU|RFU|Switch|Direction of arrival|RFU|MicLevel|Proximity|Lux|Acc|Gyro|Mag|Pressure|Humidity|Temperature|Battery|Second Temperature|
+   |Feature|RFU|ADPCM Sync|Switch|Direction of arrival|ADPC Audio|MicLevel|Proximity|Lux|Acc|Gyro|Mag|Pressure|Humidity|Temperature|Battery|Second Temperature|
    
    |Bit|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1|0|
    |:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
@@ -108,8 +108,9 @@ If available, the configuration service must have the UUID <code>00000000-000F-1
 
 
 ###Example
-The ST Bluemicrosystem1 and ST Bluemicrosystem3 firmware implements this protocol, you can find 
-the project source here: [Bluemicrosystem](http://www.st.com/bluemicrosystem)
+The ST Bluemicrosystem1,ST Bluemicrosystem2, ST Bluemicrosystem3 and ST Sensor Tile firmware
+implements this protocol, you can find the projects source here: [Bluemicrosystem](http://www.st
+.com/bluemicrosystem)
 
 ##How to install the library
 ###As an external library
@@ -174,7 +175,8 @@ Available features can be retrieved from [Features package](https://stmicroelect
     2.	Create a constructor that accepts only the node as a parameter. From this constructor call the [super constructor](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Feature.html#Feature-java.lang.String-com.st.BlueSTSDK.Node-com.st.BlueSTSDK.Features.Field:A-), passing the feature name and the feature field.
     3.  Implement the method [<code> Feature.ExtractResult Feature.extractData(long,byte[],int)</code>](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Feature.html#extractData-long-byte:A-int-). 
     4.  Create a utility static method that extracts the data from the Feature.Sample class 
- 2. Before start the scanning register the new feature
+ 2. If you want to use the advertise feature bitmask and our characteristics UUID format, before
+    start the scanning register the new feature:
  
     ```Java
     // add the feature to the Nucleo device
@@ -188,6 +190,14 @@ Available features can be retrieved from [Features package](https://stmicroelect
     } catch (InvalidFeatureBitMaskException e) {
     	e.printStackTrace();
     }
+    ```
+
+    Otherwise you can register the characteristics before call the connect method:
+    ```Java
+    Node node=...
+    UUIDToFeatureMap map = new UUIDToFeatureMap();
+    map.put(UUID.fromString("00002a37-0000-1000-8000-00805f9b34fb"), FeatureHeartRate.class);
+    node.addExternalCharacteristics(map)
     ```
 
 ##Log

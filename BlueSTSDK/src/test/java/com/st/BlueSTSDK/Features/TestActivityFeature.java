@@ -45,7 +45,7 @@ public class TestActivityFeature {
 
     @Test
     public void testInvalidSampleActivityId(){
-        Feature.Sample s = new Feature.Sample(100,new Number[]{});
+        Feature.Sample s = new Feature.Sample(100,new Number[]{}, new Field[]{});
         Assert.assertEquals(FeatureActivity.ActivityType.ERROR,
                 FeatureActivity.getActivityStatus(s));
     }
@@ -53,7 +53,7 @@ public class TestActivityFeature {
     @Test
     public void testSampleActivityId(){
         byte activityId = 0x02;
-        Feature.Sample s = new Feature.Sample(100,new Number[]{activityId});
+        Feature.Sample s = new Feature.Sample(100,new Number[]{activityId}, new Field[]{});
         Assert.assertEquals(FeatureActivity.ActivityType.WALKING,
                 FeatureActivity.getActivityStatus(s));
     }
@@ -65,14 +65,14 @@ public class TestActivityFeature {
 
     @Test
     public void testInvalidSampleTime(){
-        Feature.Sample s = new Feature.Sample(100,new Number[]{0});
+        Feature.Sample s = new Feature.Sample(100,new Number[]{0}, new Field[]{});
         Assert.assertEquals(null,FeatureActivity.getActivityDate(s));
     }
 
     @Test
     public void testSampleTime(){
         long time = System.currentTimeMillis();
-        Feature.Sample s = new Feature.Sample(100,new Number[]{0,time});
+        Feature.Sample s = new Feature.Sample(100,new Number[]{0,time}, new Field[]{});
         Date d = FeatureActivity.getActivityDate(s);
         if(d!=null)
             Assert.assertEquals(time,d.getTime());
@@ -130,37 +130,37 @@ public class TestActivityFeature {
     @Test
     public void testStatusValue(){
 
-        Feature.Sample s = new Feature.Sample(100,new Number[]{0,0,0,0x00});
+        Feature.Sample s = new Feature.Sample(100,new Number[]{0,0,0,0x00}, new Field[]{});
         Assert.assertEquals(FeatureActivity.ActivityType.NO_ACTIVITY,
                 FeatureActivity.getActivityStatus(s));
 
-        s = new Feature.Sample(100,new Number[]{0x01});
+        s = new Feature.Sample(100,new Number[]{0x01}, new Field[]{});
         Assert.assertEquals(FeatureActivity.ActivityType.STATIONARY,
                 FeatureActivity.getActivityStatus(s));
 
-        s = new Feature.Sample(100,new Number[]{0x02});
+        s = new Feature.Sample(100,new Number[]{0x02}, new Field[]{});
         Assert.assertEquals(FeatureActivity.ActivityType.WALKING,
                 FeatureActivity.getActivityStatus(s));
 
-        s = new Feature.Sample(100,new Number[]{0x03});
+        s = new Feature.Sample(100,new Number[]{0x03}, new Field[]{});
         Assert.assertEquals(FeatureActivity.ActivityType.FASTWALKING,
                 FeatureActivity.getActivityStatus(s));
 
-        s = new Feature.Sample(100,new Number[]{0x04});
+        s = new Feature.Sample(100,new Number[]{0x04}, new Field[]{});
         Assert.assertEquals(FeatureActivity.ActivityType.JOGGING,
                 FeatureActivity.getActivityStatus(s));
 
-        s = new Feature.Sample(100,new Number[]{0x05});
+        s = new Feature.Sample(100,new Number[]{0x05}, new Field[]{});
         Assert.assertEquals(FeatureActivity.ActivityType.BIKING,
                 FeatureActivity.getActivityStatus(s));
 
-        s = new Feature.Sample(100,new Number[]{0x06});
+        s = new Feature.Sample(100,new Number[]{0x06}, new Field[]{});
         Assert.assertEquals(FeatureActivity.ActivityType.DRIVING,
                 FeatureActivity.getActivityStatus(s));
 
 
         //other value are errors
-        s = new Feature.Sample(100,new Number[]{0x12});
+        s = new Feature.Sample(100,new Number[]{0x12}, new Field[]{});
         Assert.assertEquals(FeatureActivity.ActivityType.ERROR,
                 FeatureActivity.getActivityStatus(s));
     }

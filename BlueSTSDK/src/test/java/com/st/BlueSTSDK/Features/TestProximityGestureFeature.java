@@ -15,7 +15,7 @@ public class TestProximityGestureFeature {
 
     @Test
     public void testInvalidSampleGestureId(){
-        Feature.Sample s = new Feature.Sample(100,new Number[]{});
+        Feature.Sample s = new Feature.Sample(100,new Number[]{}, new Field[]{});
         Assert.assertEquals(FeatureProximityGesture.Gesture.ERROR,
                 FeatureProximityGesture.getGesture(s));
     }
@@ -23,7 +23,7 @@ public class TestProximityGestureFeature {
     @Test
     public void testSampleActivityId(){
         byte activityId = 0x02;
-        Feature.Sample s = new Feature.Sample(100,new Number[]{activityId});
+        Feature.Sample s = new Feature.Sample(100,new Number[]{activityId}, new Field[]{});
         Assert.assertEquals(FeatureProximityGesture.Gesture.LEFT,
                 FeatureProximityGesture.getGesture(s));
     }
@@ -78,25 +78,25 @@ public class TestProximityGestureFeature {
     @Test
     public void testStatusValue(){
 
-        Feature.Sample s = new Feature.Sample(100,new Number[]{0,0,0,0x00});
+        Feature.Sample s = new Feature.Sample(100,new Number[]{0,0,0,0x00}, new Field[]{});
         Assert.assertEquals(FeatureProximityGesture.Gesture.UNKNOWN,
                 FeatureProximityGesture.getGesture(s));
 
-        s = new Feature.Sample(100,new Number[]{0x01});
+        s = new Feature.Sample(100,new Number[]{0x01}, new Field[]{});
         Assert.assertEquals(FeatureProximityGesture.Gesture.TAP,
                 FeatureProximityGesture.getGesture(s));
 
-        s = new Feature.Sample(100,new Number[]{0x02});
+        s = new Feature.Sample(100,new Number[]{0x02}, new Field[]{});
         Assert.assertEquals(FeatureProximityGesture.Gesture.LEFT,
                 FeatureProximityGesture.getGesture(s));
 
-        s = new Feature.Sample(100,new Number[]{0x03});
+        s = new Feature.Sample(100,new Number[]{0x03}, new Field[]{});
         Assert.assertEquals(FeatureProximityGesture.Gesture.RIGHT,
                 FeatureProximityGesture.getGesture(s));
 
 
         //other value are errors
-        s = new Feature.Sample(100,new Number[]{0xFF});
+        s = new Feature.Sample(100,new Number[]{0xFF}, new Field[]{});
         Assert.assertEquals(FeatureProximityGesture.Gesture.ERROR,
                 FeatureProximityGesture.getGesture(s));
 

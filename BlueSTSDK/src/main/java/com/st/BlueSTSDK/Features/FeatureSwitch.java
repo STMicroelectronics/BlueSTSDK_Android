@@ -39,7 +39,7 @@ import com.st.BlueSTSDK.Node;
 public class FeatureSwitch extends Feature {
 
     public static final String FEATURE_NAME = "Switch";
-    public static final String FEATURE_UNIT = "";
+    public static final String FEATURE_UNIT = null;
     public static final String FEATURE_DATA_NAME = "Status";
     public static final short DATA_MAX = 256;
     public static final short DATA_MIN = 0;
@@ -104,7 +104,7 @@ public class FeatureSwitch extends Feature {
             throw new IllegalArgumentException("There are no byte available to read");
         Sample temp = new Sample(timestamp,new Number[]{
                 data[dataOffset]
-        });
+        },getFieldsDesc());
         return new ExtractResult(temp,1);
     }//update
 
@@ -116,7 +116,7 @@ public class FeatureSwitch extends Feature {
             return super.toString();
         Number data[] = sample.data;
         Field dataDesc[] = getFieldsDesc();
-        return String.format(FEATURE_NAME+":\n\tTimestamp:%d\n\t%s: %s)",sample.timestamp,
+        return String.format(FEATURE_NAME+":\n\tTimestamp: %d\n\t%s: %s",sample.timestamp,
                 dataDesc[0].getName(),data[0].byteValue()==0 ? "Off" : "On");
     }
 }

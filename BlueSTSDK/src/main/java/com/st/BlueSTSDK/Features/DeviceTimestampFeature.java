@@ -24,47 +24,38 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  ******************************************************************************/
-package com.st.BlueSTSDK.Features.emul;
+package com.st.BlueSTSDK.Features;
 
-import com.st.BlueSTSDK.Features.FeatureBattery;
+import android.support.annotation.NonNull;
+
+import com.st.BlueSTSDK.Feature;
 import com.st.BlueSTSDK.Node;
-import com.st.BlueSTSDK.NodeEmulator;
-import com.st.BlueSTSDK.Utils.NumberConversion;
-
-import java.util.Random;
 
 /**
- * generate random data for emulate the class {@link FeatureBattery}
+ * Class that a feature has to extend if it doesn't has the timestamp field,
+ * as timestamp the system time will be used
  *
  * @author STMicroelectronics - Central Labs.
  * @version 1.0
  */
-public class FeatureRandomBattery extends FeatureBattery implements NodeEmulator.EmulableFeature {
+public abstract class DeviceTimestampFeature extends Feature {
 
-    Random mRandom = new Random();
-    int mCharge =5;
-    public FeatureRandomBattery(Node parent) {
-        super(parent);
+    /**
+     * build a new disabled feature, that doesn't need to be initialized in the node side
+     *
+     * @param name     name of the feature
+     * @param n        node that will update this feature
+     * @param dataDesc description of the data that belong to this feature
+     */
+    public DeviceTimestampFeature(String name, Node n, @NonNull Field[] dataDesc) {
+        super(name, n, dataDesc);
     }
 
-
-    @Override
-    public byte[] generateFakeData() {
-        byte data[] = new byte[7];
-
-        byte temp[] = NumberConversion.LittleEndian.int16ToBytes((short)(mCharge*10));
-        mCharge = (mCharge+10)%100;
-        System.arraycopy(temp, 0, data, 0, 2);
-
-        temp = NumberConversion.LittleEndian.int16ToBytes((short)(mRandom.nextFloat()*1000));
-        System.arraycopy(temp, 0, data, 2, 2);
-
-        temp = NumberConversion.LittleEndian.int16ToBytes((short)((mRandom.nextFloat()*10)-5));
-        System.arraycopy(temp, 0, data, 4, 2);
-
-        temp = new byte[] {(byte) (mRandom.nextFloat()*4)};
-        System.arraycopy(temp, 0, data, 5, 1);
-
-        return data;
+    /*
+     * change the timestamp with the system timestamp and reset the data offset
+     */
+    protected int update_priv(long timeStamp, byte[] data, int dataOffset) {
+        return super.update_priv(System.currentTimeMillis(),data,dataOffset-2);
     }
+
 }

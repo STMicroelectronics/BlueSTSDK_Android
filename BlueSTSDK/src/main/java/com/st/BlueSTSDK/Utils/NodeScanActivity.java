@@ -61,7 +61,6 @@ import com.st.BlueSTSDK.R;
  * @version 1.0
  */
 public class NodeScanActivity extends AppCompatActivity {
-    private final static String TAG = NodeScanActivity.class.getCanonicalName() ;
     private final static String SCAN_TIMEOUT = NodeScanActivity.class.getCanonicalName() + "" +
             ".SCAN_TIMEOUT";
 
@@ -148,13 +147,9 @@ public class NodeScanActivity extends AppCompatActivity {
                         @Override
                         public void onClick(DialogInterface paramDialogInterface, int paramInt) {
                             paramDialogInterface.cancel();
-                            final View viewRoot = ((ViewGroup) NodeScanActivity.this
-                                    .findViewById(android.R.id.content)).getChildAt(0);
-                            if (viewRoot !=null)
-                                Snackbar.make(viewRoot,  R.string.LocationNotEnabled, Snackbar.LENGTH_SHORT).show();
-                            else{
-                                Toast.makeText(NodeScanActivity.this,R.string.LocationNotEnabled,Toast.LENGTH_SHORT).show();
-                            }
+                            Toast.makeText(NodeScanActivity.this,
+                                    R.string.LocationNotEnabled,
+                                    Toast.LENGTH_SHORT).show();
                             finish();
                         }//onClick
                     });
@@ -221,14 +216,6 @@ public class NodeScanActivity extends AppCompatActivity {
         return false;
     }//checkAdapterAndPermission
 
-    @Override
-    protected  void onResume(){
-        super.onResume();
-        if(mLastTimeOut!=0)
-            startNodeDiscovery(mLastTimeOut);
-
-    }//onResume
-
     /**
      * method start a discovery and update the gui for the new state
      * @param timeoutMs time to wait before stop the discovery
@@ -261,15 +248,9 @@ public class NodeScanActivity extends AppCompatActivity {
         // User chose not to enable Bluetooth -> close all
         if (requestCode == REQUEST_ENABLE_BT){
             if(resultCode == Activity.RESULT_CANCELED) {
-                final View viewRoot = ((ViewGroup) this
-                        .findViewById(android.R.id.content)).getChildAt(0);
-                if (viewRoot !=null)
-                    Snackbar.make(viewRoot,  R.string.bluetoothNotEnabled, Snackbar.LENGTH_SHORT).show();
-                else{
-                    Toast.makeText(this,R.string.bluetoothNotEnabled,Toast.LENGTH_SHORT).show();
-                }
+                Toast.makeText(this,R.string.bluetoothNotEnabled,Toast.LENGTH_SHORT).show();
                 finish();
-            }else {
+            } else {
                 //bluetooth enable -> try to start scanning
                 startNodeDiscovery(mLastTimeOut);
             }//if result
@@ -292,7 +273,6 @@ public class NodeScanActivity extends AppCompatActivity {
                     //we have the permission try to start the scan again
                     startNodeDiscovery(mLastTimeOut);
                 } else {
-
                     final View viewRoot = ((ViewGroup) this
                             .findViewById(android.R.id.content)).getChildAt(0);
                     if (viewRoot !=null)

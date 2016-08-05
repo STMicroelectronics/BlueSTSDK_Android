@@ -17,14 +17,14 @@ public class TestPedometerFeature {
 
     @Test
     public void testInvalidSampleSteps(){
-        Feature.Sample s = new Feature.Sample(100,new Number[]{});
+        Feature.Sample s = new Feature.Sample(100,new Number[]{}, new Field[]{});
         Assert.assertTrue(FeaturePedometer.getSteps(s)<0);
     }
 
     @Test
     public void testGetSampleSteps(){
         int steps = 123;
-        Feature.Sample s = new Feature.Sample(100,new Number[]{steps});
+        Feature.Sample s = new Feature.Sample(100,new Number[]{steps}, new Field[]{});
         Assert.assertEquals(steps, FeaturePedometer.getSteps(s));
     }
 
@@ -36,14 +36,14 @@ public class TestPedometerFeature {
 
     @Test
     public void testInvalidSampleFrequency(){
-        Feature.Sample s = new Feature.Sample(100,new Number[]{2});
+        Feature.Sample s = new Feature.Sample(100,new Number[]{2}, new Field[]{});
         Assert.assertTrue(FeaturePedometer.getFrequency(null) < 0);
     }
 
     @Test
     public void testGetSampleFrequency(){
         int fequency = 100;
-        Feature.Sample s = new Feature.Sample(100,new Number[]{2,fequency});
+        Feature.Sample s = new Feature.Sample(100,new Number[]{2,fequency}, new Field[]{});
         Assert.assertEquals(fequency, FeaturePedometer.getFrequency(s));
     }
 
@@ -71,7 +71,7 @@ public class TestPedometerFeature {
 
         UpdateFeatureUtil.callUpdate(f, 1, TestUtil.mergeArray(nStepArray, freqArray), 0);
 
-        Assert.assertEquals(new Feature.Sample(1, new Number[]{nStep, freq}),
+        Assert.assertEquals(new Feature.Sample(1, new Number[]{nStep, freq}, new Field[]{}),
                 f.getSample());
     }
 
@@ -89,7 +89,7 @@ public class TestPedometerFeature {
         UpdateFeatureUtil.callUpdate(f, 1, TestUtil.mergeArray(offsetArray,
                 TestUtil.mergeArray (nStepArray, freqArray)), offset);
 
-        Assert.assertEquals(new Feature.Sample(1, new Number[]{nStep,freq}),
+        Assert.assertEquals(new Feature.Sample(1, new Number[]{nStep,freq}, new Field[]{}),
                 f.getSample());
     }
 

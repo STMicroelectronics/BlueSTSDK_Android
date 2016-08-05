@@ -31,8 +31,6 @@ import android.bluetooth.BluetoothGattCharacteristic;
 import com.st.BlueSTSDK.Feature;
 import com.st.BlueSTSDK.Node;
 
-import java.util.UUID;
-
 /**
  * It is a special feature that is used during the development and doesn't follow the sdk schema.
  * <ul>
@@ -47,7 +45,7 @@ import java.util.UUID;
  */
 public class FeatureGenPurpose extends Feature {
 
-    public static final String FEATURE_UNIT="";
+    public static final String FEATURE_UNIT=null;
     public static final String FEATURE_DATA_NAME ="RawData";
     public static final byte DATA_MAX = 127;
     public static final byte DATA_MIN = -127;
@@ -65,7 +63,7 @@ public class FeatureGenPurpose extends Feature {
      * @param characteristics characteristics that export this data
      */
     public FeatureGenPurpose(Node n, BluetoothGattCharacteristic characteristics){
-        super("GenPurpose_"+characteristics.getUuid().toString(),n,new Field[]{
+        super("GenPurpose_"+characteristics.getUuid().toString().substring(0,Math.min(8,characteristics.getUuid().toString().length())),n,new Field[]{
                 new Field(FEATURE_DATA_NAME,FEATURE_UNIT, Field.Type.Int8,DATA_MAX,DATA_MIN)
         });
         mChar=characteristics;
@@ -104,7 +102,8 @@ public class FeatureGenPurpose extends Feature {
             dataObj[i-offsetData]=data[i];
         }//for i
 
-        return new ExtractResult(new Sample(timestamp,dataObj),data.length-offsetData);
+        return new ExtractResult(new Sample(timestamp,dataObj,getFieldsDesc()),
+                data.length-offsetData);
 
     }//update
 
@@ -113,7 +112,7 @@ public class FeatureGenPurpose extends Feature {
         //create the string with the feature data
         StringBuilder sb = new StringBuilder();
         Sample sample = mLastSample;
-        sb.append(getName()).append(":\n\tTimestamp:").append(sample.timestamp).append('\n');
+        sb.append(getName()).append(":\n\tTimestamp: ").append(sample.timestamp).append('\n');
         sb.append('\t').append(FEATURE_DATA_NAME).append(": ");
         Number data[] = sample.data;
         for (Number n: data) {

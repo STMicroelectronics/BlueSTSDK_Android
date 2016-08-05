@@ -43,14 +43,14 @@ public class TestLuminosityFunction {
 
     @Test
     public void testInvalidSampleLuminosity(){
-        Feature.Sample s = new Feature.Sample(100,new Number[]{});
+        Feature.Sample s = new Feature.Sample(100,new Number[]{}, new Field[]{});
         Assert.assertEquals(-1, FeatureLuminosity.getLuminosity(s));
     }
 
     @Test
     public void testGetSampleLuminosity(){
         int x = 50;
-        Feature.Sample s = new Feature.Sample(100,new Number[]{x});
+        Feature.Sample s = new Feature.Sample(100,new Number[]{x}, new Field[]{});
         Assert.assertEquals(x, FeatureLuminosity.getLuminosity(s));
     }
 
@@ -78,7 +78,7 @@ public class TestLuminosityFunction {
 
         UpdateFeatureUtil.callUpdate(f, 1, temp, 0);
 
-        Assert.assertEquals(new Feature.Sample(1, new Short[]{luminosity}),
+        Assert.assertEquals(new Feature.Sample(1, new Short[]{luminosity}, new Field[]{}),
                 f.getSample());
     }
 
@@ -96,7 +96,7 @@ public class TestLuminosityFunction {
 
         UpdateFeatureUtil.callUpdate(f, 1, data, offset);
 
-        Assert.assertEquals(new Feature.Sample(1, new Short[]{luminosity}),
+        Assert.assertEquals(new Feature.Sample(1, new Short[]{luminosity}, new Field[]{}),
                 f.getSample());
 
     }

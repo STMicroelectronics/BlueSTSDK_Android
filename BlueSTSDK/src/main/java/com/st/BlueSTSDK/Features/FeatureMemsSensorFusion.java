@@ -52,7 +52,7 @@ import com.st.BlueSTSDK.Utils.NumberConversion;
 public class FeatureMemsSensorFusion extends FeatureAutoConfigurable {
 
     public static final String FEATURE_NAME = "MEMS Sensor Fusion";
-    public static final String FEATURE_UNIT = "";
+    public static final String FEATURE_UNIT = null;
     public static final String[] FEATURE_DATA_NAME = new String[]{"qi", "qj", "qk", "qs"};
     public static final float DATA_MAX = 1.0f;
     public static final float DATA_MIN = -1.0f;
@@ -216,7 +216,7 @@ public class FeatureMemsSensorFusion extends FeatureAutoConfigurable {
             nReadByte = 12;
         }//if-else
 
-        return new ExtractResult(new Sample(timestamp, new Number[]{ qi,qj,qk,qs }),nReadByte);
+        return new ExtractResult(new Sample(timestamp, new Number[]{ qi,qj,qk,qs },getFieldsDesc()),nReadByte);
     }
 
     @Override
@@ -227,7 +227,7 @@ public class FeatureMemsSensorFusion extends FeatureAutoConfigurable {
             return super.toString();
         Number data[] = sample.data;
         Field dataDesc[] = getFieldsDesc();
-        return String.format(FEATURE_NAME+":\n\tTimestamp:%d\n\tQuat:(%s: %.3f, %s: %.3f, %s: %" +
+        return String.format(FEATURE_NAME+":\n\tTimestamp: %d\n\tQuat:(%s: %.3f, %s: %.3f, %s: %" +
                         ".3f, %s: %.3f)",sample.timestamp,
                 dataDesc[0].getName(),data[0].floatValue(),
                 dataDesc[1].getName(),data[1].floatValue(),

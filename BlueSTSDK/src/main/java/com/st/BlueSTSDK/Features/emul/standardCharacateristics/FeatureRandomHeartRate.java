@@ -24,47 +24,39 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  ******************************************************************************/
-package com.st.BlueSTSDK.Features.emul;
+package com.st.BlueSTSDK.Features.emul.standardCharacateristics;
 
-import com.st.BlueSTSDK.Features.FeatureBattery;
+import com.st.BlueSTSDK.Features.standardCharacteristics.FeatureHeartRate;
 import com.st.BlueSTSDK.Node;
 import com.st.BlueSTSDK.NodeEmulator;
-import com.st.BlueSTSDK.Utils.NumberConversion;
 
 import java.util.Random;
 
 /**
- * generate random data for emulate the class {@link FeatureBattery}
+ * generate random data for emulate the class {@link FeatureHeartRate}
  *
  * @author STMicroelectronics - Central Labs.
  * @version 1.0
  */
-public class FeatureRandomBattery extends FeatureBattery implements NodeEmulator.EmulableFeature {
-
-    Random mRandom = new Random();
-    int mCharge =5;
-    public FeatureRandomBattery(Node parent) {
-        super(parent);
+public class FeatureRandomHeartRate extends FeatureHeartRate
+        implements NodeEmulator.EmulableFeature {
+    /**
+     * build a new disabled feature, that doesn't need to be initialized in the node side
+     *
+     * @param n node that will update this feature
+     */
+    public FeatureRandomHeartRate(Node n) {
+        super(n);
     }
 
+    private Random mRnd = new Random();
 
     @Override
     public byte[] generateFakeData() {
-        byte data[] = new byte[7];
 
-        byte temp[] = NumberConversion.LittleEndian.int16ToBytes((short)(mCharge*10));
-        mCharge = (mCharge+10)%100;
-        System.arraycopy(temp, 0, data, 0, 2);
+        byte rate = (byte)mRnd.nextInt();
+        rate = (byte)Math.abs(rate);
 
-        temp = NumberConversion.LittleEndian.int16ToBytes((short)(mRandom.nextFloat()*1000));
-        System.arraycopy(temp, 0, data, 2, 2);
-
-        temp = NumberConversion.LittleEndian.int16ToBytes((short)((mRandom.nextFloat()*10)-5));
-        System.arraycopy(temp, 0, data, 4, 2);
-
-        temp = new byte[] {(byte) (mRandom.nextFloat()*4)};
-        System.arraycopy(temp, 0, data, 5, 1);
-
-        return data;
+        return new byte[]{0,rate};
     }
 }

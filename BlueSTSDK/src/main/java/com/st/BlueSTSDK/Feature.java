@@ -437,8 +437,8 @@ public abstract class Feature {
             return mName+":\n\tNo Data";
         }
         StringBuilder sb = new StringBuilder();
-        sb.append(mName).append(":\n\tTimestamp:").append(sample.timestamp).append('\n');
-        Number data[] = sample.data; // it create a copy -> we are thread safe
+        sb.append(mName).append(":\n\tTimestamp: ").append(sample.timestamp).append('\n');
+        Number data[] = sample.data;
         for (int i = 0; i < data.length-1; i++) {
             sb.append('\t').append(mDataDesc[i].getName())
                     .append(": ").append(data[i]).append('\n');
@@ -493,12 +493,12 @@ public abstract class Feature {
     }
 
     /**
-     * class that contains the last data from the node
+     * Class that contains the last data from the node
      */
     public static class Sample{
 
         /**
-         * data time stamp
+         * Data time stamp send with the data
          */
         public final long timestamp;
 
@@ -508,12 +508,29 @@ public abstract class Feature {
         public final Number[] data;
 
         /**
+         * description of the data field
+         */
+        public final Field[] dataDesc;
+
+        /**
+         * Unix timestamp of the moment the notification arrive at the device
+         */
+        public final long notificationTime;
+
+        /**
          * @param timestamp data timestamp
          * @param data feature data
+         * @param dataDesc description for each field data
          */
-        public Sample(long timestamp,@NonNull Number[] data) {
+        public Sample(long timestamp,@NonNull Number[] data, @NonNull Field[] dataDesc) {
             this.timestamp = timestamp;
             this.data = data;
+            this.dataDesc=dataDesc;
+            notificationTime = System.currentTimeMillis();
+        }
+
+        public Sample(@NonNull Number[] data,@NonNull Field[] dataDesc) {
+            this(0,data,dataDesc);
         }
 
         /**
@@ -523,6 +540,8 @@ public abstract class Feature {
         public Sample(@NonNull Sample copyMe) {
             this.timestamp =copyMe.timestamp;
             this.data = copyMe.data.clone();
+            this.notificationTime =copyMe.notificationTime;
+            this.dataDesc = copyMe.dataDesc;
         }
 
         @Override

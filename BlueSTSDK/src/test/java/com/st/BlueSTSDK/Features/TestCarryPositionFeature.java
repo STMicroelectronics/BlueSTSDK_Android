@@ -44,7 +44,7 @@ public class TestCarryPositionFeature {
 
     @Test
     public void testInvalidSamplePositionId(){
-        Feature.Sample s = new Feature.Sample(100,new Number[]{});
+        Feature.Sample s = new Feature.Sample(100,new Number[]{}, new Field[]{});
         Assert.assertEquals(FeatureCarryPosition.Position.ERROR,
                 FeatureCarryPosition.getPosition(s));
     }
@@ -52,7 +52,7 @@ public class TestCarryPositionFeature {
     @Test
     public void testSampleActivityId(){
         byte activityId = 0x02;
-        Feature.Sample s = new Feature.Sample(100,new Number[]{activityId});
+        Feature.Sample s = new Feature.Sample(100,new Number[]{activityId}, new Field[]{});
         Assert.assertEquals(FeatureCarryPosition.Position.IN_HAND,
                 FeatureCarryPosition.getPosition(s));
     }
@@ -107,37 +107,37 @@ public class TestCarryPositionFeature {
     @Test
     public void testStatusValue(){
 
-        Feature.Sample s = new Feature.Sample(100,new Number[]{0,0,0,0x00});
+        Feature.Sample s = new Feature.Sample(100,new Number[]{0,0,0,0x00}, new Field[]{});
         Assert.assertEquals(FeatureCarryPosition.Position.UNKNOWN,
                 FeatureCarryPosition.getPosition(s));
 
-        s = new Feature.Sample(100,new Number[]{0x01});
+        s = new Feature.Sample(100,new Number[]{0x01}, new Field[]{});
         Assert.assertEquals(FeatureCarryPosition.Position.ON_DESK,
                 FeatureCarryPosition.getPosition(s));
 
-        s = new Feature.Sample(100,new Number[]{0x02});
+        s = new Feature.Sample(100,new Number[]{0x02}, new Field[]{});
         Assert.assertEquals(FeatureCarryPosition.Position.IN_HAND,
                 FeatureCarryPosition.getPosition(s));
 
-        s = new Feature.Sample(100,new Number[]{0x03});
+        s = new Feature.Sample(100,new Number[]{0x03}, new Field[]{});
         Assert.assertEquals(FeatureCarryPosition.Position.NEAR_HEAD,
                 FeatureCarryPosition.getPosition(s));
 
-        s = new Feature.Sample(100,new Number[]{0x04});
+        s = new Feature.Sample(100,new Number[]{0x04}, new Field[]{});
         Assert.assertEquals(FeatureCarryPosition.Position.SHIRT_POCKET,
                 FeatureCarryPosition.getPosition(s));
 
-        s = new Feature.Sample(100,new Number[]{0x05});
+        s = new Feature.Sample(100,new Number[]{0x05}, new Field[]{});
         Assert.assertEquals(FeatureCarryPosition.Position.TROUSERS_POCKET,
                 FeatureCarryPosition.getPosition(s));
 
-        s = new Feature.Sample(100,new Number[]{0x06});
+        s = new Feature.Sample(100,new Number[]{0x06}, new Field[]{});
         Assert.assertEquals(FeatureCarryPosition.Position.ARM_SWING,
                 FeatureCarryPosition.getPosition(s));
 
 
         //other value are errors
-        s = new Feature.Sample(100,new Number[]{0x12});
+        s = new Feature.Sample(100,new Number[]{0x12}, new Field[]{});
         Assert.assertEquals(FeatureCarryPosition.Position.ERROR,
                 FeatureCarryPosition.getPosition(s));
 

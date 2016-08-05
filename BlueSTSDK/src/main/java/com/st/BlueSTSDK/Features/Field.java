@@ -26,8 +26,11 @@
  ******************************************************************************/
 package com.st.BlueSTSDK.Features;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
 /**
- * class that describe a feature data field
+ * Class that describe a feature data field
  *
  * @author STMicroelectronics - Central Labs.
  * @version 1.0
@@ -35,7 +38,7 @@ package com.st.BlueSTSDK.Features;
 public class Field {
 
     /**
-     * type used for store this Field
+     * Type used for store this Field
      */
     public enum Type {
         Float,
@@ -45,7 +48,8 @@ public class Field {
         UInt16,
         Int16,
         UInt8,
-        Int8
+        Int8,
+        ByteArray
     }
 
     /** field unit */
@@ -67,7 +71,7 @@ public class Field {
      * @param max field max value
      * @param min field min value
      */
-    public Field(String name,String unit,Type type,Number max,Number min){
+    public Field(@NonNull String name, String unit, Type type, Number max, Number min){
         mName=name;
         mUnit=unit;
         mType=type;
@@ -79,7 +83,7 @@ public class Field {
      * get filed unit
      * @return filed unit
      */
-    public String getUnit() {
+    public @Nullable String getUnit() {
         return mUnit;
     }
 
@@ -87,7 +91,7 @@ public class Field {
      * get filed name
      * @return filed name
      */
-    public String getName() {
+    public @NonNull String getName() {
         return mName;
     }
 

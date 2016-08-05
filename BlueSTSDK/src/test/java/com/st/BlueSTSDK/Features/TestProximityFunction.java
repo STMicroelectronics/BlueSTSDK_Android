@@ -42,14 +42,14 @@ public class TestProximityFunction {
 
     @Test
     public void testInvalidSampleProximity(){
-        Feature.Sample s = new Feature.Sample(100,new Number[]{});
+        Feature.Sample s = new Feature.Sample(100,new Number[]{}, new Field[]{});
         Assert.assertEquals(-1, FeatureProximity.getProximityDistance(s));
     }
 
     @Test
     public void testGetSampleProximity(){
         int x = 50;
-        Feature.Sample s = new Feature.Sample(100,new Number[]{x});
+        Feature.Sample s = new Feature.Sample(100,new Number[]{x}, new Field[]{});
         Assert.assertEquals(x, FeatureProximity.getProximityDistance(s));
     }
 
@@ -77,7 +77,7 @@ public class TestProximityFunction {
 
         UpdateFeatureUtil.callUpdate(f, 1, temp, 0);
 
-        Assert.assertEquals(new Feature.Sample(1, new Integer[]{(int)proximity}),
+        Assert.assertEquals(new Feature.Sample(1, new Integer[]{(int)proximity}, new Field[]{}),
                 f.getSample());
     }
 
@@ -95,7 +95,7 @@ public class TestProximityFunction {
 
         UpdateFeatureUtil.callUpdate(f, 1, data, offset);
 
-        Assert.assertEquals(new Feature.Sample(1, new Integer[]{(int)proximity}),
+        Assert.assertEquals(new Feature.Sample(1, new Integer[]{(int)proximity}, new Field[]{}),
                 f.getSample());
     }
 

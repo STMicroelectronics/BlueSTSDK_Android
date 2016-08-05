@@ -24,47 +24,39 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  ******************************************************************************/
-package com.st.BlueSTSDK.Features.emul;
+package com.st.BlueSTSDK.Utils;
 
-import com.st.BlueSTSDK.Features.FeatureBattery;
-import com.st.BlueSTSDK.Node;
-import com.st.BlueSTSDK.NodeEmulator;
-import com.st.BlueSTSDK.Utils.NumberConversion;
+import com.st.BlueSTSDK.Feature;
 
-import java.util.Random;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.UUID;
 
 /**
- * generate random data for emulate the class {@link FeatureBattery}
+ * Utility class that extend the Map&lt;UUID,List&lt;Class&lt; ? extends Feature&gt;&gt;&gt; and
+ * permit to add a single Feature instead of a list of Feature
  *
  * @author STMicroelectronics - Central Labs.
  * @version 1.0
  */
-public class FeatureRandomBattery extends FeatureBattery implements NodeEmulator.EmulableFeature {
+public class UUIDToFeatureMap extends HashMap<UUID,List<Class< ? extends Feature>>> {
 
-    Random mRandom = new Random();
-    int mCharge =5;
-    public FeatureRandomBattery(Node parent) {
-        super(parent);
-    }
-
-
-    @Override
-    public byte[] generateFakeData() {
-        byte data[] = new byte[7];
-
-        byte temp[] = NumberConversion.LittleEndian.int16ToBytes((short)(mCharge*10));
-        mCharge = (mCharge+10)%100;
-        System.arraycopy(temp, 0, data, 0, 2);
-
-        temp = NumberConversion.LittleEndian.int16ToBytes((short)(mRandom.nextFloat()*1000));
-        System.arraycopy(temp, 0, data, 2, 2);
-
-        temp = NumberConversion.LittleEndian.int16ToBytes((short)((mRandom.nextFloat()*10)-5));
-        System.arraycopy(temp, 0, data, 4, 2);
-
-        temp = new byte[] {(byte) (mRandom.nextFloat()*4)};
-        System.arraycopy(temp, 0, data, 5, 1);
-
-        return data;
-    }
+    /**
+     * add a single feature to the map
+     * @param key UUID to manage with a feature class
+     * @param value feature class that has its data inside the key UUID
+     * @return null if the key wasn't present or the list of features that are read from that UUID
+     */
+    public List<Class<? extends Feature>> put(UUID key, Class<? extends Feature> value) {
+        List<Class<? extends Feature>> features = get(key);
+        if (features != null) {
+            features.add(value);
+        } else {
+            features = new ArrayList<>(1);
+            features.add(value);
+            super.put(key, features);
+        }//if-else
+        return features;
+    }//put
 }

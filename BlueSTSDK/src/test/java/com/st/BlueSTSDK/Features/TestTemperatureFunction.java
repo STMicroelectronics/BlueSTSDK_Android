@@ -42,14 +42,14 @@ public class TestTemperatureFunction {
 
     @Test
     public void testInvalidSampleTemperature(){
-        Feature.Sample s = new Feature.Sample(100,new Number[]{});
+        Feature.Sample s = new Feature.Sample(100,new Number[]{}, new Field[]{});
         Assert.assertEquals(Float.NaN, FeatureTemperature.getTemperature(s), 0.0f);
     }
 
     @Test
     public void testGetSampleTemperature(){
         float x = 50.0f;
-        Feature.Sample s = new Feature.Sample(100,new Number[]{x});
+        Feature.Sample s = new Feature.Sample(100,new Number[]{x}, new Field[]{});
         Assert.assertEquals(x, FeatureTemperature.getTemperature(s), 0.0f);
     }
 
@@ -77,7 +77,7 @@ public class TestTemperatureFunction {
 
         UpdateFeatureUtil.callUpdate(f, 1, temp, 0);
 
-        Assert.assertEquals(new Feature.Sample(1, new Float[]{temperature}),
+        Assert.assertEquals(new Feature.Sample(1, new Float[]{temperature}, new Field[]{}),
                 f.getSample());
     }
 
@@ -95,7 +95,7 @@ public class TestTemperatureFunction {
 
         UpdateFeatureUtil.callUpdate(f, 1, data, offset);
 
-        Assert.assertEquals(new Feature.Sample(1,new Float[]{temperature}),
+        Assert.assertEquals(new Feature.Sample(1,new Float[]{temperature}, new Field[]{}),
                 f.getSample());
     }
 

@@ -26,11 +26,15 @@
  ******************************************************************************/
 package com.st.BlueSTSDK;
 
-import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.util.Log;
 
 import com.st.BlueSTSDK.Utils.BLENodeDefines;
 
+import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.UUID;
 
 /**
@@ -55,6 +59,11 @@ public class Debug {
     private final BluetoothGattCharacteristic mErrChar;
 
     /**
+     * thread used for call the user listener
+     */
+    private Handler mNotifyThread;
+
+    /**
      * class where the notify that we receive a new data
      */
     private DebugOutputListener mListener;
@@ -62,6 +71,15 @@ public class Debug {
      * Max size of string to sent in the input char
      */
     public static final int MAX_STRING_SIZE_TO_SENT = 20;
+
+    private void initHandler(){
+        HandlerThread temp = new HandlerThread(Debug.class.getCanonicalName());
+        //if you send a lot of data through the debug interface, you need this for avoid delay that
+        //can trigger a timeout
+        temp.setPriority(Thread.MAX_PRIORITY);
+        temp.start();
+        mNotifyThread= new Handler(temp.getLooper());
+    }//initHandler
 
     /**
      * @param n          node that will send the data
@@ -73,19 +91,52 @@ public class Debug {
         mNode = n;
         mTermChar = termChar;
         mErrChar = errChar;
+        initHandler();
     }//Debug
 
     /**
-     * write a message to the stdIn of the debug console prepare the string to sent and check
-     * if there is a current message in queue to be sent
+     * write a message to the stdIn, the message can be split in more ble writes
+     * the string will be converted in a byte array using the default charset configuration
      *
      * @param message message to send
-     * @return number of char sent in Terminal standard characteristic, or -1 if was impossible send
-     * the message
+     * @return number of char sent in Terminal standard characteristic
      */
     public int write(String message) {
-        mNode.enqueueCharacteristicsWrite(mTermChar,message.getBytes());
-        return (message.length() > MAX_STRING_SIZE_TO_SENT) ? MAX_STRING_SIZE_TO_SENT :message.length();
+        return write(message.getBytes());
+    }
+
+    /**
+     * write an array of byte into the stdIn. the array can be split in more ble write
+     *
+     * @param data array to write
+     * @return number of byte sent
+     */
+    public int write(byte[] data){
+        return write(data,0,data.length);
+    }
+
+    /**
+     * Write an array of byte into the stdInt, the array can be split in more ble write
+     * @param data array to write
+     * @param offset offset in the array where start read data
+     * @param byteToSend number of byte to send
+     * @return number of byte sent
+     */
+    public int write(byte[] data,int offset, int byteToSend){
+        int byteSend=offset;
+        //write the message with chunk of MAX_STRING_SIZE_TO_SENT bytes
+        while((byteToSend-byteSend) > MAX_STRING_SIZE_TO_SENT){
+            mNode.enqueueCharacteristicsWrite(mTermChar,
+                    Arrays.copyOfRange(data,byteSend, byteSend + MAX_STRING_SIZE_TO_SENT));
+            byteSend+=MAX_STRING_SIZE_TO_SENT;
+        }//while
+
+        //send the remaining data
+        if(byteSend!=byteToSend){
+            mNode.enqueueCharacteristicsWrite(mTermChar,
+                    Arrays.copyOfRange(data,byteSend,byteToSend));
+        }//if
+        return byteToSend;
     }
 
     /**
@@ -105,20 +156,42 @@ public class Debug {
         mNode.changeNotificationStatus(mErrChar, enable);
     }
 
+    private String encodeMessageString(byte[] value){
+        //convert to standard ascii characters
+        return new String(value, Charset.forName("ISO-8859-1"));
+    }
+
     /**
      * the node had received an update on this characteristics, if it is a debug characteristic we
      * sent its data to the listener
      *
      * @param characteristic characteristic that has been updated
      */
-    void receiveCharacteristicsUpdate(BluetoothGattCharacteristic characteristic) {
+    void receiveCharacteristicsUpdate(final BluetoothGattCharacteristic characteristic) {
         if (mListener == null)
             return;
         UUID charUuid = characteristic.getUuid();
+        final String msg = encodeMessageString(characteristic.getValue());
         if (charUuid.equals(BLENodeDefines.Services.Debug.DEBUG_STDERR_UUID)) {
-            mListener.onStdErrReceived(this, characteristic.getStringValue(0));
-        } else if (charUuid.equals(BLENodeDefines.Services.Debug.DEBUG_TERM_UUID))
-            mListener.onStdOutReceived(this, characteristic.getStringValue(0));
+           // mListener.onStdErrReceived(Debug.this, characteristic.getStringValue(0));
+            mNotifyThread.post(new Runnable() {
+                @Override
+                public void run() {
+                    if(mListener!=null)
+                        mListener.onStdErrReceived(Debug.this, msg);
+                }
+            });
+
+        } else if (charUuid.equals(BLENodeDefines.Services.Debug.DEBUG_TERM_UUID)) {
+            //mListener.onStdOutReceived(Debug.this, characteristic.getStringValue(0));
+            mNotifyThread.post(new Runnable() {
+                @Override
+                public void run() {
+                    if(mListener!=null)
+                        mListener.onStdOutReceived(Debug.this, msg);
+                }
+            });
+        }//if-else-if
     }//receiveCharacteristicsUpdate
 
     /**
@@ -127,18 +200,34 @@ public class Debug {
      * @param characteristic characteristic that has been write
      * @param status         true if the write end correctly, false otherwise
      */
-    void receiveCharacteristicsWriteUpdate(BluetoothGattCharacteristic characteristic,
-                                           boolean status) {
+    void receiveCharacteristicsWriteUpdate(final BluetoothGattCharacteristic characteristic,
+                                           final boolean status) {
         if (mListener == null)
             return;
         UUID charUuid = characteristic.getUuid();
         if (charUuid.equals(BLENodeDefines.Services.Debug.DEBUG_TERM_UUID)) {
-            String str = characteristic.getStringValue(0);
-            if(str.length()>MAX_STRING_SIZE_TO_SENT)
-                mListener.onStdInSent(this,str.substring(0,MAX_STRING_SIZE_TO_SENT) , status);
-            else
-                mListener.onStdInSent(this,str , status);
-        }
+            final String str = encodeMessageString(characteristic.getValue());
+            if(str.length()>MAX_STRING_SIZE_TO_SENT) {
+                mNotifyThread.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (mListener == null)
+                            return;
+                        mListener.onStdInSent(Debug.this,
+                                str.substring(0,MAX_STRING_SIZE_TO_SENT), status);
+                    }
+                });
+            }else {
+                mNotifyThread.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (mListener == null)
+                            return;
+                        mListener.onStdInSent(Debug.this, str, status);
+                    }
+                });
+            }//if-else
+        }//if
     }//receiveCharacteristicsWriteUpdate
 
     /**
@@ -152,6 +241,7 @@ public class Debug {
 
     /**
      * Interface used for notify to the user the console activity
+     * The data received/send from/to the node are encoded with ISO-8859-1 charset.
      * @author STMicroelectronics - Central Labs.
      */
     public interface DebugOutputListener {

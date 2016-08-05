@@ -71,14 +71,19 @@ public class Manager {
      */
     static final Map<Byte, SparseArray<Class<? extends Feature>>> sFeatureMapDecoder =
             new HashMap<>();
-
     static{
         sFeatureMapDecoder.put((byte) 0x00, BLENodeDefines.FeatureCharacteristics.genericDeviceFeatures);
         sFeatureMapDecoder.put((byte) 0x01, BLENodeDefines.FeatureCharacteristics.STEVAL_WESU1_DeviceFeatures);
+        sFeatureMapDecoder.put((byte) 0x02, BLENodeDefines.FeatureCharacteristics
+                .SensorTile_DeviceFeatures);
+        sFeatureMapDecoder.put((byte) 0x03, BLENodeDefines.FeatureCharacteristics
+                .BlueCoin_DeviceFeatures);
         sFeatureMapDecoder.put((byte) 0x80, BLENodeDefines.FeatureCharacteristics.Nucleo_Generic_Features);
         sFeatureMapDecoder.put((byte) 0x81, BLENodeDefines.FeatureCharacteristics
                 .Nucleo_Remote_Features);
     }
+
+
 
     /**
      * singleton instance of the manager
@@ -168,6 +173,7 @@ public class Manager {
                     if (node.getTag().equals(deviceAddr)) {
                         //we already add this node, we set that it is alive with a new rssi
                         node.isAlive(rssi);
+                        node.upDateAdvertising(advertisedData);
                         return;
                     }//if
                 }//for
@@ -491,4 +497,19 @@ public class Manager {
         return sFeatureMapDecoder.containsKey(deviceId);
     }
 
+    /**
+     * get a copy Features available for the deviceId
+     * @param deviceId device type that will use the feature, it can be a new device id
+     * @return null if the deviceId is not registered else the list of available feature for that
+     * deviceId
+     */
+    public static SparseArray<Class<? extends Feature>> getNodeFeatures(byte deviceId){
+        SparseArray<Class<? extends Feature>> featureList = null;
+
+        if(sFeatureMapDecoder.containsKey(deviceId)) {
+            featureList = sFeatureMapDecoder.get(deviceId).clone();
+        }
+
+        return featureList;
+    }
 }//Manager

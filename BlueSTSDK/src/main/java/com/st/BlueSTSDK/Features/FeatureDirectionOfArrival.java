@@ -99,7 +99,7 @@ public class FeatureDirectionOfArrival extends Feature {
 
         Sample temp = new Sample(timestamp,new Number[]{
                 NumberConversion.LittleEndian.bytesToInt16(data, dataOffset)
-        });
+        },getFieldsDesc());
         return new ExtractResult(temp,2);
     }//extractData
 

@@ -42,14 +42,14 @@ public class TestPressureFunction {
 
     @Test
     public void testInvalidSamplePressure(){
-        Feature.Sample s = new Feature.Sample(100,new Number[]{});
+        Feature.Sample s = new Feature.Sample(100,new Number[]{}, new Field[]{});
         Assert.assertEquals(Float.NaN, FeaturePressure.getPressure(s), 0.0f);
     }
 
     @Test
     public void testGetSamplePressure(){
         float x = 50.0f;
-        Feature.Sample s = new Feature.Sample(100,new Number[]{x});
+        Feature.Sample s = new Feature.Sample(100,new Number[]{x}, new Field[]{});
         Assert.assertEquals(x, FeaturePressure.getPressure(s), 0.0f);
     }
 
@@ -78,7 +78,7 @@ public class TestPressureFunction {
 
         UpdateFeatureUtil.callUpdate(f, 1, temp, 0);
 
-        Assert.assertEquals(new Feature.Sample(1, new Float[]{pressure}),
+        Assert.assertEquals(new Feature.Sample(1, new Float[]{pressure}, new Field[]{}),
                 f.getSample());
     }
 
@@ -99,7 +99,7 @@ public class TestPressureFunction {
 
         UpdateFeatureUtil.callUpdate(f, 1, data, offset);
 
-        Assert.assertEquals(new Feature.Sample(1,new Float[]{pressure}),
+        Assert.assertEquals(new Feature.Sample(1,new Float[]{pressure}, new Field[]{}),
                 f.getSample());
     }
 

@@ -50,7 +50,7 @@ public class FeatureBattery extends Feature {
     /** feature name */
     public static final String FEATURE_NAME = "Battery";
     /** unit of the data exported by this feature */
-    public static final String[] FEATURE_UNIT = {"%", "V", "mA", ""};
+    public static final String[] FEATURE_UNIT = {"%", "V", "mA", null};
     /** name of the data exported by this feature */
     public static final String[] FEATURE_DATA_NAME = {"Level", "Voltage", "Current", "Status"};
     /** maximum value for the feature data */
@@ -175,13 +175,13 @@ public class FeatureBattery extends Feature {
                 NumberConversion.LittleEndian.bytesToInt16(data,dataOffset + 2) / 1000.0f,
                 NumberConversion.LittleEndian.bytesToInt16(data, dataOffset + 4),
                 data[dataOffset + 6]
-        });
+        },getFieldsDesc());
 
         return new ExtractResult(temp,7);
     }
 
     /**
-     * possible battery status
+     * Possible battery status
      */
     public enum BatteryStatus {
         /** low battery, when the battery capacity is below a threshold defined by the fw

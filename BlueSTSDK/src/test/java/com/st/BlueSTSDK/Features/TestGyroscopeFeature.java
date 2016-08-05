@@ -42,14 +42,14 @@ public class TestGyroscopeFeature {
 
     @Test
     public void testInvalidSampleX(){
-        Feature.Sample s = new Feature.Sample(100,new Number[]{});
+        Feature.Sample s = new Feature.Sample(100,new Number[]{}, new Field[]{});
         Assert.assertEquals(Float.NaN, FeatureGyroscope.getGyroX(s), 0.0f);
     }
 
     @Test
     public void testGetSampleX(){
         float x = 1.0f;
-        Feature.Sample s = new Feature.Sample(100,new Number[]{x*10});
+        Feature.Sample s = new Feature.Sample(100,new Number[]{x}, new Field[]{});
         Assert.assertEquals(x, FeatureGyroscope.getGyroX(s), 0.0f);
     }
 
@@ -60,14 +60,14 @@ public class TestGyroscopeFeature {
 
     @Test
     public void testInvalidSampleY(){
-        Feature.Sample s = new Feature.Sample(100,new Number[]{0});
+        Feature.Sample s = new Feature.Sample(100,new Number[]{0}, new Field[]{});
         Assert.assertEquals(Float.NaN,FeatureGyroscope.getGyroY(s),0.0f);
     }
 
     @Test
     public void testGetSampleY(){
         float y = 1.0f;
-        Feature.Sample s = new Feature.Sample(100,new Number[]{0,y*10});
+        Feature.Sample s = new Feature.Sample(100,new Number[]{0,y}, new Field[]{});
         Assert.assertEquals(y, FeatureGyroscope.getGyroY(s), 0.0f);
     }
 
@@ -78,14 +78,14 @@ public class TestGyroscopeFeature {
 
     @Test
     public void testInvalidSampleZ(){
-        Feature.Sample s = new Feature.Sample(100,new Number[]{0,0});
+        Feature.Sample s = new Feature.Sample(100,new Number[]{0,0}, new Field[]{});
         Assert.assertEquals(Float.NaN,FeatureGyroscope.getGyroZ(s),0.0f);
     }
 
     @Test
     public void testGetSampleZ(){
         float z = 1.0f;
-        Feature.Sample s = new Feature.Sample(100,new Number[]{0,0,z*10});
+        Feature.Sample s = new Feature.Sample(100,new Number[]{0,0,z}, new Field[]{});
         Assert.assertEquals(z, FeatureGyroscope.getGyroZ(s), 0.0f);
     }
 
@@ -123,7 +123,7 @@ public class TestGyroscopeFeature {
 
         UpdateFeatureUtil.callUpdate(f, 1, data, 0);
 
-        Assert.assertEquals(new Feature.Sample(1,new Float[]{(float)x,(float)y,(float)z}),
+        Assert.assertEquals(new Feature.Sample(1,new Float[]{(float)x,(float)y,(float)z}, new Field[]{}),
                 f.getSample());
     }
 
@@ -149,7 +149,7 @@ public class TestGyroscopeFeature {
 
         UpdateFeatureUtil.callUpdate(f, 2, data, offset);
 
-        Assert.assertEquals(new Feature.Sample(2,new Float[]{(float)x,(float)y,(float)z}),
+        Assert.assertEquals(new Feature.Sample(2,new Float[]{(float)x,(float)y,(float)z}, new Field[]{}),
                 f.getSample());
     }
 

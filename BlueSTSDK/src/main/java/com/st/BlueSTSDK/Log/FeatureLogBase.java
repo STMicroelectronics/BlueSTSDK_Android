@@ -37,7 +37,6 @@ import com.st.BlueSTSDK.Node;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Formatter;
@@ -93,11 +92,12 @@ public abstract class FeatureLogBase implements Feature.FeatureLoggerListener{
                 out.format(n.getFriendlyName() + ", ");
         out.format("\n");
 
-        out.format(HOST_TIMESTAMP_COLUMN + "," + NODE_NAME_COLUMN + "," + NODE_TIMESTAMP_COLUMN + "," +
+        out.format(HOST_TIMESTAMP_COLUMN + " (ms)," + NODE_NAME_COLUMN + "," + NODE_TIMESTAMP_COLUMN + "," +
                 "" + NODE_RAW_DATA_COLUMN + ",");
         for(Field field:fields){
             out.format(field.getName());
-            if (field.getUnit().length()>0 )
+            String unit =field.getUnit();
+            if (unit!=null && !unit.isEmpty() )
                 out.format(" (%s)", field.getUnit());
             out.format(",");
 
@@ -151,7 +151,20 @@ public abstract class FeatureLogBase implements Feature.FeatureLoggerListener{
      */
     protected String logFeatureFileName(Feature f) {
         return String.format("%s/%s_%s.csv",
-                mDirectoryPath, DATE_FORMAT_PREFIX.format(mStartLog), f.getName());
+                mDirectoryPath, logSessionPrefix(), f.getName());
+    }
+
+    /**
+     * Get the file prefix of current session
+     * @return the file prefix of current session
+     */
+    public String logSessionPrefix(){
+        String logPrefixName = "";
+        synchronized (mStartLog)
+        {
+            logPrefixName = DATE_FORMAT_PREFIX.format(mStartLog);
+        }
+        return logPrefixName;
     }
 
     /**
@@ -177,6 +190,10 @@ public abstract class FeatureLogBase implements Feature.FeatureLoggerListener{
      * @param directoryPath directory where this class dumped the feature data
      */
     static public void clean(Context c, String directoryPath){
+        File files[] =getLogFiles(directoryPath);
+        if(files==null || files.length==0) //nothing to do
+            return;
+
         for(File f: getLogFiles(directoryPath) ){
             if(!f.delete())
                 Log.e(TAG, "Error deleting the file " + f.getAbsolutePath());

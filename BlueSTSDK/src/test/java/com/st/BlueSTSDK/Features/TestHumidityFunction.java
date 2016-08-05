@@ -42,14 +42,14 @@ public class TestHumidityFunction {
 
     @Test
     public void testInvalidSampleHumidity(){
-        Feature.Sample s = new Feature.Sample(100,new Number[]{});
+        Feature.Sample s = new Feature.Sample(100,new Number[]{}, new Field[]{});
         Assert.assertEquals(Float.NaN, FeatureHumidity.getHumidity(s), 0.0f);
     }
 
     @Test
     public void testGetSampleHumidity(){
         float x = 50.0f;
-        Feature.Sample s = new Feature.Sample(100,new Number[]{x});
+        Feature.Sample s = new Feature.Sample(100,new Number[]{x}, new Field[]{});
         Assert.assertEquals(x, FeatureHumidity.getHumidity(s), 0.0f);
     }
 
@@ -80,7 +80,7 @@ public class TestHumidityFunction {
 
         UpdateFeatureUtil.callUpdate(f, 1, data, 0);
 
-        Assert.assertEquals(new Feature.Sample(1, new Float[]{humidity}),
+        Assert.assertEquals(new Feature.Sample(1, new Float[]{humidity}, new Field[]{}),
                 f.getSample());
     }
 
@@ -98,7 +98,7 @@ public class TestHumidityFunction {
 
         UpdateFeatureUtil.callUpdate(f, 1, data, offset);
 
-        Assert.assertEquals(new Feature.Sample(1,new Float[]{humidity}),
+        Assert.assertEquals(new Feature.Sample(1,new Float[]{humidity}, new Field[]{}),
                 f.getSample());
     }
 

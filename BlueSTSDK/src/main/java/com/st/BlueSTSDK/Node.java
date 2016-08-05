@@ -81,27 +81,21 @@ public class Node{
      */
     private static final long RETRY_COMMAND_DELAY_MS =300;
 
-    /** possible node working mode, if a node is build the board is in Application mode */
-    public enum Mode {
-        /** wait for an FW update throughout usb*/
-        USB_DFU,
-        /** wait for an FW update throughout ble */
-        OTA_BLE_DFU,
-        /** application FW is running */
-        Application
-    }//Mode enum
-
-	/** node type, board that will answer to the connection */
+	/** Node type: type the board that is advertising connection */
     public enum Type {
         /** unknown board type */
         GENERIC,
         /** STEVAL-WESU1 board */
         STEVAL_WESU1,
+        /** SensorTile board */
+        SENSOR_TILE,
+
+        BLUE_COIN,
         /** board based on a x NUCLEO board */
         NUCLEO
     }//Type
 
-    /** state of the node */
+    /** State of the node */
     public enum State {
         /** dummy initial state */
         Init,
@@ -292,11 +286,28 @@ public class Node{
                 return null;
         }//buildDebugService
 
+        private void buildKnowUuid(BluetoothGattCharacteristic characteristic,
+                                    List<Class<? extends Feature>> featureList){
+            List<Feature> temp = new ArrayList<>();
+            for(Class<? extends Feature> feature : featureList){
+                Feature f = buildFeatureFromClass(feature);
+                if(f!=null) {
+                    f.setEnable(true);
+                    mAvailableFeature.add(f);
+                    temp.add(f);
+                }
+            }
+            if(!temp.isEmpty())
+                mCharFeatureMap.put(characteristic,temp);
+
+        }
+
         /**
          * build and add the exported features from a ble characteristics
          * @param characteristic characteristics that is handle by the sdk
          */
         private void buildFeature(BluetoothGattCharacteristic characteristic){
+
             //extract the part of the uuid that contains the feature inside this
             // characteristics
             int featureMask = BLENodeDefines.FeatureCharacteristics.extractFeatureMask
@@ -330,9 +341,19 @@ public class Node{
          * @param characteristic characteristics that export the data
          */
         private void buildGenericFeature(BluetoothGattCharacteristic characteristic){
-            Feature f = new FeatureGenPurpose(Node.this,characteristic);
-            f.setEnable(true);
-            mAvailableFeature.add(f);
+            Feature f= null;
+            for (Feature fs:mAvailableFeature ) {
+                if (fs  instanceof FeatureGenPurpose){
+                    if(((FeatureGenPurpose)fs).getFeatureChar().getUuid().toString()
+                            .compareToIgnoreCase(characteristic.getUuid().toString()) == 0)
+                            f = fs;
+                }
+            }
+            if ( f == null) {
+                f = new FeatureGenPurpose(Node.this, characteristic);
+                f.setEnable(true);
+                mAvailableFeature.add(f);
+            }
             List<Feature> temp = new ArrayList<>(1);
             temp.add(f);
             mCharFeatureMap.put(characteristic, temp);
@@ -398,7 +419,9 @@ public class Node{
                         else if (BLENodeDefines.FeatureCharacteristics
                                 .isGeneralPurposeCharacteristics(uuid)) {
                             buildGenericFeature(characteristic);
-                        }//if-else
+                        }else if(mExternalCharFeatures!=null &&
+                                mExternalCharFeatures.containsKey(uuid))
+                            buildKnowUuid(characteristic,mExternalCharFeatures.get(uuid));
                     }//for
 
                 }//if-else-if-else
@@ -558,11 +581,22 @@ public class Node{
         mWriteDescQueue.clear();
         mCharacteristicWriteQueue.clear();
         mCharFeatureMap.clear();
+
+        //remove all the task queued for avoid to run an old task with a new
+        //connection object
+        mBleThread.removeCallbacks(mScanServicesTask);
+        mBleThread.removeCallbacks(mUpdateRssiTask);
+        mBleThread.removeCallbacks(mWriteFeatureCommandTask);
+        mBleThread.removeCallbacks(mWriteDescriptorTask);
+        mBleThread.removeCallbacks(mConnectionTask);
+        mBleThread.removeCallbacks(mDisconnectTask);
+
         //we stop the connection -> we have not notification enabled
         mNotifyFeature.clear();
         mFeatureCommand=null;
         mConfigControl=null;
         mDebugConsole=null;
+        mBleThread=null;
     }
 
     /**
@@ -632,6 +666,8 @@ public class Node{
      */
     private Context mContext;
 
+
+    private static final int MAX_REFRESH_DEVICE_CACHE_TRY=10;
     /**
      * invoke an hide method for clear the device cache, in this way we can have device with same
      * name and mac that export different service/char in different connection (maybe because we
@@ -643,9 +679,14 @@ public class Node{
         try {
             Method localMethod = gatt.getClass().getMethod("refresh");
             if (localMethod != null) {
-                boolean bool = ((Boolean) localMethod.invoke(gatt));
-                Log.d(TAG, "Refreshing Device Cache...");
-                return bool;
+                boolean done =false;
+                int nTry =0;
+                while (!done && nTry<MAX_REFRESH_DEVICE_CACHE_TRY) {
+                    done=((Boolean) localMethod.invoke(gatt));
+                    nTry++;
+                }//while
+                Log.d(TAG, "Refreshing Device Cache: "+done);
+                return done;
             }//if
         } catch (Exception localException) {
             Log.e(TAG, "An exception occurred while refreshing device cache.");
@@ -795,6 +836,7 @@ public class Node{
     private ArrayList<Feature> mAvailableFeature;
     /** map that join the build feature with the bitmask that tell us that the feature is present*/
     private Map<Integer,Feature> mMaskToFeature;
+    private Map<UUID,List<Class< ? extends Feature>>> mExternalCharFeatures;
     /**
      * map that tell us whit feature we can update when we receive an update from a characteristics
      */
@@ -813,6 +855,7 @@ public class Node{
      * null if the device doesn't export the debug service   */
     private ConfigControl mConfigControl;
 
+    private String mFriendlyName = null;
 
     /** ms to wait before declare a node as lost */
     private static long NODE_LOST_TIMEOUT_MS=4000;
@@ -937,6 +980,7 @@ public class Node{
     public Node(BluetoothDevice device,int rssi,byte advertise[]) throws InvalidBleAdvertiseFormat{
         mAdvertise = new BleAdvertiseParser(advertise);
         mDevice = device;
+        mExternalCharFeatures= new HashMap<>();
         updateRssi(rssi);
         updateNodeStatus(State.Idle);
         initHandler();
@@ -945,6 +989,11 @@ public class Node{
         Log.i(TAG, mAdvertise.toString());
     }
 
+    public void upDateAdvertising(byte advertise[]){
+        try {
+            mAdvertise = new BleAdvertiseParser(advertise);
+        }catch (Exception e){Log.e(TAG,"Error updating advertising for:"+ getName());}
+    }
 
     /**
      * create a new node from the advertise, the advertise have to contain the mac address
@@ -959,8 +1008,10 @@ public class Node{
             throw  new InvalidBleAdvertiseFormat("Device Address non present in the advertise");
         }
         mDevice = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(bleAddress);
+        mExternalCharFeatures= new HashMap<>();
         updateNodeStatus(State.Idle);
         initHandler();
+
         buildAvailableFeatures();
         addNodeStateListener(mNotifyCommandChange);
         Log.i(TAG, mAdvertise.toString());
@@ -979,7 +1030,11 @@ public class Node{
      * @param c context to use for open the connection
      */
     public void connect(Context c){
-        connect(c, false);
+        connect(c, false,null);
+    }//connect
+
+    public void connect(Context c,boolean resetCache){
+        connect(c, false,null);
     }//connect
 
     /**
@@ -988,19 +1043,41 @@ public class Node{
      * @param resetCache if true the handle cache for this device will be clear,
      *                   the connection will be slower, it will done only the first time that you
      *                   call this function with the parameter true
+     * @param userDefineFeature register the UUID in the map as know UUID that will be manage by
+     *                          the node class as feature
      */
-    public void connect(Context c,boolean resetCache){
+    public void connect(Context c,boolean resetCache,
+                        @Nullable Map<UUID,List<Class< ? extends Feature>>> userDefineFeature){
         //we start the connection so we will stop to receive advertise, so we delete the timeout
         if(mHandler!=null) mHandler.removeCallbacks(mSetNodeLost);
         mUserAskToDisconnect=false;
         updateNodeStatus(State.Connecting);
-
-        mBleThread = new Handler(c.getMainLooper());
+        /*
+        HandlerThread thread = new HandlerThread("NodeConnection");
+        thread.start();
+        mBleThread = new Handler(thread.getLooper());
+        */
+        mBleThread = new Handler(Looper.getMainLooper());
         mContext=c;
         setBoundListener(c.getApplicationContext());
         mResetCache=resetCache;
+        addExternalCharacteristics(userDefineFeature);
         mBleThread.post(mConnectionTask);
     }//connect
+
+    /**
+     * describe as manage some specific UUID using a feature class, the uuid will be manage by
+     * the node class only if is know before the connection
+     * if a uuid is already know it will be overwrite with the new list of feature
+     * @param userDefineFeature map that link the uuid with the features that contains.
+     */
+    public void addExternalCharacteristics(@Nullable Map<UUID,List<Class< ? extends Feature>>>
+                                                   userDefineFeature){
+        if(userDefineFeature==null)
+            return;
+
+        mExternalCharFeatures.putAll(userDefineFeature);
+    }//addExternalCharacteristics
 
     private BroadcastReceiver mBoundStateChange = null;
     private void setBoundListener(Context c){
@@ -1048,6 +1125,7 @@ public class Node{
                 mHandler.postDelayed(mSetNodeLost, NODE_LOST_TIMEOUT_MS);
             }
         });
+
     }//disconnect
 
     /**
@@ -1057,6 +1135,42 @@ public class Node{
      */
     public Type getType(){
         return mAdvertise.getBoardType();
+    }//getType
+
+    public short getTypeId(){return mAdvertise.getDeviceId();}//getTypeId
+
+    /**
+     * node sleeping state
+     * @return false running, true device is sleeping
+     */
+    public boolean isSleeping(){
+        return mAdvertise.getBoardSleeping();
+    }//getType
+
+    /**
+     * node general purpose features available
+     * @return true if general purpsoe available else false.
+     */
+    public boolean hasGeneralPurpose(){
+        return mAdvertise.getBoardHasGP();
+    }//getType
+
+    public short getTypeId(){return mAdvertise.getDeviceId();}//getTypeId
+
+    /**
+     * node sleeping state
+     * @return false running, true device is sleeping
+     */
+    public boolean isSleeping(){
+        return mAdvertise.getBoardSleeping();
+    }//getType
+
+    /**
+     * node general purpose features available
+     * @return true if general purpsoe available else false.
+     */
+    public boolean hasGeneralPurpose(){
+        return mAdvertise.getBoardHasGP();
     }//getType
 
     public short getTypeId(){return mAdvertise.getDeviceId();}//getTypeId
@@ -1097,10 +1211,13 @@ public class Node{
      * @return the device friendly Name
      */
     public String getFriendlyName(){
-        String strTagClean = "NA";
-        if (getTag() != null && getTag().length() > 0)
-            strTagClean = getTag().replace(":","");
-        return getName() + " @" + strTagClean.substring(strTagClean.length()-Math.min(6, strTagClean.length()), strTagClean.length());
+        if (mFriendlyName == null) {
+            String strTagClean = "NA";
+            if (getTag() != null && getTag().length() > 0)
+                strTagClean = getTag().replace(":", "");
+            mFriendlyName =  getName() + " @" + strTagClean.substring(strTagClean.length() - Math.min(6, strTagClean.length()), strTagClean.length());
+        }
+        return mFriendlyName;
     }//getFriendlyName
 
     /**
@@ -1272,7 +1389,7 @@ public class Node{
         public void run() {
         if(mConnection!=null &&  (isConnected() || mState==State.Disconnecting) && !isPairing()) {
             synchronized (mWriteDescQueue) {
-                if(!mWriteDescQueue.isEmpty()) {
+                if(mConnection!=null && !mWriteDescQueue.isEmpty()) {
                     WriteDescCommand command = mWriteDescQueue.peek();
                     BluetoothGattDescriptor desc = command.desc;
                     desc.setValue(command.data);

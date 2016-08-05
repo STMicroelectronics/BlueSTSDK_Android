@@ -32,6 +32,12 @@ import com.st.BlueSTSDK.NodeEmulator;
 
 import java.util.Random;
 
+/**
+ * generate random data for emulate the class {@link FeatureFreeFall}
+ *
+ * @author STMicroelectronics - Central Labs.
+ * @version 1.0
+ */
 public class FeatureRandomFreeFall extends FeatureFreeFall implements NodeEmulator.EmulableFeature {
 
         private Random mRnd = new Random();

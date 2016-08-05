@@ -35,7 +35,7 @@ import com.st.BlueSTSDK.Utils.NumberConversion;
 import java.util.Date;
 
 /**
- * this feature manage the quaternion data in the compact way, in this package the quaternion
+ * This feature manage the quaternion data in the compact way, in this package the quaternion
  * component are encoded using a int16 with  5 decimal values, and sent in group of 2-4 quaternions
  * <p>
  *     the quaternion are normalized, so the sum of the square is 1
@@ -143,7 +143,7 @@ public class FeatureMemsSensorFusionCompact extends FeatureMemsSensorFusion {
     private void notifySample(long timestamp, float qi,float qj,float qk,float qs,byte rawData[]){
         Sample newSample;
         mWriteLock.lock();
-            mLastSample = new Sample(timestamp,new Number[]{qi,qj,qk,qs});
+            mLastSample = new Sample(timestamp,new Number[]{qi,qj,qk,qs},getFieldsDesc());
             newSample = mLastSample;
         mWriteLock.unlock();
         notifyUpdate(newSample);

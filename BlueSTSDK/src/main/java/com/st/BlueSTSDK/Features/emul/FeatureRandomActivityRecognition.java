@@ -35,6 +35,12 @@ import java.nio.ByteOrder;
 import java.util.Date;
 import java.util.Random;
 
+/**
+ * generate random data for emulate the class {@link FeatureActivity}
+ *
+ * @author STMicroelectronics - Central Labs.
+ * @version 1.0
+ */
 public class FeatureRandomActivityRecognition extends FeatureActivity implements NodeEmulator.EmulableFeature {
 
     private Random mRnd = new Random();

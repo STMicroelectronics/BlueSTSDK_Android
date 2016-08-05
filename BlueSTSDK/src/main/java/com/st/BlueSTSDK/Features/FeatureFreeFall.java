@@ -42,7 +42,7 @@ import com.st.BlueSTSDK.Node;
 public class FeatureFreeFall extends Feature {
 
     public static final String FEATURE_NAME="FreeFall";
-    public static final String FEATURE_UNIT = "";
+    public static final String FEATURE_UNIT = null;
     public static final String FEATURE_DATA_NAME = FEATURE_NAME;
     public static final float DATA_MAX = 1;
     public static final float DATA_MIN = 0;
@@ -89,7 +89,7 @@ public class FeatureFreeFall extends Feature {
             throw new IllegalArgumentException("There are no 1 bytes available to read");
         Sample temp = new Feature.Sample(timestamp,new Number[]{
                 data[dataOffset],
-        });
+        },getFieldsDesc());
         return new ExtractResult(temp,1);
     }
 }

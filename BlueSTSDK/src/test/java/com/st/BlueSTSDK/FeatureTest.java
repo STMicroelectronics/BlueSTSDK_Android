@@ -55,7 +55,7 @@ public class FeatureTest {
         @Override
         protected ExtractResult extractData(long timestamp, byte[] data, int dataOffset) {
 
-            return new ExtractResult(new Sample(timestamp, new Number[]{data[dataOffset]}),1);
+            return new ExtractResult(new Sample(timestamp, new Number[]{data[dataOffset]}, new Field[]{}),1);
         }
 
         public int getFeatureListenerSize(){
@@ -176,7 +176,7 @@ public class FeatureTest {
 
         f.update(timestamp, data, 0);
         f.execAllTask();
-        verify(listener).onUpdate(f, new Feature.Sample(timestamp, new Number[]{data[0]}));
+        verify(listener).onUpdate(f, new Feature.Sample(timestamp, new Number[]{data[0]}, new Field[]{}));
     }
 
     @Test
@@ -189,7 +189,7 @@ public class FeatureTest {
 
         f.update(timestamp, data, 0);
 
-        Assert.assertEquals(new Feature.Sample(timestamp, new Number[]{data[0]}),
+        Assert.assertEquals(new Feature.Sample(timestamp, new Number[]{data[0]}, new Field[]{}),
                 f.getSample());
     }
 
@@ -205,7 +205,7 @@ public class FeatureTest {
 
         Feature.Sample s = f.getSample();
 
-        Assert.assertEquals(new Feature.Sample(timestamp, new Number[]{data[0]}),
+        Assert.assertEquals(new Feature.Sample(timestamp, new Number[]{data[0]}, new Field[]{}),
                 s);
 
         s.data[0]=127-s.data[0].byteValue();
@@ -236,40 +236,40 @@ public class FeatureTest {
     @Test
     public void sampleEquals(){
 
-        Feature.Sample s1 = new Feature.Sample(100,new Number[]{1,2,3,4});
+        Feature.Sample s1 = new Feature.Sample(100,new Number[]{1,2,3,4}, new Field[]{});
         Assert.assertEquals(s1, s1);
-        Feature.Sample s2 = new Feature.Sample(100,new Number[]{1,2,3,4});
+        Feature.Sample s2 = new Feature.Sample(100,new Number[]{1,2,3,4}, new Field[]{});
         Assert.assertEquals(s1, s2);
     }
 
     @Test
     public void sampleEqualsTimestamp(){
 
-        Feature.Sample s1 = new Feature.Sample(100,new Number[]{1,2,3,4});
-        Feature.Sample s2 = new Feature.Sample(101,new Number[]{1,2,3,4});
+        Feature.Sample s1 = new Feature.Sample(100,new Number[]{1,2,3,4}, new Field[]{});
+        Feature.Sample s2 = new Feature.Sample(101,new Number[]{1,2,3,4}, new Field[]{});
         Assert.assertNotEquals(s1, s2);
     }
 
     @Test
     public void sampleEqualsData(){
 
-        Feature.Sample s1 = new Feature.Sample(100,new Number[]{1,2,3,4});
-        Feature.Sample s2 = new Feature.Sample(100,new Number[]{1,-2,3,4});
+        Feature.Sample s1 = new Feature.Sample(100,new Number[]{1,2,3,4}, new Field[]{});
+        Feature.Sample s2 = new Feature.Sample(100,new Number[]{1,-2,3,4}, new Field[]{});
         Assert.assertNotEquals(s1,s2);
     }
 
     @Test
     public void sampleEqualsDataLength(){
 
-        Feature.Sample s1 = new Feature.Sample(100,new Number[]{1,2,3,4});
-        Feature.Sample s2 = new Feature.Sample(100,new Number[]{1,2,3});
+        Feature.Sample s1 = new Feature.Sample(100,new Number[]{1,2,3,4}, new Field[]{});
+        Feature.Sample s2 = new Feature.Sample(100,new Number[]{1,2,3}, new Field[]{});
         Assert.assertNotEquals(s1,s2);
     }
 
     @Test
     public void sampleEqualsDiffObj(){
 
-        Feature.Sample s1 = new Feature.Sample(100,new Number[]{1,2,3,4});
+        Feature.Sample s1 = new Feature.Sample(100,new Number[]{1,2,3,4}, new Field[]{});
         Assert.assertNotEquals(s1,new Object());
     }
 

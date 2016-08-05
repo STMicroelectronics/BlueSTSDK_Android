@@ -28,7 +28,7 @@ package com.st.BlueSTSDK.Config;
 
 
 /**
- * class that represent an abstraction of the device Register
+ * Class that represent an abstraction of the device Register
  * <p>
  * The class maintain the information like type, access,
  * address and size for the single register

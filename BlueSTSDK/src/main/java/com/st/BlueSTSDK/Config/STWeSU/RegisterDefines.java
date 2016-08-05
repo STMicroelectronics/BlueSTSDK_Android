@@ -96,11 +96,13 @@ public class RegisterDefines {
         GROUP_B_FEATURE_CTRLS_8000(new Register(0x44, 1, Register.Access.RW, Register.Target.BOTH)),
 
         BLE_DEBUG_CONFIG(new Register(0x45, 1, Register.Access.RW, Register.Target.BOTH)),
-        USB_DEBUG_CONFIG(new Register(0x46, 1, Register.Access.RW, Register.Target.BOTH)),
+        USART_DEBUG_CONFIG(new Register(0x46, 1, Register.Access.RW, Register.Target.BOTH)),
         GROUP_A_CALIBRATION_MAP(new Register(0x47, 1, Register.Access.R, Register.Target.PERSISTENT)),
         GROUP_B_CALIBRATION_MAP(new Register(0x48, 1, Register.Access.R, Register.Target.PERSISTENT)),
         GROUP_A_FEATURES_MAP(new Register(0x49, 1, Register.Access.RW, Register.Target.BOTH)),
         GROUP_B_FEATURES_MAP(new Register(0x4A, 1, Register.Access.RW, Register.Target.BOTH)),
+
+        MAGNETOMETER_CALIBRATION_START(new Register(0x60, 1, Register.Access.RW, Register.Target.PERSISTENT)),
 
         ACCELEROMETER_CONFIG_FS(new Register(0x74, 1, Register.Access.RW, Register.Target.PERSISTENT)),
         ACCELEROMETER_CONFIG_ODR(new Register(0x75, 1, Register.Access.RW, Register.Target.PERSISTENT)),
@@ -108,8 +110,9 @@ public class RegisterDefines {
         GYROSCOPE_CONFIG_ODR(new Register(0x77, 1, Register.Access.RW, Register.Target.PERSISTENT)),
         MAGNETOMETER_CONFIG_FS(new Register(0x78, 1, Register.Access.RW, Register.Target.PERSISTENT)),
         MAGNETOMETER_CONFIG_ODR(new Register(0x79, 1, Register.Access.RW, Register.Target.PERSISTENT)),
-        PRESSURE_CONFIG_FS(new Register(0x7A, 1, Register.Access.R, Register.Target.PERSISTENT)), //Reserved
         PRESSURE_CONFIG_ODR(new Register(0x7B, 1, Register.Access.RW, Register.Target.PERSISTENT)),
+
+        MAGNETOMETER_CALIBRATION_STATUS(new Register(0x8F, 1, Register.Access.R, Register.Target.SESSION)),
 
         RTC_DATE_TIME(new Register(0x90, 4, Register.Access.RW, Register.Target.SESSION)),
 

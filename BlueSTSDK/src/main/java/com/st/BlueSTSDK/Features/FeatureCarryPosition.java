@@ -39,13 +39,13 @@ import com.st.BlueSTSDK.Node;
  */
 public class FeatureCarryPosition extends Feature {
     public static final String FEATURE_NAME = "CarryPosition";
-    public static final String FEATURE_UNIT = "";
+    public static final String FEATURE_UNIT = null;
     public static final String FEATURE_DATA_NAME = "Position";
     public static final float DATA_MAX = 6;
     public static final float DATA_MIN = 0;
 
     /**
-     * enum containing the possible result of the carry position detection
+     * Enum containing the possible result of the carry position detection
      */
     public enum Position {
         /** we don't have enough data for decide */
@@ -125,7 +125,7 @@ public class FeatureCarryPosition extends Feature {
             throw new IllegalArgumentException("There are no 1 byte available to read");
         Sample temp = new Sample(timestamp,new Number[]{
                 data[dataOffset]
-        });
+        },getFieldsDesc());
         return new ExtractResult(temp,1);
     }//extractData
 

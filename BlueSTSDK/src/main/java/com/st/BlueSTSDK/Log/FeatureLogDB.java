@@ -43,7 +43,6 @@ import com.st.BlueSTSDK.Node;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Formatter;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -85,7 +84,7 @@ public class FeatureLogDB extends  FeatureLogBase {
 
     @Override
     public void logFeatureUpdate(Feature feature, byte[] rawData, Feature.Sample data) {
-        mDb.insert(sanitizeFeatureName(feature.getName()),null,
+        mDb.insert(sanitizeString(feature.getName()),null,
                 getFeatureRow(feature, rawData, data));
     }
     /**
@@ -104,24 +103,25 @@ public class FeatureLogDB extends  FeatureLogBase {
         cv.put(NODE_RAW_DATA_COLUMN,rawData);
         int nFeature = fields.length;
         for(int i=0;i<nFeature;i++){
+            String fieldName = sanitizeString(fields[i].getName());
             switch (fields[i].getType()){
                 case Float:
-                    cv.put(fields[i].getName(), sample.data[i].floatValue());
+                    cv.put(fieldName, sample.data[i].floatValue());
                     break;
                 case Int64:
                 case UInt32:
-                    cv.put(fields[i].getName(),sample.data[i].longValue());
+                    cv.put(fieldName,sample.data[i].longValue());
                     break;
                 case Int32:
                 case UInt16:
-                    cv.put(fields[i].getName(),sample.data[i].intValue());
+                    cv.put(fieldName,sample.data[i].intValue());
                     break;
                 case Int16:
                 case UInt8:
-                    cv.put(fields[i].getName(),sample.data[i].shortValue());
+                    cv.put(fieldName,sample.data[i].shortValue());
                     break;
                 case Int8:
-                    cv.put(fields[i].getName(),sample.data[i].byteValue());
+                    cv.put(fieldName,sample.data[i].byteValue());
                     break;
             }//switch
         }//for
@@ -164,7 +164,7 @@ public class FeatureLogDB extends  FeatureLogBase {
      * @param featureName feature name
      * @return feature name containing only letter or number
      */
-    public static String sanitizeFeatureName(String featureName){
+    public static String sanitizeString(String featureName){
         return featureName.replaceAll("\\W","");
     }
     /**
@@ -180,7 +180,7 @@ public class FeatureLogDB extends  FeatureLogBase {
      */
     public static String getFeatureTable(Feature feature){
         StringBuilder sqlTable = new StringBuilder();
-        sqlTable.append("CREATE TABLE ").append(sanitizeFeatureName(feature.getName())).append("(\n");
+        sqlTable.append("CREATE TABLE ").append(sanitizeString(feature.getName())).append("(\n");
         sqlTable.append(BaseColumns._ID).append(" INTEGER PRIMARY KEY AUTOINCREMENT,\n");
         sqlTable.append(HOST_TIMESTAMP_COLUMN).append(" INTEGER NOT NULL,\n");
         sqlTable.append(NODE_NAME_COLUMN).append(" TEXT,\n");
@@ -189,7 +189,7 @@ public class FeatureLogDB extends  FeatureLogBase {
         Field featureDesc[] = feature.getFieldsDesc();
         int nFeature = featureDesc.length;
         for(int i=0;i<nFeature;i++){
-            sqlTable.append(featureDesc[i].getName());
+            sqlTable.append(sanitizeString(featureDesc[i].getName()));
             switch (featureDesc[i].getType()){
                 case Float:
                     sqlTable.append(" REAL NOT NULL");
@@ -247,10 +247,10 @@ public class FeatureLogDB extends  FeatureLogBase {
                 columName.add(NODE_TIMESTAMP_COLUMN);
                 columName.add(NODE_RAW_DATA_COLUMN);
                 for (Field desc: featureDesc){
-                    columName.add(desc.getName());
+                    columName.add(sanitizeString(desc.getName()));
                 }
 
-                Cursor res = db.query(sanitizeFeatureName(f.getName()),
+                Cursor res = db.query(sanitizeString(f.getName()),
                         //all the column + device name
                         columName.toArray(new String[columName.size()]), //select
                         null, null, //where

@@ -149,8 +149,8 @@ public class FeatureAcceleration extends Feature {
                 //y
                 (NumberConversion.LittleEndian.bytesToInt16(data, dataOffset + 2)),
                 //z
-                (NumberConversion.LittleEndian.bytesToInt16(data, dataOffset + 4))
-        });
+                (NumberConversion.LittleEndian.bytesToInt16(data, dataOffset + 4)),
+        },getFieldsDesc());
 
         return new ExtractResult(temp,6);
     }//update
@@ -163,7 +163,7 @@ public class FeatureAcceleration extends Feature {
         Sample sample = mLastSample; //keep a reference for be thread safe
         if(sample==null)
             return super.toString();
-        sb.append(FEATURE_NAME).append(":\n\tTimestamp:").append(sample.timestamp).append('\n');
+        sb.append(FEATURE_NAME).append(":\n\tTimestamp: ").append(sample.timestamp).append('\n');
         Number data[] = sample.data;
         Field dataDesc[] = getFieldsDesc();
         sb.append("\tData: ( ");

@@ -42,14 +42,14 @@ public class TestSensorFusionFunction {
 
     @Test
     public void testInvalidSampleQi(){
-        Feature.Sample s = new Feature.Sample(100,new Number[]{});
+        Feature.Sample s = new Feature.Sample(100,new Number[]{}, new Field[]{});
         Assert.assertEquals(Float.NaN, FeatureMemsSensorFusion.getQi(s), 0.0f);
     }
 
     @Test
     public void testGetSampleQi(){
         float x = 1.0f;
-        Feature.Sample s = new Feature.Sample(100,new Number[]{x});
+        Feature.Sample s = new Feature.Sample(100,new Number[]{x}, new Field[]{});
         Assert.assertEquals(x, FeatureMemsSensorFusion.getQi(s), 0.0f);
     }
 
@@ -60,14 +60,14 @@ public class TestSensorFusionFunction {
 
     @Test
     public void testInvalidSampleQj(){
-        Feature.Sample s = new Feature.Sample(100,new Number[]{0.0f});
+        Feature.Sample s = new Feature.Sample(100,new Number[]{0.0f}, new Field[]{});
         Assert.assertEquals(Float.NaN, FeatureMemsSensorFusion.getQj(s), 0.0f);
     }
 
     @Test
     public void testGetSampleQj(){
         float y = 1.0f;
-        Feature.Sample s = new Feature.Sample(100,new Number[]{0.0f,y});
+        Feature.Sample s = new Feature.Sample(100,new Number[]{0.0f,y}, new Field[]{});
         Assert.assertEquals(y, FeatureMemsSensorFusion.getQj(s), 0.0f);
     }
 
@@ -79,14 +79,14 @@ public class TestSensorFusionFunction {
 
     @Test
     public void testInvalidSampleQk(){
-        Feature.Sample s = new Feature.Sample(100,new Number[]{0.0f,0.0f});
+        Feature.Sample s = new Feature.Sample(100,new Number[]{0.0f,0.0f}, new Field[]{});
         Assert.assertEquals(Float.NaN, FeatureMemsSensorFusion.getQk(s), 0.0f);
     }
 
     @Test
     public void testGetSampleQk(){
         float z = 1.0f;
-        Feature.Sample s = new Feature.Sample(100,new Number[]{0.0f,0.0f,z});
+        Feature.Sample s = new Feature.Sample(100,new Number[]{0.0f,0.0f,z}, new Field[]{});
         Assert.assertEquals(z, FeatureMemsSensorFusion.getQk(s), 0.0f);
     }
 
@@ -97,14 +97,14 @@ public class TestSensorFusionFunction {
 
     @Test
     public void testInvalidSampleQs(){
-        Feature.Sample s = new Feature.Sample(100,new Number[]{0.0f,0.0f,0.0f});
+        Feature.Sample s = new Feature.Sample(100,new Number[]{0.0f,0.0f,0.0f}, new Field[]{});
         Assert.assertEquals(Float.NaN, FeatureMemsSensorFusion.getQs(s), 0.0f);
     }
 
     @Test
     public void testGetSampleQs(){
         float w = 1.0f;
-        Feature.Sample s = new Feature.Sample(100,new Number[]{0.0f,0.0f,0.0f,w});
+        Feature.Sample s = new Feature.Sample(100,new Number[]{0.0f,0.0f,0.0f,w}, new Field[]{});
         Assert.assertEquals(w, FeatureMemsSensorFusion.getQs(s), 0.0f);
     }
 
@@ -161,7 +161,7 @@ public class TestSensorFusionFunction {
 
         Assert.assertEquals(readBytes,16);
 
-        Assert.assertEquals(new Feature.Sample(1, new Float[]{x,y,z,w}),
+        Assert.assertEquals(new Feature.Sample(1, new Float[]{x,y,z,w}, new Field[]{}),
                 f.getSample());
     }
 
@@ -206,7 +206,7 @@ public class TestSensorFusionFunction {
 
         Assert.assertEquals(readBytes,16);
 
-        Assert.assertEquals(new Feature.Sample(1, new Float[]{x,y,z,w}),
+        Assert.assertEquals(new Feature.Sample(1, new Float[]{x,y,z,w}, new Field[]{}),
                 f.getSample());
     }
 
@@ -245,7 +245,7 @@ public class TestSensorFusionFunction {
 
         Assert.assertEquals(readBytes, 12);
 
-        Assert.assertEquals(new Feature.Sample(1, new Float[]{x,y,z,w}),
+        Assert.assertEquals(new Feature.Sample(1, new Float[]{x,y,z,w}, new Field[]{}),
                 f.getSample());
     }
 
@@ -285,7 +285,7 @@ public class TestSensorFusionFunction {
 
         Assert.assertEquals(readBytes, 12);
 
-        Assert.assertEquals(new Feature.Sample(1, new Float[]{x,y,z,w}),
+        Assert.assertEquals(new Feature.Sample(1, new Float[]{x,y,z,w}, new Field[]{}),
                 f.getSample());
     }
 
@@ -330,7 +330,7 @@ public class TestSensorFusionFunction {
         z /= norm;
         w /= norm;
 
-        Assert.assertEquals(new Feature.Sample(1, new Float[]{x,y,z,w}),
+        Assert.assertEquals(new Feature.Sample(1, new Float[]{x,y,z,w}, new Field[]{}),
                 f.getSample());
     }
 

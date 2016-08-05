@@ -42,14 +42,14 @@ public class TestBatteryFeature {
 
     @Test
     public void testInvalidSampleBatteryLevel(){
-        Feature.Sample s = new Feature.Sample(100,new Number[]{});
+        Feature.Sample s = new Feature.Sample(100,new Number[]{}, new Field[]{});
         Assert.assertEquals(Float.NaN, FeatureBattery.getBatteryLevel(s), 0.0f);
     }
 
     @Test
     public void testSampleBatteryLevel(){
         float x = 20.0f;
-        Feature.Sample s = new Feature.Sample(100,new Number[]{x});
+        Feature.Sample s = new Feature.Sample(100,new Number[]{x}, new Field[]{});
         Assert.assertEquals(x, FeatureBattery.getBatteryLevel(s), 0.0f);
     }
 
@@ -60,14 +60,14 @@ public class TestBatteryFeature {
 
     @Test
     public void testInvalidSampleVoltage(){
-        Feature.Sample s = new Feature.Sample(100,new Number[]{0});
+        Feature.Sample s = new Feature.Sample(100,new Number[]{0}, new Field[]{});
         Assert.assertEquals(Float.NaN,FeatureBattery.getVoltage(s),0.0f);
     }
 
     @Test
     public void testGetSampleVoltage(){
         float y = 5.0f;
-        Feature.Sample s = new Feature.Sample(100,new Number[]{0,y});
+        Feature.Sample s = new Feature.Sample(100,new Number[]{0,y}, new Field[]{});
         Assert.assertEquals(y, FeatureBattery.getVoltage(s), 0.0f);
     }
 
@@ -78,14 +78,14 @@ public class TestBatteryFeature {
 
     @Test
     public void testInvalidSampleCurrent(){
-        Feature.Sample s = new Feature.Sample(100,new Number[]{0,0});
+        Feature.Sample s = new Feature.Sample(100,new Number[]{0,0}, new Field[]{});
         Assert.assertEquals(Float.NaN,FeatureBattery.getCurrent(s),0.0f);
     }
 
     @Test
     public void testGetSampleCurrent(){
         float z = 1.0f;
-        Feature.Sample s = new Feature.Sample(100,new Number[]{0,0,z});
+        Feature.Sample s = new Feature.Sample(100,new Number[]{0,0,z}, new Field[]{});
         Assert.assertEquals(z, FeatureBattery.getCurrent(s), 0.0f);
     }
 
@@ -97,7 +97,7 @@ public class TestBatteryFeature {
 
     @Test
     public void testInvalidSampleStatus(){
-        Feature.Sample s = new Feature.Sample(100,new Number[]{0,0,0});
+        Feature.Sample s = new Feature.Sample(100,new Number[]{0,0,0}, new Field[]{});
         Assert.assertEquals(FeatureBattery.BatteryStatus.Error,
                 FeatureBattery.getBatteryStatus(s));
     }
@@ -105,7 +105,7 @@ public class TestBatteryFeature {
     @Test
     public void testGetSampleStatus(){
         int status = 0x03;
-        Feature.Sample s = new Feature.Sample(100,new Number[]{0,0,0,status});
+        Feature.Sample s = new Feature.Sample(100,new Number[]{0,0,0,status}, new Field[]{});
         Assert.assertEquals(FeatureBattery.BatteryStatus.Charging,
                 FeatureBattery.getBatteryStatus(s));
     }
@@ -198,28 +198,28 @@ public class TestBatteryFeature {
     @Test
     public void testStatusValue(){
 
-        Feature.Sample s = new Feature.Sample(100,new Number[]{0,0,0,0x00});
+        Feature.Sample s = new Feature.Sample(100,new Number[]{0,0,0,0x00}, new Field[]{});
         Assert.assertEquals(FeatureBattery.BatteryStatus.LowBattery,
                 FeatureBattery.getBatteryStatus(s));
 
-        s = new Feature.Sample(100,new Number[]{0,0,0,0x01});
+        s = new Feature.Sample(100,new Number[]{0,0,0,0x01}, new Field[]{});
         Assert.assertEquals(FeatureBattery.BatteryStatus.Discharging,
                 FeatureBattery.getBatteryStatus(s));
 
-        s = new Feature.Sample(100,new Number[]{0,0,0,0x02});
+        s = new Feature.Sample(100,new Number[]{0,0,0,0x02}, new Field[]{});
         Assert.assertEquals(FeatureBattery.BatteryStatus.PluggedNotCharging,
                 FeatureBattery.getBatteryStatus(s));
 
-        s = new Feature.Sample(100,new Number[]{0,0,0,0x03});
+        s = new Feature.Sample(100,new Number[]{0,0,0,0x03}, new Field[]{});
         Assert.assertEquals(FeatureBattery.BatteryStatus.Charging,
                 FeatureBattery.getBatteryStatus(s));
 
-        s = new Feature.Sample(100,new Number[]{0,0,0,0xFF});
+        s = new Feature.Sample(100,new Number[]{0,0,0,0xFF}, new Field[]{});
         Assert.assertEquals(FeatureBattery.BatteryStatus.Error,
                 FeatureBattery.getBatteryStatus(s));
 
         //other value are errors
-        s = new Feature.Sample(100,new Number[]{0,0,0,0x12});
+        s = new Feature.Sample(100,new Number[]{0,0,0,0x12}, new Field[]{});
         Assert.assertEquals(FeatureBattery.BatteryStatus.Error,
                 FeatureBattery.getBatteryStatus(s));
     }

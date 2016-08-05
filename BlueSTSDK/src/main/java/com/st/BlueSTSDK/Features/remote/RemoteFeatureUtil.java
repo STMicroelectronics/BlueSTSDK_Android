@@ -84,14 +84,16 @@ public class RemoteFeatureUtil {
     /**
      * Add the remote node id field to an already decoded data sample, the remote node id will be
      * added as last element
+     * @param f feature that generate the data
      * @param remoteSample decoded data sample
      * @param remoteId node that acquired the data
      * @return new sample with the remoteSample data + the remote id
      */
-    public static Feature.Sample appendRemoteId(Feature.Sample remoteSample, int remoteId){
+    public static Feature.Sample appendRemoteId(Feature f, Feature.Sample remoteSample,
+                                                int remoteId){
         Number remoteData[] = Arrays.copyOf(remoteSample.data, remoteSample.data.length + 1);
         remoteData[remoteData.length-1]=remoteId;
-        return new Feature.Sample(remoteSample.timestamp,remoteData);
+        return new Feature.Sample(remoteSample.timestamp,remoteData,f.getFieldsDesc());
     } //appendRemoteId
 
     /**

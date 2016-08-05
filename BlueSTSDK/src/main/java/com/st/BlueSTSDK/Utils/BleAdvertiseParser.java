@@ -77,6 +77,16 @@ public class BleAdvertiseParser {
     private Node.Type mBoardType;
 
     /**
+     * board is in sleeping state
+     */
+    private boolean mBoardSleeping;
+
+    /**
+     * board has general purpose info
+     */
+    private boolean mHasGeneralPurpose;
+
+    /**
      * parse the advertise data
      *
      * @param advertise ble advertise data
@@ -136,11 +146,35 @@ public class BleAdvertiseParser {
         short temp = (short) (nodeType & 0xFF);
         if (temp == 0x01)
             return Node.Type.STEVAL_WESU1;
+        if(temp == 0x02)
+            return Node.Type.SENSOR_TILE;
+        if(temp == 0x03)
+            return Node.Type.BLUE_COIN;
         if (temp >= 0x80 && temp <= 0xff)
             return Node.Type.NUCLEO;
         else // 0 or user defined
             return Node.Type.GENERIC;
 
+    }
+
+    /**
+     * parse the node type field to check if board is sleeping
+     *
+     * @param nodeType node type field
+     * @return boolean false running true is sleeping
+     */
+    private static boolean getNodeSleepingState(byte nodeType) {
+        return( ((nodeType & 0x80) == 0x80)? false : ((nodeType & 0x40) == 0x40));
+    }
+
+    /**
+     * parse the node type field to check if board has generic purpose implemented
+     *
+     * @param nodeType node type field
+     * @return boolean false if the device has Generic purpose servicess and char
+     */
+    private static boolean getHasGenericPurposeFeature(byte nodeType) {
+        return( ((nodeType & 0x80) == 0x80)? false : ((nodeType & 0x20) == 0x20));
     }
 
     /**
@@ -165,8 +199,10 @@ public class BleAdvertiseParser {
                     +VERSION_PROTOCOL_SUPPORTED_MIN + ", " + VERSION_PROTOCOL_SUPPORTED_MAX + "]");
         }
 
-        mDeviceId = advertise[startOffset+1];
+        mDeviceId = (byte)(((advertise[startOffset+1] & 0x80) == 0x80) ? (advertise[startOffset+1] & 0xFF) : (advertise[startOffset+1] & 0x1F));
         mBoardType = getNodeType(mDeviceId);
+        mBoardSleeping = getNodeSleepingState(advertise[startOffset+1]);
+        mHasGeneralPurpose = getHasGenericPurposeFeature(advertise[startOffset+1]);
         mFeatureMap = NumberConversion.BigEndian.bytesToInt32(advertise, startOffset + 2);
 
         if ((length == 13 )) {
@@ -222,6 +258,22 @@ public class BleAdvertiseParser {
         return mBoardType;
     }
 
+    /**
+     * get the sleeping
+     *
+     * @return board Sleeping state
+     */
+    public boolean getBoardSleeping() {
+        return mBoardSleeping;
+    }
+    /**
+     * general purpose available state
+     *
+     * @return return if the general purpose is available
+     */
+    public boolean getBoardHasGP() {
+        return mHasGeneralPurpose;
+    }
     /**
      * get the raw device id data filed
      *

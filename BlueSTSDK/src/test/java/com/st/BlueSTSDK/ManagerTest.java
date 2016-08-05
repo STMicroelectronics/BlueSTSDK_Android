@@ -310,9 +310,9 @@ public class ManagerTest {
 
         Assert.assertEquals(Node.Type.NUCLEO, node.getType());
 
-        Manager.addFeatureToNode((byte) 0x02, featureList);
+        Manager.addFeatureToNode((byte) 0x04, featureList);
 
-        node = buildNodeWithId((byte) 0x02);
+        node = buildNodeWithId((byte) 0x04);
 
         Assert.assertEquals(Node.Type.GENERIC, node.getType());
 

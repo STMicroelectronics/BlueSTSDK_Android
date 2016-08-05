@@ -43,14 +43,14 @@ public class TestAccelerationFeature {
 
     @Test
     public void testInvalidSampleX(){
-        Feature.Sample s = new Feature.Sample(100,new Number[]{});
+        Feature.Sample s = new Feature.Sample(100,new Number[]{}, new Field[]{});
         Assert.assertEquals(Float.NaN, FeatureAcceleration.getAccX(s), 0.0f);
     }
 
     @Test
     public void testGetSampleX(){
         float x = 1.0f;
-        Feature.Sample s = new Feature.Sample(100,new Number[]{x});
+        Feature.Sample s = new Feature.Sample(100,new Number[]{x}, new Field[]{});
         Assert.assertEquals(x, FeatureAcceleration.getAccX(s), 0.0f);
     }
 
@@ -61,14 +61,14 @@ public class TestAccelerationFeature {
 
     @Test
     public void testInvalidSampleY(){
-        Feature.Sample s = new Feature.Sample(100,new Number[]{0});
+        Feature.Sample s = new Feature.Sample(100,new Number[]{0}, new Field[]{});
         Assert.assertEquals(Float.NaN,FeatureAcceleration.getAccY(s),0.0f);
     }
 
     @Test
     public void testGetSampleY(){
         float y = 1.0f;
-        Feature.Sample s = new Feature.Sample(100,new Number[]{0,y});
+        Feature.Sample s = new Feature.Sample(100,new Number[]{0,y}, new Field[]{});
         Assert.assertEquals(y, FeatureAcceleration.getAccY(s), 0.0f);
     }
 
@@ -79,14 +79,14 @@ public class TestAccelerationFeature {
 
     @Test
     public void testInvalidSampleZ(){
-        Feature.Sample s = new Feature.Sample(100,new Number[]{0,0});
+        Feature.Sample s = new Feature.Sample(100,new Number[]{0,0}, new Field[]{});
         Assert.assertEquals(Float.NaN,FeatureAcceleration.getAccZ(s),0.0f);
     }
 
     @Test
     public void testGetSampleZ(){
         float z = 1.0f;
-        Feature.Sample s = new Feature.Sample(100,new Number[]{0,0,z});
+        Feature.Sample s = new Feature.Sample(100,new Number[]{0,0,z}, new Field[]{});
         Assert.assertEquals(z, FeatureAcceleration.getAccZ(s), 0.0f);
     }
 
@@ -126,7 +126,7 @@ public class TestAccelerationFeature {
 
         UpdateFeatureUtil.callUpdate(f, 1, data, 0);
 
-        Assert.assertEquals(new Feature.Sample(1,new Short[]{x,y,z}),
+        Assert.assertEquals(new Feature.Sample(1,new Short[]{x,y,z}, new Field[]{}),
                 f.getSample());
     }
 
@@ -152,7 +152,7 @@ public class TestAccelerationFeature {
 
         UpdateFeatureUtil.callUpdate(f, 2, data, offset);
 
-        Assert.assertEquals(new Feature.Sample(2,new Short[]{x,y,z}),
+        Assert.assertEquals(new Feature.Sample(2,new Short[]{x,y,z}, new Field[]{}),
                 f.getSample());
     }
 

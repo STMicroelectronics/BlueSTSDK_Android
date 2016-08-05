@@ -187,7 +187,7 @@ public class NodeTest {
 
         @Override
         protected ExtractResult extractData(long timestamp, byte[] data, int dataOffset) {
-            return new ExtractResult(new Sample(timestamp,new Number[]{}),0);
+            return new ExtractResult(new Sample(timestamp,new Number[]{}, new Field[]{}),0);
         }
 
         public void execAllTask(){

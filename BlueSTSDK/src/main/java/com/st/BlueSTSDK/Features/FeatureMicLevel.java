@@ -119,6 +119,6 @@ public class FeatureMicLevel extends Feature {
             levels[i]=data[dataOffset+i];
         }//for
 
-        return new ExtractResult(new Sample(timestamp,levels),nMic);
+        return new ExtractResult(new Sample(timestamp,levels,getFieldsDesc()),nMic);
     }//extractData
 }

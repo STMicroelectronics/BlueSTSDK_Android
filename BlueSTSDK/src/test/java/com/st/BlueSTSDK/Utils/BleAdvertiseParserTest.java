@@ -179,7 +179,7 @@ public class BleAdvertiseParserTest {
     @Test(expected= InvalidBleAdvertiseFormat.class)
     public void testInvalidNodeType() throws Exception {
         byte advertise[]  = new byte[]{
-                7,(byte)0xFF,(byte)0x01,(byte)0x03, (byte)0xFF, (byte)0xFF, (byte)0x00, (byte)0x00
+                7,(byte)0xFF,(byte)0x01,(byte)0x10, (byte)0xFF, (byte)0xFF, (byte)0x00, (byte)0x00
         };
         new BleAdvertiseParser(advertise);
     }

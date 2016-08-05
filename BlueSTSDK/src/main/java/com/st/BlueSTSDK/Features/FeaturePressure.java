@@ -98,7 +98,7 @@ public class FeaturePressure extends Feature {
             throw new IllegalArgumentException("There are no 4 bytes available to read");
         Sample temp = new Sample(timestamp,new Number[]{
                 NumberConversion.LittleEndian.bytesToInt32(data, dataOffset)/100.0f
-        });
+        },getFieldsDesc());
         return new ExtractResult(temp,4);
     }//update
 

@@ -41,13 +41,13 @@ import com.st.BlueSTSDK.Node;
 public class FeatureMemsGesture extends Feature {
 
     public static final String FEATURE_NAME = "Gesture";
-    public static final String FEATURE_UNIT = "";
+    public static final String FEATURE_UNIT = null;
     public static final String FEATURE_DATA_NAME = "Gesture";
     public static final short DATA_MAX = 3;
     public static final short DATA_MIN = 0;
 
     /**
-     * enum containing the possible result of the gesture detection
+     * Enum containing the possible result of the gesture detection
      */
     public enum Gesture {
         /** unknown gesture */
@@ -116,7 +116,7 @@ public class FeatureMemsGesture extends Feature {
             throw new IllegalArgumentException("There are no 1 byte available to read");
         Sample temp = new Sample(timestamp,new Number[]{
                 data[dataOffset]
-        });
+        },getFieldsDesc());
         return new ExtractResult(temp,1);
     }//extractData
 
@@ -125,7 +125,7 @@ public class FeatureMemsGesture extends Feature {
         Sample sample = mLastSample;
         if(sample!=null){
             return FEATURE_NAME+":\n"+
-                    "\tTimestamp:"+ sample.timestamp+"\n" +
+                    "\tTimestamp: "+ sample.timestamp+"\n" +
                     "\tGesture: "+ getGesture(sample);
         }else{
             return super.toString();

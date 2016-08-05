@@ -39,7 +39,7 @@ import com.st.BlueSTSDK.Utils.NumberConversion;
 public class FeaturePedometer extends Feature{
 
     public static final String FEATURE_NAME = "Pedometer";
-    public static final String FEATURE_UNIT[] = {"","step/min"};
+    public static final String FEATURE_UNIT[] = {null,"step/min"};
     public static final String FEATURE_DATA_NAME[] ={"Steps","Freq"} ;
     public static final Number DATA_MAX[] = {Integer.MAX_VALUE,Short.MAX_VALUE};
     public static final Number DATA_MIN[] = {0,0};
@@ -115,7 +115,7 @@ public class FeaturePedometer extends Feature{
         Sample temp = new Sample(timestamp, new Number[]{
                 (NumberConversion.LittleEndian.bytesToUInt32(data, dataOffset + 0)),
                 (NumberConversion.LittleEndian.bytesToUInt16(data, dataOffset + 4))
-        });
+        },getFieldsDesc());
 
         return new ExtractResult(temp,6);
     }

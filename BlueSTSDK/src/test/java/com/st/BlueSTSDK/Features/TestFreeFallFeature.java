@@ -41,13 +41,13 @@ public class TestFreeFallFeature {
 
     @Test
     public void testInvalidFreeFallStatus(){
-        Feature.Sample s = new Feature.Sample(100,new Number[]{});
+        Feature.Sample s = new Feature.Sample(100,new Number[]{}, new Field[]{});
         Assert.assertEquals(false, FeatureFreeFall.getFreeFallStatus(s));
     }
 
     @Test
     public void testSampleActivity(){
-        Feature.Sample s = new Feature.Sample(100,new Number[]{1});
+        Feature.Sample s = new Feature.Sample(100,new Number[]{1}, new Field[]{});
         Assert.assertEquals(true, FeatureFreeFall.getFreeFallStatus(s));
     }
 

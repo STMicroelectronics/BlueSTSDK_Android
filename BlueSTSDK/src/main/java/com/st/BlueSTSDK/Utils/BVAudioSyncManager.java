@@ -24,47 +24,44 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  ******************************************************************************/
-package com.st.BlueSTSDK.Features.emul;
+package com.st.BlueSTSDK.Utils;
 
-import com.st.BlueSTSDK.Features.FeatureBattery;
-import com.st.BlueSTSDK.Node;
-import com.st.BlueSTSDK.NodeEmulator;
-import com.st.BlueSTSDK.Utils.NumberConversion;
-
-import java.util.Random;
+import com.st.BlueSTSDK.Feature;
+import com.st.BlueSTSDK.Features.FeatureAudioADPCMSync;
 
 /**
- * generate random data for emulate the class {@link FeatureBattery}
+ * Class containing the sync data needed in a ADPCM stream decoding
  *
  * @author STMicroelectronics - Central Labs.
  * @version 1.0
  */
-public class FeatureRandomBattery extends FeatureBattery implements NodeEmulator.EmulableFeature {
+public class BVAudioSyncManager {
 
-    Random mRandom = new Random();
-    int mCharge =5;
-    public FeatureRandomBattery(Node parent) {
-        super(parent);
+    private boolean intra_flag=false;
+    private short adpcm_index_in=0;
+    private int adpcm_predsample_in=0;
+
+    public boolean isIntra() {
+        return intra_flag;
     }
 
+    public short getAdpcm_index_in() {
+        return adpcm_index_in;
+    }
 
-    @Override
-    public byte[] generateFakeData() {
-        byte data[] = new byte[7];
+    public int getAdpcm_predsample_in() {
+        return adpcm_predsample_in;
+    }
 
-        byte temp[] = NumberConversion.LittleEndian.int16ToBytes((short)(mCharge*10));
-        mCharge = (mCharge+10)%100;
-        System.arraycopy(temp, 0, data, 0, 2);
+    public void reinitResetFlag(){
+        intra_flag = false;
+    }
 
-        temp = NumberConversion.LittleEndian.int16ToBytes((short)(mRandom.nextFloat()*1000));
-        System.arraycopy(temp, 0, data, 2, 2);
-
-        temp = NumberConversion.LittleEndian.int16ToBytes((short)((mRandom.nextFloat()*10)-5));
-        System.arraycopy(temp, 0, data, 4, 2);
-
-        temp = new byte[] {(byte) (mRandom.nextFloat()*4)};
-        System.arraycopy(temp, 0, data, 5, 1);
-
-        return data;
+    public void setSyncParams(Feature.Sample sample){
+        synchronized (this) {
+            adpcm_index_in = FeatureAudioADPCMSync.getIndex(sample);
+            adpcm_predsample_in = FeatureAudioADPCMSync.getPredictedSample(sample);
+            intra_flag = true;
+        }
     }
 }

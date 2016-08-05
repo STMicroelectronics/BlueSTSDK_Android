@@ -91,7 +91,7 @@ public class RemoteFeaturePressure  extends FeaturePressure
 
         ExtractResult tempData = super.extractData(timestamp, data, dataOffset + 2);
 
-        return new ExtractResult(RemoteFeatureUtil.appendRemoteId(tempData.getNewSample(),remoteId),
+        return new ExtractResult(RemoteFeatureUtil.appendRemoteId(this,tempData.getNewSample(),remoteId),
                 2+tempData.getReadBytes());
     }//update
 }

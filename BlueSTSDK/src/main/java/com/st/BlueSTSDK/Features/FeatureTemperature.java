@@ -45,7 +45,7 @@ public class FeatureTemperature extends Feature {
 
     public static final String FEATURE_NAME = "Temperature";
     public static final String FEATURE_UNIT = "\u2103"; // celsius degree
-    public static final String FEATURE_DATA_NAME = "Temp";
+    public static final String FEATURE_DATA_NAME = "Temperature";
     public static final float DATA_MAX = 100;
     public static final float DATA_MIN = 0;
 
@@ -98,7 +98,7 @@ public class FeatureTemperature extends Feature {
             throw new IllegalArgumentException("There are no 2 bytes available to read");
         Sample temp = new Sample(timestamp,new Number[]{
                 NumberConversion.LittleEndian.bytesToInt16(data, dataOffset)/10.0f
-        });
+        },getFieldsDesc());
         return new ExtractResult(temp,2);
     }//update
 }

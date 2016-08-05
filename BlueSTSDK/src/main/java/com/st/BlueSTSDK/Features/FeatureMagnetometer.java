@@ -142,7 +142,7 @@ public class FeatureMagnetometer extends Feature {
                 (NumberConversion.LittleEndian.bytesToInt16(data, dataOffset + 2)),
                 //z
                 (NumberConversion.LittleEndian.bytesToInt16(data, dataOffset + 4))
-        });
+        },getFieldsDesc());
 
         return new ExtractResult(temp,6);
     }
@@ -154,7 +154,7 @@ public class FeatureMagnetometer extends Feature {
         Sample sample = mLastSample;
         if(sample==null)
             return super.toString();
-        sb.append(FEATURE_NAME).append(":\n\tTimestamp:").append(sample.timestamp).append('\n');
+        sb.append(FEATURE_NAME).append(":\n\tTimestamp: ").append(sample.timestamp).append('\n');
         Number data[] = sample.data;
         Field dataDesc[] = getFieldsDesc();
         sb.append("\tData: ( ");
