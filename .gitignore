@@ -30,3 +30,6 @@ proguard/
 #Android Studio
 *.iml
 .idea/
+
+#mac file
+.DS_Store

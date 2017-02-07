@@ -88,7 +88,7 @@ public class FeatureProximityGesture extends Feature {
             //if
         //if
         return Gesture.ERROR;
-    }//getActivityStatus
+    }//getGesture
 
     /**
      * build a proximityGesture feature

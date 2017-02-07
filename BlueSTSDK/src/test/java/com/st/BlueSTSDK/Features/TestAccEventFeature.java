@@ -36,22 +36,22 @@ public class TestAccEventFeature {
     }
 
     @Test
-    public void testNullSampleAccEvent(){
-        Assert.assertEquals(AccelerationEvent.ERROR, FeatureAccelerationEvent
+    public void testNullSampleAccNone(){
+        Assert.assertEquals(FeatureAccelerationEvent.NO_EVENT, FeatureAccelerationEvent
                 .getAccelerationEvent(null));
     }
 
     @Test
     public void testInvalidSampleAccEvent(){
         Feature.Sample s = new Feature.Sample(100,new Number[]{}, new Field[]{});
-        Assert.assertEquals(AccelerationEvent.ERROR, FeatureAccelerationEvent
+        Assert.assertEquals(FeatureAccelerationEvent.NO_EVENT, FeatureAccelerationEvent
                 .getAccelerationEvent(s));
     }
 
     @Test
     public void testGetSampleAccEvent(){
-        Feature.Sample s = new Feature.Sample(100,new Number[]{0x01}, new Field[]{});
-        Assert.assertEquals(AccelerationEvent.ORIENTATION_TOP_RIGHT,
+        Feature.Sample s = new Feature.Sample(100,new Number[]{FeatureAccelerationEvent.FREE_FALL}, new Field[]{});
+        Assert.assertEquals(FeatureAccelerationEvent.FREE_FALL,
                 FeatureAccelerationEvent.getAccelerationEvent(s));
     }
 
@@ -69,8 +69,8 @@ public class TestAccEventFeature {
     @Test
     public void testGetSamplePedometerSteps(){
         int nStep = 1234;
-        Feature.Sample s = new Feature.Sample(100,new Number[]{0x100,nStep}, new Field[]{});
-        Assert.assertEquals(AccelerationEvent.PEDOMETER,
+        Feature.Sample s = new Feature.Sample(100,new Number[]{FeatureAccelerationEvent.PEDOMETER,nStep}, new Field[]{});
+        Assert.assertEquals(FeatureAccelerationEvent.PEDOMETER,
                 FeatureAccelerationEvent.getAccelerationEvent(s));
         Assert.assertEquals(nStep,
                 FeatureAccelerationEvent.getPedometerSteps(s));

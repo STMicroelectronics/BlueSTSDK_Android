@@ -89,7 +89,7 @@ public class FeatureMemsGesture extends Feature {
             //if
         //if sample!=null
         return Gesture.ERROR;
-    }//getActivityStatus
+    }//getGesture
 
     /**
      * build a carry gesture feature

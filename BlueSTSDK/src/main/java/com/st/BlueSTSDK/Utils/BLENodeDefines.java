@@ -36,12 +36,9 @@ import com.st.BlueSTSDK.Features.FeatureAudioADPCM;
 import com.st.BlueSTSDK.Features.FeatureAudioADPCMSync;
 import com.st.BlueSTSDK.Features.FeatureBattery;
 import com.st.BlueSTSDK.Features.FeatureCarryPosition;
+import com.st.BlueSTSDK.Features.FeatureCompass;
 import com.st.BlueSTSDK.Features.FeatureDirectionOfArrival;
 import com.st.BlueSTSDK.Features.FeatureFreeFall;
-import com.st.BlueSTSDK.Features.FeatureSwitch;
-import com.st.BlueSTSDK.Features.FeatureMemsGesture;
-import com.st.BlueSTSDK.Features.FeaturePedometer;
-import com.st.BlueSTSDK.Features.FeatureProximityGesture;
 import com.st.BlueSTSDK.Features.FeatureGyroscope;
 import com.st.BlueSTSDK.Features.FeatureHumidity;
 import com.st.BlueSTSDK.Features.FeatureLuminosity;
@@ -50,6 +47,7 @@ import com.st.BlueSTSDK.Features.FeatureMemsGesture;
 import com.st.BlueSTSDK.Features.FeatureMemsSensorFusion;
 import com.st.BlueSTSDK.Features.FeatureMemsSensorFusionCompact;
 import com.st.BlueSTSDK.Features.FeatureMicLevel;
+import com.st.BlueSTSDK.Features.FeatureMotionIntensity;
 import com.st.BlueSTSDK.Features.FeaturePedometer;
 import com.st.BlueSTSDK.Features.FeaturePressure;
 import com.st.BlueSTSDK.Features.FeatureProximity;
@@ -285,12 +283,8 @@ public class BLENodeDefines {
             STEVAL_WESU1_DeviceFeatures.put(0x00800000, FeatureAcceleration.class);
             STEVAL_WESU1_DeviceFeatures.put(0x00400000, FeatureGyroscope.class);
             STEVAL_WESU1_DeviceFeatures.put(0x00200000, FeatureMagnetometer.class);
-            //STEVAL_WESU1_DeviceFeatures.put(0x00080000, FeatureHumidity.class);
             STEVAL_WESU1_DeviceFeatures.put(0x00040000, FeatureTemperature.class);
             STEVAL_WESU1_DeviceFeatures.put(0x00100000, FeaturePressure.class);
-            //STEVAL_WESU1_DeviceFeatures.put(0x01000000, FeatureLuminosity.class);
-            //STEVAL_WESU1_DeviceFeatures.put(0x02000000, FeatureProximity.class);
-            //STEVAL_WESU1_DeviceFeatures.put(0x04000000, FeatureMicLevel.class);
             STEVAL_WESU1_DeviceFeatures.put(0x00020000, FeatureBattery.class);
             STEVAL_WESU1_DeviceFeatures.put(0x00000400, FeatureAccelerationEvent.class);
             STEVAL_WESU1_DeviceFeatures.put(0x00000200, FeatureFreeFall.class);
@@ -298,13 +292,11 @@ public class BLENodeDefines {
             STEVAL_WESU1_DeviceFeatures.put(0x00000080, FeatureMemsSensorFusion.class);
             STEVAL_WESU1_DeviceFeatures.put(0x00000010, FeatureActivity.class);
             STEVAL_WESU1_DeviceFeatures.put(0x00000008, FeatureCarryPosition.class);
-            //STEVAL_WESU1_DeviceFeatures.put(0x00000004, FeatureProximityGesture.class);
             STEVAL_WESU1_DeviceFeatures.put(0x00000002, FeatureMemsGesture.class);
             STEVAL_WESU1_DeviceFeatures.put(0x00000001, FeaturePedometer.class);
 
             SensorTile_DeviceFeatures.put(0x40000000, FeatureAudioADPCMSync.class);
             SensorTile_DeviceFeatures.put(0x20000000, FeatureSwitch.class);
-            SensorTile_DeviceFeatures.put(0x10000000, FeatureDirectionOfArrival.class);
             SensorTile_DeviceFeatures.put(0x08000000, FeatureAudioADPCM.class);
             SensorTile_DeviceFeatures.put(0x04000000, FeatureMicLevel.class); //1 mic
             SensorTile_DeviceFeatures.put(0x00800000, FeatureAcceleration.class);
@@ -313,11 +305,12 @@ public class BLENodeDefines {
             SensorTile_DeviceFeatures.put(0x00100000, FeaturePressure.class);
             SensorTile_DeviceFeatures.put(0x00080000, FeatureHumidity.class);
             SensorTile_DeviceFeatures.put(0x00040000, FeatureTemperature.class);
+            SensorTile_DeviceFeatures.put(0x00020000, FeatureBattery.class);
             SensorTile_DeviceFeatures.put(0x00010000, FeatureTemperature.class);
             SensorTile_DeviceFeatures.put(0x00000400, FeatureAccelerationEvent.class);
-            SensorTile_DeviceFeatures.put(0x00000200, FeatureFreeFall.class);
             SensorTile_DeviceFeatures.put(0x00000100, FeatureMemsSensorFusionCompact.class);
-            SensorTile_DeviceFeatures.put(0x00000080, FeatureMemsSensorFusion.class);
+            SensorTile_DeviceFeatures.put(0x00000040, FeatureCompass.class);
+            SensorTile_DeviceFeatures.put(0x00000020, FeatureMotionIntensity.class);
             SensorTile_DeviceFeatures.put(0x00000010, FeatureActivity.class);
             SensorTile_DeviceFeatures.put(0x00000008, FeatureCarryPosition.class);
             SensorTile_DeviceFeatures.put(0x00000002, FeatureMemsGesture.class);
@@ -328,20 +321,20 @@ public class BLENodeDefines {
             BlueCoin_DeviceFeatures.put(0x10000000, FeatureDirectionOfArrival.class);
             BlueCoin_DeviceFeatures.put(0x08000000, FeatureAudioADPCM.class);
             BlueCoin_DeviceFeatures.put(0x04000000, FeatureMicLevel.class);//4 microphone
+            BlueCoin_DeviceFeatures.put(0x02000000, FeatureProximity.class);
             BlueCoin_DeviceFeatures.put(0x00800000, FeatureAcceleration.class);
             BlueCoin_DeviceFeatures.put(0x00400000, FeatureGyroscope.class);
             BlueCoin_DeviceFeatures.put(0x00200000, FeatureMagnetometer.class);
             BlueCoin_DeviceFeatures.put(0x00100000, FeaturePressure.class);
             BlueCoin_DeviceFeatures.put(0x00040000, FeatureTemperature.class);
             BlueCoin_DeviceFeatures.put(0x00000400, FeatureAccelerationEvent.class);
-            BlueCoin_DeviceFeatures.put(0x00000200, FeatureFreeFall.class);
             BlueCoin_DeviceFeatures.put(0x00000100, FeatureMemsSensorFusionCompact.class);
-            BlueCoin_DeviceFeatures.put(0x00000080, FeatureMemsSensorFusion.class);
+            BlueCoin_DeviceFeatures.put(0x00000040, FeatureCompass.class);
             BlueCoin_DeviceFeatures.put(0x00000010, FeatureActivity.class);
             BlueCoin_DeviceFeatures.put(0x00000008, FeatureCarryPosition.class);
+            BlueCoin_DeviceFeatures.put(0x00000004, FeatureProximityGesture.class);
             BlueCoin_DeviceFeatures.put(0x00000002, FeatureMemsGesture.class);
             BlueCoin_DeviceFeatures.put(0x00000001, FeaturePedometer.class);
-
 
             Nucleo_Generic_Features.put(0x40000000, FeatureAudioADPCMSync.class);
             Nucleo_Generic_Features.put(0x20000000, FeatureSwitch.class);
@@ -356,12 +349,13 @@ public class BLENodeDefines {
             Nucleo_Generic_Features.put(0x00100000, FeaturePressure.class);
             Nucleo_Generic_Features.put(0x00080000, FeatureHumidity.class);
             Nucleo_Generic_Features.put(0x00040000, FeatureTemperature.class);
-            Nucleo_Generic_Features.put(0x00020000, FeatureBattery.class);
             Nucleo_Generic_Features.put(0x00010000, FeatureTemperature.class);
             Nucleo_Generic_Features.put(0x00000400, FeatureAccelerationEvent.class);
             Nucleo_Generic_Features.put(0x00000200, FeatureFreeFall.class);
             Nucleo_Generic_Features.put(0x00000100, FeatureMemsSensorFusionCompact.class);
             Nucleo_Generic_Features.put(0x00000080, FeatureMemsSensorFusion.class);
+            Nucleo_Generic_Features.put(0x00000040, FeatureCompass.class);
+            Nucleo_Generic_Features.put(0x00000020, FeatureMotionIntensity.class);
             Nucleo_Generic_Features.put(0x00000010, FeatureActivity.class);
             Nucleo_Generic_Features.put(0x00000008, FeatureCarryPosition.class);
             Nucleo_Generic_Features.put(0x00000004, FeatureProximityGesture.class);

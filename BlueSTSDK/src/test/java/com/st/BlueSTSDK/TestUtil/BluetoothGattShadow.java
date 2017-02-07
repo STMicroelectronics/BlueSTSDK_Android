@@ -34,6 +34,7 @@ import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothProfile;
 
+import org.robolectric.Robolectric;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
 import org.robolectric.annotation.RealObject;
@@ -48,6 +49,9 @@ import java.util.Random;
  */
 @Implements(BluetoothGatt.class)
 public class BluetoothGattShadow {
+
+    private static long CALLBACK_DELAY_MS=100;
+
     @RealObject private BluetoothGatt bluetoothGatt;
 
     /**
@@ -71,15 +75,25 @@ public class BluetoothGattShadow {
     @Implementation
     public void disconnect(){
         if(userCallBack!=null)
-            userCallBack.onConnectionStateChange(bluetoothGatt,BluetoothGatt.GATT_SUCCESS,
-                BluetoothProfile.STATE_DISCONNECTED);
+            Robolectric.getBackgroundThreadScheduler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    userCallBack.onConnectionStateChange(bluetoothGatt,BluetoothGatt.GATT_SUCCESS,
+                            BluetoothProfile.STATE_DISCONNECTED);
+                }
+            },CALLBACK_DELAY_MS);
     }
 
     @Implementation
     public  boolean connect(){
         if(userCallBack!=null) {
-            userCallBack.onConnectionStateChange(bluetoothGatt, BluetoothGatt.GATT_SUCCESS,
-                    BluetoothProfile.STATE_CONNECTED);
+            Robolectric.getBackgroundThreadScheduler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    userCallBack.onConnectionStateChange(bluetoothGatt, BluetoothGatt.GATT_SUCCESS,
+                            BluetoothProfile.STATE_CONNECTED);
+                }
+            },CALLBACK_DELAY_MS);
             return true;
         }
         return false;
@@ -88,7 +102,11 @@ public class BluetoothGattShadow {
     @Implementation
     public boolean discoverServices(){
         if(userCallBack!=null) {
-            userCallBack.onServicesDiscovered(bluetoothGatt, BluetoothGatt.GATT_SUCCESS);
+            Robolectric.getBackgroundThreadScheduler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    userCallBack.onServicesDiscovered(bluetoothGatt, BluetoothGatt.GATT_SUCCESS);
+                }},CALLBACK_DELAY_MS);
             return true;
         }else{
             return false;

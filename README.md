@@ -29,11 +29,11 @@ Currently, bits are mapped in the following way:
   
    |Bit|31|30|29|28|27|26|25|24|23|22|21|20|19|18|17|16|
    |:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-   |Feature|RFU|ADPCM Sync|Switch|Direction of arrival|ADPCM Audio|MicLevel|Proximity|Lux|Acc|Gyro|Mag|Pressure|Humidity|Temperature|Battery|Second Temperature|
+   |Feature|RFU|ADPCM Sync|Switch|Direction of arrival|ADPC Audio|MicLevel|Proximity|Lux|Acc|Gyro|Mag|Pressure|Humidity|Temperature|Battery|Second Temperature|
    
    |Bit|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1|0|
    |:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-   |Feature|RFU|RFU|RFU|RFU|RFU|AccEvent|FreeFall|Sensor Fusion Compact|Sensor Fusion|RFU|RFU|Activity|Carry Position|ProximityGesture|MemsGesture|Pedometer|
+   |Feature|RFU|RFU|RFU|RFU|RFU|AccEvent|FreeFall|Sensor Fusion Compact|Sensor Fusion|Compass|Motion Intensity|Activity|Carry Position|ProximityGesture|MemsGesture|Pedometer|
 You can use one of the RFU bits or define a new device and decide how to map the feature. 
 To see how the data is exported by pre-defined features, consult the export method [<code> Feature.ExtractResult Feature.extractData(long,byte[],int)</code>](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Feature.html#extractData-long-byte:A-int-).  within the feature class definition.
 
@@ -181,7 +181,7 @@ Available features can be retrieved from [Features package](https://stmicroelect
     ```Java
     // add the feature to the Nucleo device
     byte deviceId = (byte) 0x80;
-    SparseArray temp = new SparceArray();
+    SparseArray<Class<? extends Feature>> temp = new SparseArray<>();
     // the feature will be mapped in the characteristic 
     // 0x10000000-0001-11e1-ac36-0002a5d5c51b
     temp.append(0x10000000,MyNewFeature.class);
@@ -197,7 +197,7 @@ Available features can be retrieved from [Features package](https://stmicroelect
     Node node=...
     UUIDToFeatureMap map = new UUIDToFeatureMap();
     map.put(UUID.fromString("00002a37-0000-1000-8000-00805f9b34fb"), FeatureHeartRate.class);
-    node.addExternalCharacteristics(map);
+    node.addExternalCharacteristics(map)
     ```
 
 ##Log

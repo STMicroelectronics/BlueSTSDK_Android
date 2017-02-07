@@ -114,6 +114,16 @@ public abstract class Feature {
     protected Field[] mDataDesc;
 
     /**
+     * check if the sample has valid data in the index position
+     * @param s sample to test
+     * @param index index to test
+     * @return true if sample is not null and has a non null value into the index position
+     */
+    protected static boolean hasValidIndex(Sample s, int index){
+        return ((s != null) && (s.data.length > index) && (s.data[index]!=null));
+    }
+
+    /**
      * build a new disabled feature, that doesn't need to be initialized in the node side
      *
      * @param name     name of the feature

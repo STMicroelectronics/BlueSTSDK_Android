@@ -128,6 +128,9 @@ public class DebugConsoleActivity extends AppCompatActivity {
      */
     private static final long SENDING_TIME_OUT_MS = 1000; //ms
 
+    private Debug.DebugOutputListener mConsoleListener;
+
+
     /**
      * create an intent for start the activity that will log the information from the node
      *
@@ -263,7 +266,8 @@ public class DebugConsoleActivity extends AppCompatActivity {
     private void setUpConsoleService(Debug debugService){
         mDebugService=debugService;
         if(mDebugService!=null) {
-            mDebugService.setDebugOutputListener( new UpdateConsole());
+            mConsoleListener = new UpdateConsole();
+            mDebugService.addDebugOutputListener(mConsoleListener);
             DebugConsoleActivity.this.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -303,8 +307,8 @@ public class DebugConsoleActivity extends AppCompatActivity {
     protected void onPause() {
         mNode.removeNodeStateListener(mNodeStateChangeListener);
 
-        if (mDebugService != null)
-            mDebugService.setDebugOutputListener(null);
+        if (mDebugService != null && mConsoleListener!=null)
+            mDebugService.removeDebugOutputListener(mConsoleListener);
 
         super.onPause();
     }//onPause

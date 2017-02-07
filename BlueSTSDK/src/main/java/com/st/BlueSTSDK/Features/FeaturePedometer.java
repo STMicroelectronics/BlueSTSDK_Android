@@ -91,7 +91,7 @@ public class FeaturePedometer extends Feature{
         super(FEATURE_NAME, n,
                 new Field[]{
                         new Field(FEATURE_DATA_NAME[NUMBER_STEPS_INDEX],
-                                FEATURE_UNIT[NUMBER_STEPS_INDEX], Field.Type.Int32,
+                                FEATURE_UNIT[NUMBER_STEPS_INDEX], Field.Type.UInt32,
                                 DATA_MAX[NUMBER_STEPS_INDEX],
                                 DATA_MIN[NUMBER_STEPS_INDEX]),
                         new Field(FEATURE_DATA_NAME[FREQUENCY_STEPS_INDEX],

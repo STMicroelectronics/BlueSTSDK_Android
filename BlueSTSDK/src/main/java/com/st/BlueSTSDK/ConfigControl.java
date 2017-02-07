@@ -48,9 +48,9 @@ import java.util.concurrent.Executors;
 public class ConfigControl {
 
     public interface ConfigControlListener {
-        void onRegisterReadResult(Command cmd, int error);
-        void onRegisterWriteResult(Command cmd, int error);
-        void onRequestResult(Command cmd, boolean success);
+        void onRegisterReadResult(ConfigControl control,Command cmd, int error);
+        void onRegisterWriteResult(ConfigControl control,Command cmd, int error);
+        void onRequestResult(ConfigControl control,Command cmd, boolean success);
     }
 
     /**
@@ -128,8 +128,10 @@ public class ConfigControl {
      * </p>
      * @param characteristic byte read from the register
      */
-    public void characteristicsUpdate(BluetoothGattCharacteristic characteristic) {
+    void characteristicsUpdate(BluetoothGattCharacteristic characteristic) {
         byte [] dataReg = characteristic.getValue();
+        if(dataReg==null)
+            return;
         final Command cmd = new Command( dataReg);
         final boolean readOperation = Register.isReadOperation(dataReg);
         final int error = Register.getError(dataReg);
@@ -139,9 +141,9 @@ public class ConfigControl {
                 @Override
                 public void run() {
                     if (readOperation)
-                        listener.onRegisterReadResult(cmd, error);
+                        listener.onRegisterReadResult(ConfigControl.this,cmd, error);
                     else
-                        listener.onRegisterWriteResult(cmd, error);
+                        listener.onRegisterWriteResult(ConfigControl.this,cmd, error);
                 }//run
             });
         }//for
@@ -157,13 +159,16 @@ public class ConfigControl {
      * @param characteristic that contains the data command sent to the device
      * @param success true if the wrote command is send correctly
      */
-    public void characteristicsWriteUpdate(BluetoothGattCharacteristic characteristic, final boolean success) {
-        final Command cmd = new Command( characteristic.getValue());
+     void characteristicsWriteUpdate(BluetoothGattCharacteristic characteristic, final boolean success) {
+         byte[] dataReg = characteristic.getValue();
+         if(dataReg==null)
+             return;
+        final Command cmd = new Command(dataReg);
         for (final ConfigControlListener listener : mConfigControlListener) {
             sThreadPool.execute(new Runnable() {
                 @Override
                 public void run() {
-                    listener.onRequestResult(cmd, success);
+                    listener.onRequestResult(ConfigControl.this,cmd, success);
                 }//run
             });
         }//for
@@ -174,9 +179,8 @@ public class ConfigControl {
      * @param cmd read command
      */
     public void read(Command cmd ) {
-        if (mRegChar != null && mConnection != null) {
-            mRegChar.setValue(cmd.ToReadPacket());
-            mConnection.writeCharacteristic(mRegChar);
+        if (mRegChar != null && mConnection != null && cmd!=null) {
+            mNode.enqueueCharacteristicsWrite(mRegChar,cmd.ToReadPacket());
         }
     }
 
@@ -185,9 +189,8 @@ public class ConfigControl {
      * @param cmd write command
      */
     public void write(Command cmd ) {
-        if (mRegChar != null && mConnection != null) {
-            mRegChar.setValue(cmd.ToWritePacket());
-            mConnection.writeCharacteristic(mRegChar);
+        if (mRegChar != null && mConnection != null && cmd!=null) {
+            mNode.enqueueCharacteristicsWrite(mRegChar,cmd.ToWritePacket());
         }
     }
 }

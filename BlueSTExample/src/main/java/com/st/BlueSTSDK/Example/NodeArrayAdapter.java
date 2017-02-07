@@ -30,6 +30,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -99,7 +100,7 @@ public class NodeArrayAdapter extends ArrayAdapter<Node> implements Manager.Mana
     void disconnectAllNodes() {
         for (int i = 0; i < getCount(); i++) {
             Node n = getItem(i);
-            if (n.isConnected())
+            if (n!=null && n.isConnected())
                 n.disconnect();
         }//for
     }//disconnectAllNodes
@@ -112,8 +113,9 @@ public class NodeArrayAdapter extends ArrayAdapter<Node> implements Manager.Mana
      * @param parent   group where the view will be stored
      * @return a view that contains the information about the node in position \code{position}
      */
+    @NonNull
     @Override
-    public View getView(int position, View v, ViewGroup parent) {
+    public View getView(int position, View v, @NonNull ViewGroup parent) {
 
         ViewHolderItem viewHolder;
 

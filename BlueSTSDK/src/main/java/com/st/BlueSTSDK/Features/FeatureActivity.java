@@ -49,7 +49,7 @@ import java.util.Locale;
  */
 public class FeatureActivity extends Feature {
 
-    public static final String FEATURE_NAME = "Activity";
+    public static final String FEATURE_NAME = "Activity Recognition";
     public static final String FEATURE_UNIT[] = {null,"ms"};
     public static final String FEATURE_DATA_NAME[] = {"Activity","Date"};
     public static final float DATA_MAX = 6;

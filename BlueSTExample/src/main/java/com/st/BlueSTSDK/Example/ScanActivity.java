@@ -207,6 +207,8 @@ public class ScanActivity extends NodeScanActivity implements AbsListView.OnItem
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         Node n = mAdapter.getItem(position);
+        if(n==null)
+            return;
 
         Intent i = FeatureListActivity.getStartIntent(this, n);
         startActivity(i);

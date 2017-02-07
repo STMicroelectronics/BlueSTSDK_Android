@@ -75,6 +75,7 @@ public class FeatureRandomAccelerationEvent extends FeatureAccelerationEvent imp
         if(mEnabledEvent== DetectableEvent.PEDOMETER)
             return NumberConversion.LittleEndian.int16ToBytes((short)mRandom.nextInt());
         else
-            return new byte[]{0};
+
+            return new byte[]{(byte)mRandom.nextInt(), (byte)mRandom.nextInt(), (byte)mRandom.nextInt() };
     }
 }

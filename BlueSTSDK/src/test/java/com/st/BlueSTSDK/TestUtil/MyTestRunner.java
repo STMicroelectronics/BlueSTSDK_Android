@@ -27,14 +27,17 @@
 
 package com.st.BlueSTSDK.TestUtil;
 
+import android.support.annotation.NonNull;
+
 import org.junit.runners.model.InitializationError;
-import org.robolectric.RobolectricGradleTestRunner;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 import org.robolectric.internal.bytecode.InstrumentationConfiguration;
 
 /**
  * class used for register the custom shadow
  */
-public class MyTestRunner extends RobolectricGradleTestRunner {
+public class MyTestRunner extends RobolectricTestRunner {
 
     private static final Class[] CUSTOM_SHADOW_TARGETS =  new Class[] {
                     BluetoothGattShadow.class,
@@ -45,8 +48,9 @@ public class MyTestRunner extends RobolectricGradleTestRunner {
         super(klass);
     }
 
+    @NonNull
     @Override
-    public InstrumentationConfiguration createClassLoaderConfig() {
+    public InstrumentationConfiguration createClassLoaderConfig(Config config) {
         InstrumentationConfiguration.Builder builder = InstrumentationConfiguration.newBuilder();
         for(Class c : CUSTOM_SHADOW_TARGETS)
             builder.addInstrumentedClass(c.getName());

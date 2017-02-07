@@ -43,7 +43,7 @@ import com.st.BlueSTSDK.Utils.NumberConversion;
  * </ul>
  *
  * @author STMicroelectronics - Central Labs.
- * @version 1.0
+ * @version 1.1
  */
 public class FeatureBattery extends Feature {
 
@@ -66,6 +66,9 @@ public class FeatureBattery extends Feature {
     public static final int CURRENT_INDEX = 2;
     /** index where you can find the status value/description */
     public static final int STATUS_INDEX = 3;
+
+    private static final byte COMMAND_GET_BATTERY_CAPACITY = 0x01;
+    private static final byte COMMAND_GET_MAX_ASSORBED_CURRENT = 0X02;
 
     /**
      * create a feature Battery
@@ -90,10 +93,8 @@ public class FeatureBattery extends Feature {
      * @return percentage of charge inside the battery, or nan if the data are not valid
      */
     public static float getBatteryLevel(Sample s) {
-        if(s!=null)
-            if (s.data.length > PERCENTAGE_INDEX)
-                if (s.data[PERCENTAGE_INDEX] != null)
-                    return s.data[PERCENTAGE_INDEX].floatValue();
+        if(hasValidIndex(s,PERCENTAGE_INDEX))
+            return s.data[PERCENTAGE_INDEX].floatValue();
         //else
         return Float.NaN;
     }//getBatteryLevel
@@ -104,10 +105,8 @@ public class FeatureBattery extends Feature {
      * @return battery voltage , or nan if the data are not valid
      */
     public static float getVoltage(Sample s) {
-        if(s!=null)
-            if (s.data.length > VOLTAGE_INDEX)
-                if (s.data[VOLTAGE_INDEX] != null)
-                    return s.data[VOLTAGE_INDEX].floatValue();
+        if(hasValidIndex(s,VOLTAGE_INDEX))
+            return s.data[VOLTAGE_INDEX].floatValue();
             //else
         return Float.NaN;
     }//getVoltage
@@ -118,10 +117,8 @@ public class FeatureBattery extends Feature {
      * @return current used by the system , or nan if the data are not valid
      */
     public static float getCurrent(Sample s) {
-        if(s!=null)
-            if (s.data.length > CURRENT_INDEX)
-                if (s.data[CURRENT_INDEX] != null)
-                    return s.data[CURRENT_INDEX].floatValue();
+        if(hasValidIndex(s,CURRENT_INDEX))
+            return s.data[CURRENT_INDEX].floatValue();
         //else
         return Float.NaN;
     }//getCurrent
@@ -132,13 +129,10 @@ public class FeatureBattery extends Feature {
      * @return battery status , or Error if data are not valid
      */
     public static BatteryStatus getBatteryStatus(Sample s) {
-        int status = 0xFF;
-        if(s==null)
+        if(!hasValidIndex(s,STATUS_INDEX))
             return BatteryStatus.Error;
 
-        if (s.data.length > STATUS_INDEX)
-            if (s.data[STATUS_INDEX] != null)
-                status = s.data[STATUS_INDEX].byteValue();
+        int status = s.data[STATUS_INDEX].byteValue();
 
         switch (status) {
             case 0x00:
@@ -149,6 +143,8 @@ public class FeatureBattery extends Feature {
                 return BatteryStatus.PluggedNotCharging;
             case 0x03:
                 return BatteryStatus.Charging;
+            case 0x04:
+                return BatteryStatus.Unknown;
             case 0xFF:
                 return BatteryStatus.Error;
             default:
@@ -156,6 +152,24 @@ public class FeatureBattery extends Feature {
         }//switch
     }//getBatteryStatus
 
+
+    /**
+     * the most significative bit in the staus tell us if the current has an high resolution or not
+     * @param status battery status
+     * @return true if the  MSB is 1 -> we use high precision current, false otherwise
+     */
+    private static boolean hasHeightResolutionCurrent(short status){
+        return (status & 0x80)!=0;
+    }
+
+    /***
+     * remove the most MSB for extract only the battery status value
+     * @param status battery status
+     * @return the status with the MSB set to 0
+     */
+    private static byte getBatteryStatus(short status){
+        return (byte)(status & 0x7F);
+    }
 
     /**
      * extract the battery information from 7 byte
@@ -169,16 +183,98 @@ public class FeatureBattery extends Feature {
         if (data.length - dataOffset < 7)
             throw new IllegalArgumentException("There are no 7 bytes available to read");
 
+        short tempStatus = NumberConversion.byteToUInt8(data,dataOffset + 6);
+        float current = NumberConversion.LittleEndian.bytesToInt16(data, dataOffset + 4);
+        if(hasHeightResolutionCurrent(tempStatus))
+            current=current/10;
 
         Sample temp = new Sample(timestamp,new Number[]{
                 (float) NumberConversion.LittleEndian.bytesToInt16(data,dataOffset) / 10.0f,
                 NumberConversion.LittleEndian.bytesToInt16(data,dataOffset + 2) / 1000.0f,
-                NumberConversion.LittleEndian.bytesToInt16(data, dataOffset + 4),
-                data[dataOffset + 6]
+                current,
+                getBatteryStatus(tempStatus)
         },getFieldsDesc());
 
         return new ExtractResult(temp,7);
     }
+
+    /**
+     * Send the command used for read the board battery capacity. The value will be notified with the
+     * callback {@link FeatureBattery.FeatureBatteryListener#onCapacityRead(FeatureBattery, int)}
+     * @return true if the command is correctly sent
+     */
+    public boolean readBatteryCapacity(){
+        return sendCommand(COMMAND_GET_BATTERY_CAPACITY,new byte[]{});
+    }
+
+    /**
+     * Send the command used for read the biggest current assorbed by the system.
+     * The value will be notified with the callback
+     * {@link FeatureBattery.FeatureBatteryListener#onMaxAssorbedCurrentRead(FeatureBattery, float)}
+     * @return true if the command is correctly sent
+     */
+    public boolean readMaxAbsorbedCurrent(){
+        return sendCommand(COMMAND_GET_MAX_ASSORBED_CURRENT,new byte[]{});
+    }
+
+    /**
+     * Notify to all the listener of type FeatureBatteryListener, that the battery capacity was read
+     * @param batteryCapacity battery capacity read from the board
+     */
+    private void notifyBatteryCapacity(final int batteryCapacity) {
+        for (final FeatureListener listener : mFeatureListener) {
+            if (listener instanceof FeatureBatteryListener)
+                sThreadPool.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        ((FeatureBatteryListener) listener).onCapacityRead(FeatureBattery.this,
+                                batteryCapacity);
+                    }//run
+                });
+        }//for
+    }//notifyUpdate
+
+    /**
+     * Notify to all the listener of type FeatureBatteryListener, that the max current was read
+     * @param current max current assorbed by the system
+     */
+    private void notifyMaxAbsorbedCurrent(final float current) {
+        for (final FeatureListener listener : mFeatureListener) {
+            if (listener instanceof FeatureBatteryListener)
+                sThreadPool.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        ((FeatureBatteryListener) listener).onMaxAssorbedCurrentRead(FeatureBattery.this,
+                                current);
+                    }//run
+                });
+        }//for
+    }//notifyUpdate
+
+
+    /**
+     * callback called when we receve an answer to a command
+     * @param timeStamp device time stamp of when the response was send
+     * @param commandType id of the request that the feature did
+     * @param data data attached to the response
+     */
+    @Override
+    protected void parseCommandResponse(int timeStamp, byte commandType, byte[] data) {
+        if(commandType == COMMAND_GET_BATTERY_CAPACITY){
+            int capacity = NumberConversion.LittleEndian.bytesToUInt16(data);
+            notifyBatteryCapacity(capacity);
+            return;
+        }
+
+        if(commandType == COMMAND_GET_MAX_ASSORBED_CURRENT){
+            float current = NumberConversion.LittleEndian.bytesToInt16(data)/10.0f;
+            notifyMaxAbsorbedCurrent(current);
+            return;
+        }
+        //else
+        super.parseCommandResponse(timeStamp,commandType,data);
+    }
+
 
     /**
      * Possible battery status
@@ -193,7 +289,31 @@ public class FeatureBattery extends Feature {
         PluggedNotCharging,
         /** the battery is charging (current is positive */
         Charging,
+        /** unknown status */
+        Unknown,
         /** internal error or not valid status */
         Error
     }
+
+    /**
+     * Listener interface that include the callback for the battery commands
+     */
+    public interface FeatureBatteryListener extends FeatureListener{
+
+        /***
+         * Called when the battery capacity is read
+         * @param featureBattery feature where the data was read
+         * @param batteryCapacity battery capacity in mAh
+         */
+        void onCapacityRead(FeatureBattery featureBattery, int batteryCapacity);
+
+        /**
+         * Called when the max assorbed current is read
+         * @param featureBattery fature where the data was read
+         * @param current max current assorbed by the system, in mA
+         */
+        void onMaxAssorbedCurrentRead(FeatureBattery featureBattery, float current);
+
+    }
+
 }

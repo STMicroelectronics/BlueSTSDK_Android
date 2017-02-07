@@ -38,7 +38,7 @@ import com.st.BlueSTSDK.Node;
  * @version 1.0
  */
 public class FeatureCarryPosition extends Feature {
-    public static final String FEATURE_NAME = "CarryPosition";
+    public static final String FEATURE_NAME = "Carry Position";
     public static final String FEATURE_UNIT = null;
     public static final String FEATURE_DATA_NAME = "Position";
     public static final float DATA_MAX = 6;
@@ -98,7 +98,7 @@ public class FeatureCarryPosition extends Feature {
             //if
         //if sample!=null
         return Position.ERROR;
-    }//getActivityStatus
+    }//getPosition
 
     /**
      * build a carry position feature

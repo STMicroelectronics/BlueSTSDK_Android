@@ -33,11 +33,11 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.RobolectricGradleTestRunner;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
-@RunWith(RobolectricGradleTestRunner.class)
-@Config(constants = BuildConfig.class,manifest = "src/main/AndroidManifest.xml", sdk = 21)
+@RunWith(RobolectricTestRunner.class)
+@Config(constants = BuildConfig.class,manifest = "src/main/AndroidManifest.xml", sdk = 23)
 public class BleAdvertiseParserTest {
 
     @Test

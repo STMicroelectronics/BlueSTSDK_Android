@@ -28,7 +28,9 @@ package com.st.BlueSTSDK.Config.STWeSU;
 
 import android.support.annotation.Nullable;
 
+import com.st.BlueSTSDK.Config.Command;
 import com.st.BlueSTSDK.Config.Register;
+import com.st.BlueSTSDK.Utils.FwVersion;
 
 /**
  * This class help to get list of Registers available for The BlueST devices
@@ -101,6 +103,7 @@ public class RegisterDefines {
         GROUP_B_CALIBRATION_MAP(new Register(0x48, 1, Register.Access.R, Register.Target.PERSISTENT)),
         GROUP_A_FEATURES_MAP(new Register(0x49, 1, Register.Access.RW, Register.Target.BOTH)),
         GROUP_B_FEATURES_MAP(new Register(0x4A, 1, Register.Access.RW, Register.Target.BOTH)),
+        BLUENRG_INFO(new Register(0x4C, 2, Register.Access.R, Register.Target.SESSION)),
 
         MAGNETOMETER_CALIBRATION_START(new Register(0x60, 1, Register.Access.RW, Register.Target.PERSISTENT)),
 
@@ -110,9 +113,12 @@ public class RegisterDefines {
         GYROSCOPE_CONFIG_ODR(new Register(0x77, 1, Register.Access.RW, Register.Target.PERSISTENT)),
         MAGNETOMETER_CONFIG_FS(new Register(0x78, 1, Register.Access.RW, Register.Target.PERSISTENT)),
         MAGNETOMETER_CONFIG_ODR(new Register(0x79, 1, Register.Access.RW, Register.Target.PERSISTENT)),
+        ACC_EVENT_CONFIG(new Register(0x7A, 1, Register.Access.RW, Register.Target.BOTH)),
         PRESSURE_CONFIG_ODR(new Register(0x7B, 1, Register.Access.RW, Register.Target.PERSISTENT)),
 
-        MAGNETOMETER_CALIBRATION_STATUS(new Register(0x8F, 1, Register.Access.R, Register.Target.SESSION)),
+        MOTION_FX_CALIBRATION_LIC_STATUS(new Register(0x8C, 2, Register.Access.R, Register.Target.SESSION)),
+        MOTION_AR_VALUE_LIC_STATUS(new Register(0x8D, 2, Register.Access.R, Register.Target.SESSION)),
+        MOTION_CP_VALUE_LIC_STATUS(new Register(0x8E, 2, Register.Access.R, Register.Target.SESSION)),
 
         RTC_DATE_TIME(new Register(0x90, 4, Register.Access.RW, Register.Target.SESSION)),
 
@@ -202,6 +208,17 @@ public class RegisterDefines {
         public int getValue(){return offModeValue; }
 
         PowerOffModes(int nVal){offModeValue = nVal;}
-
     }
+
+
+    public static class FwVersionWesu extends FwVersion{
+        public FwVersionWesu(Command fwVersionAnswer){
+            super(
+                    ((fwVersionAnswer.getData()[1] >> 4) & 0x0F),
+                    ((fwVersionAnswer.getData()[1]) & 0x0F),
+                    (fwVersionAnswer.getData()[0] & 0xFF)
+            );
+        }
+    }
+
 }

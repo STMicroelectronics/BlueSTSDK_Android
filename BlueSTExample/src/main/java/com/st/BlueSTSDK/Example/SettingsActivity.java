@@ -115,10 +115,7 @@ public class SettingsActivity extends PreferenceActivity {
     /**
      * in case of small screen this activity will be recreate for show a new fragment with the
      * selected options, we propagate the useful information to the fragment
-     * @param fragmentName
-     * @param args
-     * @param titleRes
-     * @param shortTitleRes
+
      * @return intent that will re start the the activity with the proper fragment
      */
     @Override
@@ -160,34 +157,4 @@ public class SettingsActivity extends PreferenceActivity {
         super.onBackPressed();
     }
 
-    /**
-     * if not already instantiate it instantiate a new fragment that will contain the node
-     * @return fragment that will survive to the activity configuration change, and will contain
-     * the node
-     */
-    /*
-    @Override
-    public NodeContainerFragment instantiateNodeContainer(){
-        if(mNodeContainer==null){
-            initializeNodeContainer();
-        }//if
-        return mNodeContainer;
-    }
-*/
-    /**
-     * the connection start when the NodeContainerFragment is created, the NodeContainerFragment
-     * is created when is added to the activity
-     */
-  /*  @Override
-    public void createNodeContainer() {
-        //if the activity is not already added to the activity
-        Fragment temp = getFragmentManager()
-                .findFragmentByTag(NODE_FRAGMENT);
-        //we add it -> start the connection with the node
-        if(temp==null)
-            getFragmentManager().beginTransaction()
-                    .add(mNodeContainer,NODE_FRAGMENT)
-                    .commit();
-    }
-*/
 }

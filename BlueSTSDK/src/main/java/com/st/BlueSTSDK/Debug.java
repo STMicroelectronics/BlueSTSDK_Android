@@ -29,6 +29,9 @@ package com.st.BlueSTSDK;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v7.app.ActionBar;
 import android.util.Log;
 
 import com.st.BlueSTSDK.Utils.BLENodeDefines;
@@ -36,6 +39,7 @@ import com.st.BlueSTSDK.Utils.BLENodeDefines;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Class used for write and read from the debug console
@@ -66,7 +70,8 @@ public class Debug {
     /**
      * class where the notify that we receive a new data
      */
-    private DebugOutputListener mListener;
+    private final CopyOnWriteArrayList<DebugOutputListener> mListener = new CopyOnWriteArrayList<>();
+
     /**
      * Max size of string to sent in the input char
      */
@@ -139,6 +144,26 @@ public class Debug {
         return byteToSend;
     }
 
+    public void addDebugOutputListener(@Nullable DebugOutputListener listener){
+        if(listener==null)
+            return;
+        mListener.addIfAbsent(listener);
+        if(mListener.size()==1){
+            mNode.changeNotificationStatus(mTermChar, true);
+            mNode.changeNotificationStatus(mErrChar, true);
+        }
+    }
+
+    public void removeDebugOutputListener(@Nullable DebugOutputListener listener){
+        if(listener==null)
+            return;
+        mListener.remove(listener);
+        if(mListener.isEmpty()){
+            mNode.changeNotificationStatus(mTermChar, false);
+            mNode.changeNotificationStatus(mErrChar, false);
+        }
+    }
+
     /**
      * set the output listener, only one listener can be set in this class
      * <p>
@@ -147,13 +172,9 @@ public class Debug {
      *
      * @param listener class with the callback when something appear in the debug console
      */
-    public void setDebugOutputListener(DebugOutputListener listener) {
-        if(mListener==listener)
-            return;
-        mListener = listener;
-        boolean enable = mListener != null;
-        mNode.changeNotificationStatus(mTermChar, enable);
-        mNode.changeNotificationStatus(mErrChar, enable);
+    @Deprecated
+    public void setDebugOutputListener(@NonNull DebugOutputListener listener) {
+        addDebugOutputListener(listener);
     }
 
     private String encodeMessageString(byte[] value){
@@ -168,7 +189,7 @@ public class Debug {
      * @param characteristic characteristic that has been updated
      */
     void receiveCharacteristicsUpdate(final BluetoothGattCharacteristic characteristic) {
-        if (mListener == null)
+        if (mListener.isEmpty())
             return;
         UUID charUuid = characteristic.getUuid();
         final String msg = encodeMessageString(characteristic.getValue());
@@ -177,8 +198,8 @@ public class Debug {
             mNotifyThread.post(new Runnable() {
                 @Override
                 public void run() {
-                    if(mListener!=null)
-                        mListener.onStdErrReceived(Debug.this, msg);
+                for(DebugOutputListener listener : mListener)
+                    listener.onStdErrReceived(Debug.this, msg);
                 }
             });
 
@@ -187,8 +208,8 @@ public class Debug {
             mNotifyThread.post(new Runnable() {
                 @Override
                 public void run() {
-                    if(mListener!=null)
-                        mListener.onStdOutReceived(Debug.this, msg);
+                for(DebugOutputListener listener : mListener)
+                    listener.onStdOutReceived(Debug.this, msg);
                 }
             });
         }//if-else-if
@@ -202,28 +223,27 @@ public class Debug {
      */
     void receiveCharacteristicsWriteUpdate(final BluetoothGattCharacteristic characteristic,
                                            final boolean status) {
-        if (mListener == null)
+        if (mListener.isEmpty())
             return;
         UUID charUuid = characteristic.getUuid();
+
         if (charUuid.equals(BLENodeDefines.Services.Debug.DEBUG_TERM_UUID)) {
             final String str = encodeMessageString(characteristic.getValue());
             if(str.length()>MAX_STRING_SIZE_TO_SENT) {
                 mNotifyThread.post(new Runnable() {
                     @Override
                     public void run() {
-                        if (mListener == null)
-                            return;
-                        mListener.onStdInSent(Debug.this,
-                                str.substring(0,MAX_STRING_SIZE_TO_SENT), status);
+                    final String msg = str.substring(0,MAX_STRING_SIZE_TO_SENT);
+                    for(DebugOutputListener listener : mListener)
+                        listener.onStdInSent(Debug.this, msg, status);
                     }
                 });
             }else {
                 mNotifyThread.post(new Runnable() {
                     @Override
                     public void run() {
-                        if (mListener == null)
-                            return;
-                        mListener.onStdInSent(Debug.this, str, status);
+                    for(DebugOutputListener listener : mListener)
+                        listener.onStdInSent(Debug.this, str, status);
                     }
                 });
             }//if-else

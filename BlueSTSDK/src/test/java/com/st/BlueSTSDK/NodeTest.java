@@ -67,7 +67,7 @@ import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
 @RunWith(MyTestRunner.class)
-@Config(constants = BuildConfig.class,manifest = "src/main/AndroidManifest.xml", sdk = 21,
+@Config(constants = BuildConfig.class,manifest = "src/main/AndroidManifest.xml", sdk = 23,
     shadows = {BluetoothGattShadow.class, BluetoothDeviceShadow.class})
 public class NodeTest {
 

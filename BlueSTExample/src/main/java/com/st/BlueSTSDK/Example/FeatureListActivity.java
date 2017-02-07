@@ -269,6 +269,8 @@ public class FeatureListActivity extends AppCompatActivity implements AdapterVie
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
         Feature selectedFeature = mFeatureListAdapter.getItem(position);
+        if(selectedFeature==null)
+            return;
 
         if (mNode.isEnableNotification(selectedFeature)) {
 
@@ -294,15 +296,16 @@ public class FeatureListActivity extends AppCompatActivity implements AdapterVie
         /**
          * @see ArrayAdapter#ArrayAdapter(Context, int)
          */
-        public FeatureAdapter(Context c, int resourceId) {
+        FeatureAdapter(Context c, int resourceId) {
             super(c, resourceId);
         }
 
         /**
          * create a text view and initialize it with the equivalent feature name
          */
+        @NonNull
         @Override
-        public View getView(int position, View v, ViewGroup parent) {
+        public View getView(int position, View v, @NonNull ViewGroup parent) {
 
             if (v == null) {
                 LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -311,7 +314,8 @@ public class FeatureListActivity extends AppCompatActivity implements AdapterVie
 
             Feature f = getItem(position);
 
-            ((TextView) v).setText(f.getName());
+            if(f!=null)
+                ((TextView) v).setText(f.getName());
 
             return v;
 
@@ -332,7 +336,7 @@ public class FeatureListActivity extends AppCompatActivity implements AdapterVie
         /**
          * @param text text view that will show the name/values
          */
-        public GenericFragmentUpdate(TextView text) {
+        GenericFragmentUpdate(TextView text) {
             mTextView = text;
         }//GenericFragmentUpdate
 

@@ -1034,7 +1034,7 @@ public class Node{
     }//connect
 
     public void connect(Context c,boolean resetCache){
-        connect(c, false,null);
+        connect(c, resetCache,null);
     }//connect
 
     /**
@@ -1137,8 +1137,6 @@ public class Node{
         return mAdvertise.getBoardType();
     }//getType
 
-    public short getTypeId(){return mAdvertise.getDeviceId();}//getTypeId
-
     /**
      * node sleeping state
      * @return false running, true device is sleeping
@@ -1154,6 +1152,8 @@ public class Node{
     public boolean hasGeneralPurpose(){
         return mAdvertise.getBoardHasGP();
     }//getType
+
+    public short getTypeId(){return mAdvertise.getDeviceId();}//getTypeId
 
     /**
      * tell if the node is connected
@@ -1468,9 +1468,10 @@ public class Node{
      */
     private void dequeueCharacteristicsWrite(final WriteCharCommand writeOp){
         synchronized (mCharacteristicWriteQueue){
-            if(!mCharacteristicWriteQueue.contains(writeOp))
-                return;
-            mCharacteristicWriteQueue.remove(writeOp);
+            if(mCharacteristicWriteQueue.contains(writeOp))
+                mCharacteristicWriteQueue.remove(writeOp);
+            else
+                Log.d(TAG,"Characteristics write not found: "+writeOp.characteristic.getUuid()+" Data: "+Arrays.toString(writeOp.data));
             //if there still element in the queue, start write the head
             if(!mCharacteristicWriteQueue.isEmpty()) {
                 mBleThread.post(mWriteFeatureCommandTask);
@@ -1506,6 +1507,27 @@ public class Node{
             return false;
     }
 
+
+    /**
+     * check that all the other feature exported by the characteristics aren't in notification mode
+     * @param characteristic characteristic that export the feature
+     * @param currentFeature feature that we want to disable
+     * @return true if we can disable the notification without disturb other feature
+     */
+    private boolean characteristicsHasOtherEnabledFeatures(BluetoothGattCharacteristic characteristic,
+                                                           Feature currentFeature){
+        List<Feature> features = mCharFeatureMap.get(characteristic);
+        if(features.size()==1)
+            return false;
+        for(Feature f: features){
+            if(f == currentFeature)
+                break;
+            if(isEnableNotification(f))
+                return true;
+        }//for
+        return false;
+    }
+
     /**
      * unsubscribe the notification for the node update of the feature
      * @param feature feature that you want stop to be notify
@@ -1517,7 +1539,11 @@ public class Node{
         BluetoothGattCharacteristic featureChar =getCorrespondingChar(feature);
         if(charCanBeNotify(featureChar)) {
             mNotifyFeature.remove(feature);
-            return changeNotificationStatus(getCorrespondingChar(feature),false);
+            //other things are send using that characateristic, so we don't have to
+            //disable it
+            if(characteristicsHasOtherEnabledFeatures(featureChar,feature))
+                return true;
+            return changeNotificationStatus(featureChar,false);
         }//
         return false;
     }//disableNotification
@@ -1691,6 +1717,15 @@ public class Node{
         return calibPackage;
     }
 
+
+    private int extractFeatureMask(Feature f){
+        SparseArray<Class<? extends Feature>> decoder = Manager.sFeatureMapDecoder
+                .get(mAdvertise.getDeviceId());
+        int index = decoder.indexOfValue(f.getClass());
+        return decoder.keyAt(index);
+
+    }
+
     /**
      * Send a command to a feature, the command will be write into the
      * {@link com.st.BlueSTSDK.Utils.BLENodeDefines.Services.Config#FEATURE_COMMAND_UUID}
@@ -1715,8 +1750,9 @@ public class Node{
         if (writeTo == null || characteristic == null || !charCanBeWrite(writeTo))
             return false;
 
+
         if(writeTo==mFeatureCommand) {
-            int mask = BLENodeDefines.FeatureCharacteristics.extractFeatureMask(characteristic.getUuid());
+            int mask = extractFeatureMask(feature);
             enqueueCharacteristicsWrite(
                     new WriteCharCommand(mFeatureCommand, packageCommandData(mask, type, data)));
         }else{ //fail back write directly to the feature characteristics

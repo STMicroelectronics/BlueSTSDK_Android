@@ -168,8 +168,6 @@ public class DevicePreferenceFragment extends PreferenceFragment {
                             mConfigService.write(cmd);
 
                         }
-                    } else {
-
                     }
                 }
                 return false;
@@ -240,7 +238,7 @@ public class DevicePreferenceFragment extends PreferenceFragment {
     }
     private ConfigControl.ConfigControlListener configControl = new ConfigControl.ConfigControlListener() {
         @Override
-        public void onRegisterReadResult(Command cmd, int error) {
+        public void onRegisterReadResult(ConfigControl config,Command cmd, int error) {
             if (error == 0) {
                 if (cmd.getRegister().equals(RegisterDefines.RegistersName.FW_VER.getRegister())) {
                     String strVer = String.format("Version: %X.%X.%02X",
@@ -271,14 +269,14 @@ public class DevicePreferenceFragment extends PreferenceFragment {
         }
 
         @Override
-        public void onRegisterWriteResult(Command cmd, int error) {
+        public void onRegisterWriteResult(ConfigControl config,Command cmd, int error) {
             if (error == 0)
                 mConfigService.read(cmd);
 
         }
 
         @Override
-        public void onRequestResult(Command cmd, boolean success) {
+        public void onRequestResult(ConfigControl config,Command cmd, boolean success) {
 
         }
 
