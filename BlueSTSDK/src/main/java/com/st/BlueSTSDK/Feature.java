@@ -76,10 +76,6 @@ public abstract class Feature {
      */
     private final ReentrantReadWriteLock mRwLock = new ReentrantReadWriteLock();
     /**
-     * lock to use before read a data
-     */
-    private final ReentrantReadWriteLock.ReadLock mReadLock = mRwLock.readLock();
-    /**
      * lock to acquire before change the data
      */
     protected final ReentrantReadWriteLock.WriteLock mWriteLock = mRwLock.writeLock();

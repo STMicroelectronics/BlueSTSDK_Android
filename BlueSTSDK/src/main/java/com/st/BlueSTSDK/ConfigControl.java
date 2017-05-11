@@ -159,8 +159,7 @@ public class ConfigControl {
      * @param characteristic that contains the data command sent to the device
      * @param success true if the wrote command is send correctly
      */
-     void characteristicsWriteUpdate(BluetoothGattCharacteristic characteristic, final boolean success) {
-         byte[] dataReg = characteristic.getValue();
+     void characteristicsWriteUpdate(BluetoothGattCharacteristic characteristic,byte dataReg[], final boolean success) {
          if(dataReg==null)
              return;
         final Command cmd = new Command(dataReg);

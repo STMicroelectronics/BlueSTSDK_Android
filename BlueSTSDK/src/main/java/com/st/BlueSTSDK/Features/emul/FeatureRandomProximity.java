@@ -50,7 +50,7 @@ public class FeatureRandomProximity extends FeatureProximity implements NodeEmul
     @Override
     public byte[] generateFakeData() {
 
-        float delta = DATA_MAX - DATA_MIN;
+        float delta = LOW_RANGE_DATA_MAX - DATA_MIN;
 
         short rndData = (short) ((DATA_MIN + delta * mRnd.nextFloat()));
         return NumberConversion.LittleEndian.int16ToBytes(rndData);

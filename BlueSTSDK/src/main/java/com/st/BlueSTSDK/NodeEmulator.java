@@ -67,8 +67,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /** This class represents a node that don't used a ble connection for extract the data but generate
  * fake data.
  * <p>
- *     The feature exported by this node must implement the interface {@link com.st.BlueSTSDK
- *     .NodeEmulator.EmulableFeature}.
+ *     The feature exported by this node must implement the interface {@link com.st.BlueSTSDK.NodeEmulator.EmulableFeature}.
  * </p>
  * <p>
  *     The class will generate a new feature value each 1000ms
@@ -80,8 +79,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class NodeEmulator extends Node {
 
     /**
-     * list of class that implement the interface {@link com.st.BlueSTSDK
-     *     .NodeEmulator.EmulableFeature} and that will be exported by this node
+     * list of class that implement the interface {@link com.st.BlueSTSDK.NodeEmulator.EmulableFeature}
+     *  and that will be exported by this node
      */
     @SuppressWarnings("uncheked")
     public final static Class<? extends Feature> DEFAULT_EMULATED_FEATURE[] = new

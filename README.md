@@ -1,10 +1,10 @@
-#BlueST SDK
+# BlueST SDK
 
 BlueST is a multi-platform library (Android and iOS supported) that permits easy access to the data exported by a Bluetooth Low Energy (BLE) device that implements the BlueST protocol.
 
-##BlueST Protocol
+## BlueST Protocol
 
-###Advertise
+### Advertise
 The library will show only the device that has a vendor-specific field formatted in the following way:
 
 |Length|  1       |1           | 1                |1          | 4              | 6        |
@@ -72,14 +72,14 @@ For this type of feature the characteristic data format must be:
 |  Name  |  NodeID   | Remote timestamp | Feature Data  | ..... |
 
 
-###Special Services
-####[Debug](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Debug.html)
+### Special Services
+#### [Debug](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Debug.html)
 If available, the debug service must have the UUID <code>0000000-0000E-11e1-9ab4-0002a5d5c51b</code> and will contains 2 characteristics:
 
 - <code>00000001-000E-11e1-ac36-0002a5d5c51b</code> (Notify/Write) is used to send string commands to the board and to notify the user of the result.
 - <code>00000002-000E-11e1-ac36-0002a5d5c51b</code> (Notify) is used by the board to notify the user of an error message.
 
-####Configuration
+#### Configuration
 If available, the configuration service must have the UUID <code>00000000-000F-11e1-9ab4-0002a5d5c51b</code> and will contain 2 characteristics:
 
 - <code>00000002-000F-11e1-ac36-0002a5d5c51b</code> (Notify/Write): it can be used to send command/data to a specific feature.
@@ -107,17 +107,17 @@ If available, the configuration service must have the UUID <code>00000000-000F-1
 - <code>00000001-000F-11e1-ac36-0002a5d5c51b</code> (Read/Write/Notify): if available it is used to access the board configuration register that can be modified using the [ConfigControl](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/ConfigControl.html) class.
 
 
-###Example
+### Example
 The ST Bluemicrosystem1,ST Bluemicrosystem2, ST Bluemicrosystem3 and ST Sensor Tile firmware
 implements this protocol, you can find the projects source here: [Bluemicrosystem](http://www.st
 .com/bluemicrosystem)
 
-##How to install the library
-###As an external library
+## How to install the library
+### As an external library
 1. Clone the repository
 2. Add the BlueSTSDK directory as a submodule of your project: File->Import Module
 
-###As a git submodule
+### As a git submodule
 1. Add the repository as a submodule:
   
   ```Shell
@@ -126,16 +126,16 @@ implements this protocol, you can find the projects source here: [Bluemicrosyste
 2. Add the SDK as a project submodule in the *settings.gradle* file, adding the line:
 <pre>include ':BlueSTSDK:BlueSTSDK'</pre>
 
-##Main library actors
+## Main library actors
 
-###[Manager](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Manager.html)
+### [Manager](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Manager.html)
 This is a singleton class that starts/stops the discovery process and stores the retrieved nodes.
 Before starting the scanning process, it is also possible to define a new deviceId and to register/add new features to already-defined devices
 
 The Manager will notify a node discovery through the [<code>Manager.ManagerListener</code>](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Manager.ManagerListener.html) class.
 Note that each callback is performed asynchronously by a background thread.
 
-###[Node](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Node.html)
+### [Node](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Node.html)
 This class represents a remote device.
 
 From this class you can recover what features are exported by a node and read/write data from/to the device.
@@ -155,7 +155,7 @@ A node can be in one of following states:
 Note that each callback is performed asynchronously by a background thread.
 
 
-###[Feature](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Feature.html)
+### [Feature](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Feature.html)
 This class represents data exported by the node.
 
 Each Feature has an array of  [<code>Field</code>](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Features/Field.html) that describes the data exported.
@@ -168,7 +168,7 @@ Note that each callback is performed asynchronously by a background thread.
 
 Available features can be retrieved from [Features package](https://stmicroelectronics-centrallabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Features/package-summary.html).
 
-####How to add a new Feature
+#### How to add a new Feature
 
  1. Extend the class Feature: 
     1.	Create an array of [<code>Feature.Field</code>](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Features/Field.html) that will describe the data exported by the new feature
@@ -200,7 +200,7 @@ Available features can be retrieved from [Features package](https://stmicroelect
     node.addExternalCharacteristics(map)
     ```
 
-##Log
+## Log
 The SDK defines some class that will log the feature data.
 Using the class [FeatureLogCSVFile](https://stmicroelectronics-centrallabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Log/FeatureLogCSVFile.html) each feature will have its file, and the data logged will be:
 - Node address (on Android) or name (on iOS)
@@ -208,12 +208,12 @@ Using the class [FeatureLogCSVFile](https://stmicroelectronics-centrallabs.githu
 - RawData, the data received by the feature extractData method
 - one colunm for each data extracted by the feature
 
-##Docs
+## Docs
 You can find the documentation at this link: [JavaDoc](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc)
 
 
 
-##License
+## License
 COPYRIGHT(c) 2015 STMicroelectronics
 
  Redistribution and use in source and binary forms, with or without modification,

@@ -150,7 +150,7 @@ public class FeatureLogDB extends  FeatureLogBase {
     private List<Feature> getAllFeatures()
     {
 
-        List<Feature> feat = new ArrayList<Feature>();
+        List<Feature> feat = new ArrayList<>();
         for(Node n : mNodeList) {
             for(Feature f:n.getFeatures()) {
                 if(!isAvailable(f, feat))

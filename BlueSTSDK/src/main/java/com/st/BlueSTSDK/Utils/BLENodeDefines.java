@@ -122,7 +122,7 @@ public class BLENodeDefines {
             /**
              * service UUID
              */
-            public final static UUID DEBUG_SERVICE_UUID = UUID.fromString("0000000-000E" +
+            public final static UUID DEBUG_SERVICE_UUID = UUID.fromString("00000000-000E" +
                     COMMON_UUID_SERVICES);
 
             /**
@@ -166,7 +166,7 @@ public class BLENodeDefines {
             /**
              * Service uuid
              */
-            public final static UUID CONFIG_CONTROL_SERVICE_UUID = UUID.fromString("0000000-000F" +
+            public final static UUID CONFIG_CONTROL_SERVICE_UUID = UUID.fromString("00000000-000F" +
                     COMMON_UUID_SERVICES);
 
             /**

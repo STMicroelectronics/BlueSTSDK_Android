@@ -222,13 +222,14 @@ public class Debug {
      * @param status         true if the write end correctly, false otherwise
      */
     void receiveCharacteristicsWriteUpdate(final BluetoothGattCharacteristic characteristic,
+                                           final byte data[],
                                            final boolean status) {
         if (mListener.isEmpty())
             return;
         UUID charUuid = characteristic.getUuid();
 
         if (charUuid.equals(BLENodeDefines.Services.Debug.DEBUG_TERM_UUID)) {
-            final String str = encodeMessageString(characteristic.getValue());
+            final String str = encodeMessageString(data);
             if(str.length()>MAX_STRING_SIZE_TO_SENT) {
                 mNotifyThread.post(new Runnable() {
                     @Override

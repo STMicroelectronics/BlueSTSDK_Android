@@ -239,11 +239,13 @@ public class Node{
                     }//if else
                 }//if-else
             }else{
-                Node.this.updateNodeStatus(State.Dead);
+                //close & clean the dead connection
                 if(mConnection!=null) {
                     mConnection.close();
                     cleanConnectionData();
                 }//if
+                //notify to the user
+                Node.this.updateNodeStatus(State.Dead);
             }//if status
         }//onConnectionStateChange
 
@@ -552,15 +554,24 @@ public class Node{
         @Override
         public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
             super.onCharacteristicWrite(gatt, characteristic, status);
-            //Log.d(TAG,"Characteristics Write "+status);
+            WriteCharCommand out = dequeueCharacteristicsWrite();
+            if(out==null) {
+                Log.e(TAG, "No write operation requested, write notification received: char:"
+                        + characteristic.getUuid() + " val: " + Arrays.toString(characteristic.getValue()));
+                return ;
+            }
+
+            if(!out.characteristic.getUuid().equals(characteristic.getUuid())){
+                Log.e(TAG,"Write notification and last write operation are on different char: "
+                        +out.characteristic.getUuid() +" vs "+characteristic.getUuid());
+            }
+            boolean writeSuccess = status == BluetoothGatt.GATT_SUCCESS;
             if (mDebugConsole != null &&
                     BLENodeDefines.Services.Debug.isDebugCharacteristics(characteristic.getUuid()))
-                mDebugConsole.receiveCharacteristicsWriteUpdate(characteristic, status == BluetoothGatt.GATT_SUCCESS);
+                mDebugConsole.receiveCharacteristicsWriteUpdate(out.characteristic,out.data, writeSuccess);
             else if (mConfigControl != null && characteristic.getUuid().equals(BLENodeDefines.Services.Config.REGISTERS_ACCESS_UUID))
-                mConfigControl.characteristicsWriteUpdate(characteristic, status == BluetoothGatt.GATT_SUCCESS);
+                mConfigControl.characteristicsWriteUpdate(out.characteristic,out.data, writeSuccess);
 
-            WriteCharCommand writeOp = new WriteCharCommand(characteristic,characteristic.getValue());
-            dequeueCharacteristicsWrite(writeOp);
         }
     }//GattNodeConnection
 
@@ -765,8 +776,10 @@ public class Node{
             if(!(o instanceof WriteCharCommand))
                 return false;
             WriteCharCommand other =(WriteCharCommand)o;
-            return characteristic.getUuid().equals(other.characteristic.getUuid()) &&
-                    Arrays.equals(data,other.data);
+            return characteristic.getUuid().equals(other.characteristic.getUuid());
+                    // since the write are serialized in a queue is not need to check also that
+                    // the data are the same, if we receive an ack of the write is refereed the queue head
+                    //&& Arrays.equals(data,other.data); //not needed
         }//equals
     }//WriteCharCommand
 
@@ -1431,9 +1444,7 @@ public class Node{
             if(mConnection!=null &&  isConnected() && !isPairing()) {
                 synchronized (mCharacteristicWriteQueue) {
                     if(!mCharacteristicWriteQueue.isEmpty()) {
-                        WriteCharCommand command = mCharacteristicWriteQueue.peek();
-                        command.characteristic.setValue(command.data);
-                        writeCharacteristics(command.characteristic);
+                        writeCharacteristics(mCharacteristicWriteQueue.peek());
                     }//if size
                 }//synchronized
             }else{ //we can execute the task, postpone it
@@ -1463,23 +1474,22 @@ public class Node{
     }
 
     /**
-     * remove a command when complited
-     * @param writeOp command completed
+     * remove the write command from the top of the queue, and start the next write if present
+     * @return last executed write command or null if the queue is empty
      */
-    private void dequeueCharacteristicsWrite(final WriteCharCommand writeOp){
+    private @Nullable  WriteCharCommand dequeueCharacteristicsWrite(){
+        WriteCharCommand out=null;
         synchronized (mCharacteristicWriteQueue){
-            if(mCharacteristicWriteQueue.contains(writeOp))
-                mCharacteristicWriteQueue.remove(writeOp);
-            else
-                Log.d(TAG,"Characteristics write not found: "+writeOp.characteristic.getUuid()+" Data: "+Arrays.toString(writeOp.data));
-            //if there still element in the queue, start write the head
-            if(!mCharacteristicWriteQueue.isEmpty()) {
-                mBleThread.post(mWriteFeatureCommandTask);
+            if(!mCharacteristicWriteQueue.isEmpty()){
+                out = mCharacteristicWriteQueue.remove();
+                if(!mCharacteristicWriteQueue.isEmpty()) {
+                    mBleThread.post(mWriteFeatureCommandTask);
+                }
             }
+
         }//synchronized
+        return out;
     }//dequeueWriteDesc
-
-
 
     /**
      * send a request for enable/disable the notification update on a specific characteristics
@@ -1577,9 +1587,9 @@ public class Node{
     /**
      * enqueue the write command for be execute in the bleThread and only if we already do all the
      * writeDescription request
-     * @param writeMe characteristics that we have to write
+     * @param cmd characteristics that we have to write
      */
-    private void writeCharacteristics(final BluetoothGattCharacteristic writeMe){
+    private void writeCharacteristics(final WriteCharCommand cmd){
         //since we have to wait that the write description are done, we have to wait a thread -> we
         //can not run directly in the bleThread, so we use the handler for the rssi, since the load
         // on that thread will be low
@@ -1593,7 +1603,9 @@ public class Node{
                     waitCompleteAllDescriptorWriteRequest(new Runnable() {
                         @Override
                         public void run() {
-                            if (!mConnection.writeCharacteristic(writeMe)) {
+                            //set the value to write and write it
+                            cmd.characteristic.setValue(cmd.data);
+                            if (!mConnection.writeCharacteristic(cmd.characteristic)) {
                                 mHandler.postDelayed(writeChar, RETRY_COMMAND_DELAY_MS);
                             }//if
                         }//run

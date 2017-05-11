@@ -5,6 +5,13 @@ import android.support.annotation.NonNull;
 import com.st.BlueSTSDK.Feature;
 import com.st.BlueSTSDK.Node;
 
+/**
+ * Feature that use the osxMotionID library for detect the use motion intensity.
+ * The intensity is a number between 0 and 10
+ *
+ * @author STMicroelectronics - Central Labs.
+ * @version 1.0
+ */
 public class FeatureMotionIntensity extends Feature {
     public static final String FEATURE_NAME = "MotionIntensity";
     public static final String FEATURE_UNIT = null;

@@ -40,7 +40,7 @@ import com.st.BlueSTSDK.Utils.UnwrapTimestamp;
  * @author STMicroelectronics - Central Labs.
  * @version 1.0
  */
-public class RemoteFeatureHumidity  extends FeatureHumidity
+public class  RemoteFeatureHumidity  extends FeatureHumidity
         implements RemoteFeatureUtil.RemoteFeature{
 
     public static final String FEATURE_NAME = "Remote Humidity";

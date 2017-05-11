@@ -231,7 +231,7 @@ public class NodeTest {
         Assert.assertTrue(n.disableNotification(f));
         Assert.assertFalse(n.isEnableNotification(f));
     }
-
+/*
     @Test
     public void readFeature(){
         SparseArray <Class <? extends Feature> > temp = new SparseArray<>();
@@ -270,7 +270,7 @@ public class NodeTest {
         verify(gatt).readCharacteristic(dataChar);
         verify(emptyListener).onUpdate(eq(f), any(Feature.Sample.class));
     }
-
+*/
     @Test
     public void updateFeature(){
         SparseArray <Class <? extends Feature> > temp = new SparseArray<>();
