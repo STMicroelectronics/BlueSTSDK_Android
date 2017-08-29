@@ -18,7 +18,9 @@ The library will show only the device that has a vendor-specific field formatted
  - The Device Id is a number that identifies the type of device. It is used to select different types of feature mask and can manage more than 32 features.
 Currently used values are:
     - 0x00 for a generic device
-    - 0x01 is reserved for the STEVAL-WESU1 board
+    - 0x01 is reserved for the [STEVAL-WESU1](http://www.st.com/en/evaluation-tools/steval-wesu1.html) board
+    - 0x02 is reserved for the [STEVAL-STLKT01V1 (SensorTile)](http://www.st.com/content/st_com/en/products/evaluation-tools/solution-evaluation-tools/sensor-solution-eval-boards/steval-stlkt01v1.html) board
+    - 0x03 is reserved for the [STEVAL-BCNKT01V1 (BlueCoin)](http://www.st.com/content/st_com/en/products/evaluation-tools/solution-evaluation-tools/sensor-solution-eval-boards/steval-bcnkt01v1.html) board
     - 0x80 for a generic Nucleo board
     - 0x81 for a Nucleo board exporting remote feature
 
@@ -30,10 +32,10 @@ Currently, bits are mapped in the following way:
    |Bit|31|30|29|28|27|26|25|24|23|22|21|20|19|18|17|16|
    |:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
    |Feature|RFU|ADPCM Sync|Switch|Direction of arrival|ADPC Audio|MicLevel|Proximity|Lux|Acc|Gyro|Mag|Pressure|Humidity|Temperature|Battery|Second Temperature|
-   
+
    |Bit|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1|0|
    |:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-   |Feature|RFU|RFU|RFU|RFU|RFU|AccEvent|FreeFall|Sensor Fusion Compact|Sensor Fusion|Compass|Motion Intensity|Activity|Carry Position|ProximityGesture|MemsGesture|Pedometer|
+   Feature|RFU|RFU|RFU|RFU|Beam forming|AccEvent|FreeFall|Sensor Fusion Compact|Sensor Fusion|Compass|Motion intensity|Activity|Carry Position|ProximityGesture|MemsGesture|Pedometer|
 You can use one of the RFU bits or define a new device and decide how to map the feature. 
 To see how the data is exported by pre-defined features, consult the export method [<code> Feature.ExtractResult Feature.extractData(long,byte[],int)</code>](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Feature.html#extractData-long-byte:A-int-).  within the feature class definition.
 
@@ -108,9 +110,15 @@ If available, the configuration service must have the UUID <code>00000000-000F-1
 
 
 ### Example
-The ST Bluemicrosystem1,ST Bluemicrosystem2, ST Bluemicrosystem3 and ST Sensor Tile firmware
-implements this protocol, you can find the projects source here: [Bluemicrosystem](http://www.st
-.com/bluemicrosystem)
+The SDK is compatible with different ST firmware as:
+ - [FP-SNS-MOTENV1](http://www.st.com/content/st_com/en/products/embedded-software/mcus-embedded-software/stm32-embedded-software/stm32-ode-function-pack-sw/fp-sns-motenv1.html): STM32 ODE function pack for IoT node with BLE connectivity and environmental and motion sensors
+ - [FP-SNS-ALLMEMS1](http://www.st.com/content/st_com/en/products/embedded-software/mcus-embedded-software/stm32-embedded-software/stm32-ode-function-pack-sw/fp-sns-allmems1.html): STM32 ODE function pack for IoT node with BLE connectivity, digital microphone, environmental and motion sensors
+ - [FP-SNS-FLIGHT1](http://www.st.com/content/st_com/en/products/embedded-software/mcus-embedded-software/stm32-embedded-software/stm32-ode-function-pack-sw/fp-sns-flight1.html): STM32 ODE function pack for IoT node with NFC, BLE connectivity and environmental, motion and time-of-flight sensors
+ - [FP-NET-BLESTAR1](http://www.st.com/content/st_com/en/products/embedded-software/mcus-embedded-software/stm32-embedded-software/stm32-ode-function-pack-sw/fp-net-blestar1.html): STM32 ODE function pack for creating a BLE star network connected via Wi-Fi to IBM Watson IoT cloud
+
+And it is used in different application as:
+ - [ST BlueMS](https://github.com/STMicroelectronics-CentralLabs/STBlueMS_Android)
+ - [ST SensNet](https://github.com/STMicroelectronics-CentralLabs/STSensNet_Android)
 
 ## How to install the library
 ### As an external library

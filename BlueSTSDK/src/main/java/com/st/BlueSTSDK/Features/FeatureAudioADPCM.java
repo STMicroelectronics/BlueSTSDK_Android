@@ -51,7 +51,7 @@ public class FeatureAudioADPCM extends Feature {
     private ADPCMEngine adpcmEngine = new ADPCMEngine();
     private BVAudioSyncManager mBVBvAudioSyncManager =null;
 
-    protected static final Field AUDIO_FIELD = new Field(FEATURE_DATA_NAME,null,Field.Type.ByteArray,-128,127);
+    protected static final Field AUDIO_FIELD = new Field(FEATURE_DATA_NAME,null, Field.Type.ByteArray,-128,127);
 
     /**
      * build an Audio Feature

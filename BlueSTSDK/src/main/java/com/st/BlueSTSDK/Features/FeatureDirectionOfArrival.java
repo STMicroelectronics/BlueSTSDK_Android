@@ -58,6 +58,15 @@ public class FeatureDirectionOfArrival extends Feature {
      */
     public static final short DATA_MIN = 0;
 
+    //NOTE SL - sensitivity ////////////////////////////////////////////////////////////////////////
+    /** Source Localization command Type*/
+    private static final byte SL_COMMAND_SENSITIVITY = (byte)0xCC;
+    /** Disable Source Localization command*/
+    private static final byte COMMAND_SENS_LOW[] = {0x00};
+    /** Enable Source Localization command*/
+    private static final byte COMMAND_SENS_HIGH[] = {0x01};
+    //NOTE /////////////////////////////////////////////////////////////////////////////////////////
+
     /**
      * build the feature
      *
@@ -78,9 +87,8 @@ public class FeatureDirectionOfArrival extends Feature {
      * @return direction of arrival of the sound
      */
     public static short getSoundAngle(Feature.Sample s) {
-        if(s!=null)
-            if (s.data.length==1)
-                return s.data[0].shortValue();
+        if(hasValidIndex(s,0))
+            return s.data[0].shortValue();
         //else
         return Short.MIN_VALUE;
     }//getAccY
@@ -97,10 +105,40 @@ public class FeatureDirectionOfArrival extends Feature {
         if (data.length-dataOffset < 2)
             throw new IllegalArgumentException("There are no more than 2 byte available to read");
 
-        Sample temp = new Sample(timestamp,new Number[]{
-                NumberConversion.LittleEndian.bytesToInt16(data, dataOffset)
-        },getFieldsDesc());
+        short dataShort = NumberConversion.LittleEndian.bytesToInt16(data, dataOffset);
+
+        dataShort = normalizeAngle(dataShort);
+
+        Sample temp = new Sample(timestamp,new Number[]{dataShort},getFieldsDesc());
         return new ExtractResult(temp,2);
     }//extractData
 
+
+    /**
+     * add or subtract 360 to obtain an angle in the range 0 360
+     * @param angle angle to normalize
+     * @return angle between 0 and 360
+     */
+    private static short normalizeAngle(short angle){
+        while (angle<0){
+            angle+=360;
+        }
+        while (angle>360){
+            angle-=360;
+        }
+
+        return angle;
+    }
+
+    /**
+     * enable/disable high sensitivity mode
+     * @param newStatus new sensitivity status
+     * @return true if the command is correctly send
+     */
+    public boolean enableLowSensitivity(boolean newStatus){
+        if(newStatus)
+            return sendCommand(SL_COMMAND_SENSITIVITY,COMMAND_SENS_LOW);
+        else
+            return sendCommand(SL_COMMAND_SENSITIVITY,COMMAND_SENS_HIGH);
+    }
 }

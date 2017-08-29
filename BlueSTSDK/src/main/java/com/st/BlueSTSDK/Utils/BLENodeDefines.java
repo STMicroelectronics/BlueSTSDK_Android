@@ -34,6 +34,7 @@ import com.st.BlueSTSDK.Features.FeatureAccelerationEvent;
 import com.st.BlueSTSDK.Features.FeatureActivity;
 import com.st.BlueSTSDK.Features.FeatureAudioADPCM;
 import com.st.BlueSTSDK.Features.FeatureAudioADPCMSync;
+import com.st.BlueSTSDK.Features.FeatureBeamforming;
 import com.st.BlueSTSDK.Features.FeatureBattery;
 import com.st.BlueSTSDK.Features.FeatureCarryPosition;
 import com.st.BlueSTSDK.Features.FeatureCompass;
@@ -327,6 +328,7 @@ public class BLENodeDefines {
             BlueCoin_DeviceFeatures.put(0x00200000, FeatureMagnetometer.class);
             BlueCoin_DeviceFeatures.put(0x00100000, FeaturePressure.class);
             BlueCoin_DeviceFeatures.put(0x00040000, FeatureTemperature.class);
+            BlueCoin_DeviceFeatures.put(0x00000800, FeatureBeamforming.class);
             BlueCoin_DeviceFeatures.put(0x00000400, FeatureAccelerationEvent.class);
             BlueCoin_DeviceFeatures.put(0x00000100, FeatureMemsSensorFusionCompact.class);
             BlueCoin_DeviceFeatures.put(0x00000040, FeatureCompass.class);
@@ -350,6 +352,7 @@ public class BLENodeDefines {
             Nucleo_Generic_Features.put(0x00080000, FeatureHumidity.class);
             Nucleo_Generic_Features.put(0x00040000, FeatureTemperature.class);
             Nucleo_Generic_Features.put(0x00010000, FeatureTemperature.class);
+            Nucleo_Generic_Features.put(0x00000800, FeatureBeamforming.class);
             Nucleo_Generic_Features.put(0x00000400, FeatureAccelerationEvent.class);
             Nucleo_Generic_Features.put(0x00000200, FeatureFreeFall.class);
             Nucleo_Generic_Features.put(0x00000100, FeatureMemsSensorFusionCompact.class);
@@ -362,11 +365,25 @@ public class BLENodeDefines {
             Nucleo_Generic_Features.put(0x00000002, FeatureMemsGesture.class);
             Nucleo_Generic_Features.put(0x00000001, FeaturePedometer.class);
 
+            //only sensors data
+            genericDeviceFeatures.put(0x40000000, FeatureAudioADPCMSync.class);
+            genericDeviceFeatures.put(0x20000000, FeatureSwitch.class);
+            genericDeviceFeatures.put(0x08000000, FeatureAudioADPCM.class);
+            genericDeviceFeatures.put(0x04000000, FeatureMicLevel.class);
+            genericDeviceFeatures.put(0x02000000, FeatureProximity.class);
+            genericDeviceFeatures.put(0x01000000, FeatureLuminosity.class);
+            genericDeviceFeatures.put(0x00800000, FeatureAcceleration.class);
+            genericDeviceFeatures.put(0x00400000, FeatureGyroscope.class);
+            genericDeviceFeatures.put(0x00200000, FeatureMagnetometer.class);
+            genericDeviceFeatures.put(0x00100000, FeaturePressure.class);
+            genericDeviceFeatures.put(0x00080000, FeatureHumidity.class);
+            genericDeviceFeatures.put(0x00040000, FeatureTemperature.class);
+            genericDeviceFeatures.put(0x00000400, FeatureAccelerationEvent.class);
+
             Nucleo_Remote_Features.put(0x20000000, RemoteFeatureSwitch.class);
             Nucleo_Remote_Features.put(0x00100000, RemoteFeaturePressure.class);
             Nucleo_Remote_Features.put(0x00080000, RemoteFeatureHumidity.class);
             Nucleo_Remote_Features.put(0x00040000, RemoteFeatureTemperature.class);
-
 
         }//static
 

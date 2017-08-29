@@ -135,7 +135,7 @@ public abstract class LogFeatureActivity extends AppCompatActivity {
      * check it we have the permission to write data on the sd
      * @return true if we have it, false if we ask for it
      */
-    private boolean checkWriteSDPermission(){
+    public boolean checkWriteSDPermission(final int requestCode){
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -151,14 +151,14 @@ public abstract class LogFeatureActivity extends AppCompatActivity {
                             public void onClick(View view) {
                                 ActivityCompat.requestPermissions(LogFeatureActivity.this,
                                         new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                                        REQUEST_WRITE_ACCESS);
+                                        requestCode);
                             }//onClick
                         }).show();
             } else {
                 // No explanation needed, we can request the permission.
                 ActivityCompat.requestPermissions(this,
                         new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                        REQUEST_WRITE_ACCESS);
+                        requestCode);
             }//if-else
             return false;
         }else
@@ -186,9 +186,11 @@ public abstract class LogFeatureActivity extends AppCompatActivity {
                     mCurrentLogger=null;
                     invalidateOptionsMenu();
                 }//if-else
-                break;
+                return;
             }//REQUEST_LOCATION_ACCESS
         }//switch
+        super.onRequestPermissionsResult(requestCode,permissions,grantResults);
+
     }//onRequestPermissionsResult
 
     /**
@@ -225,7 +227,7 @@ public abstract class LogFeatureActivity extends AppCompatActivity {
         if((mCurrentLogger instanceof FeatureLogCSVFile ||
                 mCurrentLogger instanceof FeatureLogDB) &&
                 (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)) {
-            if(checkWriteSDPermission()){
+            if(checkWriteSDPermission(REQUEST_WRITE_ACCESS)){
                 registerLoggerListener(n);
             }//if
         }else{
@@ -352,10 +354,13 @@ public abstract class LogFeatureActivity extends AppCompatActivity {
                 new Intent(Intent.ACTION_SEND_MULTIPLE);
         emailIntent.setType("message/rfc822");
 
-        String[] strAppNameSplitted = a.getApplicationInfo().processName.split("\\.");
-        String strAppName = "Unknown";
-        if (strAppNameSplitted.length > 0)
-            strAppName = strAppNameSplitted[strAppNameSplitted.length -1];
+        String strAppName = "BlueSTSDK";
+        try {
+            PackageInfo pInfo = a.getPackageManager().getPackageInfo(a.getPackageName(), 0);
+            strAppName = a.getPackageManager().getApplicationLabel(pInfo.applicationInfo).toString();
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }//try-catch
 
         emailIntent.putExtra(Intent.EXTRA_SUBJECT, "[" +strAppName + "] "+EMAIL_TITLE);
 
@@ -368,9 +373,9 @@ public abstract class LogFeatureActivity extends AppCompatActivity {
         }//try-catch
 
         String strEmail = "\nThis is an auto generated message from the " + strAppName +" application running on:";
-        strEmail += "\n\tDevice manufacturer :" + Build.MANUFACTURER.toUpperCase();
-        strEmail += "\n\tDevice model :"+ Build.MODEL;
-        strEmail += "\n\tAndroid version :" + Build.VERSION.RELEASE + " ("+Build.VERSION.SDK_INT + ")";
+        strEmail += "\n\tDevice manufacturer: " + Build.MANUFACTURER.toUpperCase();
+        strEmail += "\n\tDevice model: "+ Build.MODEL;
+        strEmail += "\n\tAndroid version: " + Build.VERSION.RELEASE + " ("+Build.VERSION.SDK_INT + ")";
         strEmail += ".\n\nIn attach the log data files available from " + folder + ".\n";
 
         emailIntent.putExtra(Intent.EXTRA_TEXT, strEmail);
