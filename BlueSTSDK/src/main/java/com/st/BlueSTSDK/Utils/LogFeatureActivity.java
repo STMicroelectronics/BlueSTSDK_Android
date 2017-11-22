@@ -359,9 +359,11 @@ public abstract class LogFeatureActivity extends AppCompatActivity {
         emailIntent.setType("message/rfc822");
 
         String strAppName = "BlueSTSDK";
+        String strAppPackage = "com.st.BlueSTSDK";
         try {
             PackageInfo pInfo = a.getPackageManager().getPackageInfo(a.getPackageName(), 0);
             strAppName = a.getPackageManager().getApplicationLabel(pInfo.applicationInfo).toString();
+            strAppPackage = pInfo.packageName;
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
         }//try-catch
@@ -387,7 +389,7 @@ public abstract class LogFeatureActivity extends AppCompatActivity {
         ArrayList<Uri> uris = new ArrayList<>();
         // convert from paths to Android friendly Parcelable Uri's
         for (File file : logFiles) {
-            Uri temp = FileProvider.getUriForFile(a,"com.st.BlueSTSDK.logFileProvider",file);
+            Uri temp = FileProvider.getUriForFile(a,strAppPackage+".logFileProvider",file);
             //Uri temp = Uri.fromFile(file)
             uris.add(temp);
         }

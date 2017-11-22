@@ -228,8 +228,8 @@ public class Node{
                 }else if (newState == BluetoothGatt.STATE_DISCONNECTED){
                     if(mConnection!=null) {
                         mConnection.close();
-                        cleanConnectionData();
                     }//if
+                    cleanConnectionData();
                     if (mUserAskToDisconnect){
                         //disconnect completed
                         Node.this.updateNodeStatus(State.Idle);
@@ -242,8 +242,8 @@ public class Node{
                 //close & clean the dead connection
                 if(mConnection!=null) {
                     mConnection.close();
-                    cleanConnectionData();
                 }//if
+                cleanConnectionData();
                 //notify to the user
                 Node.this.updateNodeStatus(State.Dead);
             }//if status
@@ -589,18 +589,24 @@ public class Node{
      */
     private void cleanConnectionData(){
         mConnection=null;
-        mWriteDescQueue.clear();
-        mCharacteristicWriteQueue.clear();
+        synchronized (mWriteDescQueue) {
+            mWriteDescQueue.clear();
+        }
+        synchronized (mCharacteristicWriteQueue) {
+            mCharacteristicWriteQueue.clear();
+        }
         mCharFeatureMap.clear();
 
         //remove all the task queued for avoid to run an old task with a new
         //connection object
-        mBleThread.removeCallbacks(mScanServicesTask);
-        mBleThread.removeCallbacks(mUpdateRssiTask);
-        mBleThread.removeCallbacks(mWriteFeatureCommandTask);
-        mBleThread.removeCallbacks(mWriteDescriptorTask);
-        mBleThread.removeCallbacks(mConnectionTask);
-        mBleThread.removeCallbacks(mDisconnectTask);
+        if(mBleThread!=null) {
+            mBleThread.removeCallbacks(mScanServicesTask);
+            mBleThread.removeCallbacks(mUpdateRssiTask);
+            mBleThread.removeCallbacks(mWriteFeatureCommandTask);
+            mBleThread.removeCallbacks(mWriteDescriptorTask);
+            mBleThread.removeCallbacks(mConnectionTask);
+            mBleThread.removeCallbacks(mDisconnectTask);
+        }
 
         //we stop the connection -> we have not notification enabled
         mNotifyFeature.clear();
@@ -738,16 +744,8 @@ public class Node{
                     .Dead){
                 Log.e(TAG,"Error connecting to the node:"+node.getName());
                 //we disconnect -> free the gatt resource and connect again
-                if(mConnection!=null){ mConnection.close();cleanConnectionData();}
-                //we stop the connection -> we have not notification enabled
-                mNotifyFeature.clear();
-                //remove the pending write request
-                synchronized (mWriteDescQueue) {
-                    mWriteDescQueue.clear();
-                }
-                synchronized (mCharacteristicWriteQueue) {
-                    mCharacteristicWriteQueue.clear();
-                }
+                if(mConnection!=null){ mConnection.close();}
+                cleanConnectionData();
             }
             if(newState==State.Dead  || newState==State.Disconnecting){
                 if(mBoundStateChange !=null) {
@@ -1166,7 +1164,7 @@ public class Node{
         return mAdvertise.getBoardHasGP();
     }//getType
 
-    public short getTypeId(){return mAdvertise.getDeviceId();}//getTypeId
+    public byte getTypeId(){return mAdvertise.getDeviceId();}//getTypeId
 
     /**
      * tell if the node is connected
@@ -1231,21 +1229,56 @@ public class Node{
     }
 
     /**
-     * return a list of feature of a specific type
-     * @param type type of feature that we want search
-     * @param <T> class that will want search
-     * @return all the features of type {@code type} exported by this node, or an empty list
+     * get the list of feature exactly of type T
+     * @param type type feature to search
+     * @return list of feature of type T
      */
-    public @NonNull <T extends Feature> List<T> getFeatures(Class<T> type){
+    private @NonNull <T extends Feature> List<T> getFeaturesOfType(Class<T> type){
         List<T> temp = new ArrayList<>();
         for (Feature f : mAvailableFeature) {
-            if (f.getClass().isAssignableFrom(type)) {
+            if (f.getClass()==type) {
+                @SuppressWarnings("unchecked") //we just  check that we can do the assign
+                        T feature = (T)f; //needed for suppress the warnings
+                temp.add(feature);
+            }//if
+        }// for list
+        return temp;
+    }
+
+    /**
+     * get the list of feature of type T or that extends T
+     * @param type type feature to search
+     * @return list of feature that can be assigned of an object of type T
+     */
+    private @NonNull <T extends Feature> List<T> getFeaturesExtendType(Class<T> type){
+        List<T> temp = new ArrayList<>();
+        for (Feature f : mAvailableFeature) {
+            if (type.isAssignableFrom(f.getClass())) {
                 @SuppressWarnings("unchecked") //we just  check that we can do the assign
                 T feature = (T)f; //needed for suppress the warnings
                 temp.add(feature);
             }//if
         }// for list
-        return java.util.Collections.unmodifiableList(temp);
+        return temp;
+    }
+
+    /**
+     * return a list of feature of a specific type
+     * @param type type of feature that we want search
+     * @param <T> class that will want search
+     * @return all the features of type {@code type} exported by this node, or an empty list
+     *
+     * the object of type T are in the head of the list, the object that extend T are in the tail
+     */
+    public @NonNull <T extends Feature> List<T> getFeatures(Class<T> type){
+        List<T> exatType = getFeaturesOfType(type);
+        List<T> extendType = getFeaturesExtendType(type);
+        //append the feature that extend the desider type to the list
+        for (T feature : extendType) {
+                if(!exatType.contains(feature))
+                    exatType.add(feature);
+        }// for list
+        return java.util.Collections.unmodifiableList(extendType);
     }//getFeatures
 
     /**
@@ -1624,7 +1657,7 @@ public class Node{
      * @param data data that we have to send to the feature
      * @return true if the message is send without problem, false otherwise
      */
-    boolean writeFeatureData(Feature feature,byte data[]){
+    public boolean writeFeatureData(Feature feature,byte data[]){
         final BluetoothGattCharacteristic characteristic = getCorrespondingChar(feature);
         //not enable or not exist or not in write mode -> return false
         if(!charCanBeWrite(characteristic) || !feature.isEnabled())

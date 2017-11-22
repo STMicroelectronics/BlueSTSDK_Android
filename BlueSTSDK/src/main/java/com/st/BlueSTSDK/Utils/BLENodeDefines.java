@@ -53,6 +53,7 @@ import com.st.BlueSTSDK.Features.FeaturePedometer;
 import com.st.BlueSTSDK.Features.FeaturePressure;
 import com.st.BlueSTSDK.Features.FeatureProximity;
 import com.st.BlueSTSDK.Features.FeatureProximityGesture;
+import com.st.BlueSTSDK.Features.FeatureSDLogging;
 import com.st.BlueSTSDK.Features.FeatureSwitch;
 import com.st.BlueSTSDK.Features.FeatureTemperature;
 import com.st.BlueSTSDK.Features.remote.RemoteFeatureHumidity;
@@ -308,6 +309,7 @@ public class BLENodeDefines {
             SensorTile_DeviceFeatures.put(0x00040000, FeatureTemperature.class);
             SensorTile_DeviceFeatures.put(0x00020000, FeatureBattery.class);
             SensorTile_DeviceFeatures.put(0x00010000, FeatureTemperature.class);
+            SensorTile_DeviceFeatures.put(0x00001000, FeatureSDLogging.class);
             SensorTile_DeviceFeatures.put(0x00000400, FeatureAccelerationEvent.class);
             SensorTile_DeviceFeatures.put(0x00000100, FeatureMemsSensorFusionCompact.class);
             SensorTile_DeviceFeatures.put(0x00000040, FeatureCompass.class);
