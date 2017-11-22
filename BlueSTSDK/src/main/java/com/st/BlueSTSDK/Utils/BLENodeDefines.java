@@ -328,6 +328,7 @@ public class BLENodeDefines {
             BlueCoin_DeviceFeatures.put(0x00200000, FeatureMagnetometer.class);
             BlueCoin_DeviceFeatures.put(0x00100000, FeaturePressure.class);
             BlueCoin_DeviceFeatures.put(0x00040000, FeatureTemperature.class);
+            BlueCoin_DeviceFeatures.put(0x00020000, FeatureBattery.class);
             BlueCoin_DeviceFeatures.put(0x00000800, FeatureBeamforming.class);
             BlueCoin_DeviceFeatures.put(0x00000400, FeatureAccelerationEvent.class);
             BlueCoin_DeviceFeatures.put(0x00000100, FeatureMemsSensorFusionCompact.class);

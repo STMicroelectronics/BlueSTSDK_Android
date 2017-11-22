@@ -178,7 +178,8 @@ public abstract class FeatureLogBase implements Feature.FeatureLoggerListener{
         final FileFilter csvFilter = new FileFilter() {
             @Override
             public boolean accept(File pathname) {
-                return pathname.getName().endsWith(".csv");
+                String fileName =pathname.getName();
+                return fileName.endsWith(".csv") || fileName.endsWith(".wav");
             }//accept
         };
         return directory.listFiles(csvFilter);

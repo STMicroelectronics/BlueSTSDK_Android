@@ -35,10 +35,12 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -88,7 +90,9 @@ public abstract class LogFeatureActivity extends AppCompatActivity {
      * return the directory path where we will store the log file if generated
      * @return directory where store the log file
      */
-    protected abstract String getLogDirectory();
+    public static String getLogDirectory(){
+        return Environment.getExternalStorageDirectory()+"/STMicroelectronics/logs";
+    }
 
     /**
      * return the logger that we will use for store the data
@@ -383,7 +387,9 @@ public abstract class LogFeatureActivity extends AppCompatActivity {
         ArrayList<Uri> uris = new ArrayList<>();
         // convert from paths to Android friendly Parcelable Uri's
         for (File file : logFiles) {
-            uris.add(Uri.fromFile(file));
+            Uri temp = FileProvider.getUriForFile(a,"com.st.BlueSTSDK.logFileProvider",file);
+            //Uri temp = Uri.fromFile(file)
+            uris.add(temp);
         }
         emailIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
         a.startActivity(Intent.createChooser(emailIntent, "Sent mail"));

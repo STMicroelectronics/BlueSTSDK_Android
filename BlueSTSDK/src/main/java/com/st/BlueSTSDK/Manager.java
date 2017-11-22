@@ -27,8 +27,11 @@
 package com.st.BlueSTSDK;
 
 import android.Manifest;
+import android.annotation.TargetApi;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+
+import android.os.Build;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresPermission;
@@ -40,6 +43,7 @@ import com.st.BlueSTSDK.Utils.BLENodeDefines;
 import com.st.BlueSTSDK.Utils.BtAdapterNotFound;
 import com.st.BlueSTSDK.Utils.InvalidBleAdvertiseFormat;
 import com.st.BlueSTSDK.Utils.InvalidFeatureBitMaskException;
+import com.st.BlueSTSDK.Utils.ScanCallbackBridge;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -153,7 +157,7 @@ public class Manager {
     /**
      * class that contains the ble callback
      */
-    private BluetoothAdapter.LeScanCallback mScanCallBack = new BluetoothAdapter.LeScanCallback() {
+    private BluetoothAdapter.LeScanCallback mScanCallBack_pre21 = new BluetoothAdapter.LeScanCallback() {
 
         /**
          * call when an advertise package is received,
@@ -189,6 +193,11 @@ public class Manager {
         }//onLeScan
 
     };//LeScanCallback
+
+    /**
+     * ble Callback calss to use for api 21+ it fallback to pre 21 api.
+     */
+    private ScanCallbackBridge mScanCallBack_post21;
 
     /**
      * build the manager retrieving the system BluetoothAdapter.
@@ -260,9 +269,8 @@ public class Manager {
         if (mBtAdapter != null && mBtAdapter.isEnabled()) {
             if (mIsScanning)
                 return false;
-            mBtAdapter.startLeScan(mScanCallBack);
             notifyDiscoveryChange(true);
-
+            startBleScan();
             if (timeoutMs > 0) {
                 //stop scan after timeoutMs
                 mHandler.postDelayed(mStopScanning, timeoutMs);
@@ -273,6 +281,47 @@ public class Manager {
         return false;
     }//startDiscovery
 
+
+    /**
+     * start the ble scanning, this method will call the correct method to avoid the deprecated api
+     */
+    private void startBleScan(){
+        if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.LOLLIPOP){
+            startBleScan_post21();
+        }else
+            startBleScan_pre21();
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    private void startBleScan_post21() {
+        mScanCallBack_post21 = new ScanCallbackBridge(mScanCallBack_pre21);
+        mBtAdapter.getBluetoothLeScanner().startScan(mScanCallBack_post21);
+    }
+
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
+    private void startBleScan_pre21() {
+        mBtAdapter.startLeScan(mScanCallBack_pre21);
+    }
+
+    /**
+     * stop the ble scanning, this method will call the correct method to avoid the deprecated api
+     */
+    private void stopBleScan(){
+        if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.LOLLIPOP){
+            stopBleScan_post21();
+        }else
+            stopBleScan_pre21();
+    }
+
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
+    private void stopBleScan_pre21() {
+        mBtAdapter.stopLeScan(mScanCallBack_pre21);
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    private void stopBleScan_post21() {
+        mBtAdapter.getBluetoothLeScanner().stopScan(mScanCallBack_post21);
+    }
 
     /**
      * Add a fake Node to the list
@@ -315,7 +364,7 @@ public class Manager {
             //remove the timeout
             mHandler.removeCallbacks(mStopScanning);
             //stop the scan
-            mBtAdapter.stopLeScan(mScanCallBack);
+            stopBleScan();
             //notify to the user
             notifyDiscoveryChange(false);
             return true;

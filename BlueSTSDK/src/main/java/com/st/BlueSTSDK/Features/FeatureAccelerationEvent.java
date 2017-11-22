@@ -50,8 +50,15 @@ import java.lang.annotation.RetentionPolicy;
  *     FeatureAccelerationEvent#getPedometerSteps(com.st.BlueSTSDK.Feature.Sample)}
  *     for retrieve the number of steps. Otherwise the function will return a negative number
  * </p>
+ *
+ * When the notification are enabled the {@code FeatureAccelerationEvent.DEFAULT_ENABLED_EVENT} is enabled.
+ *
+ * This class is stateless, and multiple events can be enable at the same time, so you have to care
+ * about disable the previous event, if you don't care it anymore.
+ * Disabling the notification will disable the detection of all the events.
+ *
  * @author STMicroelectronics - Central Labs.
- * @version 2.0
+ * @version 3.0
  */
 public class FeatureAccelerationEvent extends Feature {
 
@@ -63,10 +70,6 @@ public class FeatureAccelerationEvent extends Feature {
 
     private static final int ACC_EVENT = 0;
     private static final int PEDOMETER_DATA = 1;
-    /**
-     * fake value used for notify a pedometer event
-     */
-    private static final short PEDOMETER_EVENT_ENUM_VALUE =0x100;
 
     /**
      * command used for disable the a specific event notification
@@ -114,6 +117,11 @@ public class FeatureAccelerationEvent extends Feature {
     private static final String DOUBLE_TAP_STR ="DOUBLE_TAP";
     private static final String WAKE_UP_STR ="WAKE_UP";
     private static final String PEDOMETER_STR ="PEDOMETER";
+
+    /**
+     * event detected when the notification are enabled
+     */
+    public static final DetectableEvent DEFAULT_ENABLED_EVENT = DetectableEvent.MULTIPLE;
 
     //define the annotation
     @Retention(RetentionPolicy.SOURCE)
@@ -262,11 +270,6 @@ public class FeatureAccelerationEvent extends Feature {
     }//DetectableEvent
 
     /**
-     * event that is currently detected by the accelerometer or null if nothing is enabled
-     */
-    private DetectableEvent mEnabledEvent = DetectableEvent.NONE;
-
-    /**
      * extract the Event from a sensor sample
      * @param sample data read from the node
      * @return type of event detected by the node
@@ -299,6 +302,7 @@ public class FeatureAccelerationEvent extends Feature {
         return -1;
     }//getPedometerSteps
 
+
     /**
      * build a activity feature
      * @param n node that will send data to this feature
@@ -311,6 +315,8 @@ public class FeatureAccelerationEvent extends Feature {
                         DATA_MAX[PEDOMETER_DATA],DATA_MIN[PEDOMETER_DATA])
         });
     }//FeatureActivity
+
+    private boolean mIsPedometerEnabled=false;
 
     /**
      * read a byte with the event data send from the node
@@ -337,7 +343,7 @@ public class FeatureAccelerationEvent extends Feature {
             nSteps = NumberConversion.LittleEndian.bytesToUInt16(data, dataOffset + 1);
             readBytes=3;
         }else if (data.length - dataOffset == 2){
-            if(mEnabledEvent==DetectableEvent.PEDOMETER) {
+            if(mIsPedometerEnabled) {
                 accEvent = PEDOMETER;
                 nSteps = NumberConversion.LittleEndian.bytesToUInt16(data, dataOffset);
             }else{
@@ -363,8 +369,8 @@ public class FeatureAccelerationEvent extends Feature {
      */
     public boolean detectEvent(DetectableEvent event, boolean enable){
 
-        if(enable && event != mEnabledEvent && mEnabledEvent!=DetectableEvent.NONE)
-            sendCommand(mEnabledEvent.getTypeId(),COMMAND_DISABLE); //disable the previous one
+        if(event == DetectableEvent.PEDOMETER)
+            mIsPedometerEnabled =enable;
 
         if(event != DetectableEvent.NONE)
             return sendCommand(event.getTypeId(), enable ? COMMAND_ENABLE : COMMAND_DISABLE);
@@ -374,13 +380,6 @@ public class FeatureAccelerationEvent extends Feature {
         }
     }
 
-    /**
-     * @return the algorithm that is running or null if no algorithm are running
-     */
-    public @Nullable
-    DetectableEvent getEnabledEvent(){
-        return mEnabledEvent;
-    }
 
     /**
      * notify to all the listener of type FeatureAccelerationEventListener that the status
@@ -415,12 +414,6 @@ public class FeatureAccelerationEvent extends Feature {
             return;
 
         boolean status = data[0]==1;
-
-        if(status){
-            mEnabledEvent=event;
-        }else if(mEnabledEvent==event){
-            mEnabledEvent=DetectableEvent.NONE;
-        }//if-else-if
 
         notifyEventEnabled(event,status);
     }

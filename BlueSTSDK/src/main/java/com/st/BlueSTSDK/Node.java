@@ -1061,10 +1061,10 @@ public class Node{
      */
     public void connect(Context c,boolean resetCache,
                         @Nullable Map<UUID,List<Class< ? extends Feature>>> userDefineFeature){
+        updateNodeStatus(State.Connecting);
         //we start the connection so we will stop to receive advertise, so we delete the timeout
         if(mHandler!=null) mHandler.removeCallbacks(mSetNodeLost);
         mUserAskToDisconnect=false;
-        updateNodeStatus(State.Connecting);
         /*
         HandlerThread thread = new HandlerThread("NodeConnection");
         thread.start();

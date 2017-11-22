@@ -64,12 +64,6 @@ public class FeatureRandomAccelerationEvent extends FeatureAccelerationEvent imp
         return true;
     }
 
-
-    @Override
-    public DetectableEvent getEnabledEvent() {
-        return mEnabledEvent;
-    }
-
     @Override
     public byte[] generateFakeData() {
         if(mEnabledEvent== DetectableEvent.PEDOMETER)

@@ -76,27 +76,6 @@ public class TestAccEventFeature {
                 FeatureAccelerationEvent.getPedometerSteps(s));
     }
 
-    @Test
-    public void defaultNoEventAreEnabled(){
-        FeatureAccelerationEvent f = new FeatureAccelerationEventTestable();
-        Assert.assertEquals(FeatureAccelerationEvent.DetectableEvent.NONE, f.getEnabledEvent());
-    }
-
-    @Test
-    public void setNoEventWhenDisableTheCurrentEvent(){
-        FeatureAccelerationEvent f = new FeatureAccelerationEventTestable();
-        f.detectEvent(FeatureAccelerationEvent.DetectableEvent.DOUBLE_TAP, true);
-        f.detectEvent(FeatureAccelerationEvent.DetectableEvent.DOUBLE_TAP, false);
-        Assert.assertEquals(FeatureAccelerationEvent.DetectableEvent.NONE, f.getEnabledEvent());
-    }
-
-    @Test
-    public void setRightEventWhenEnabled(){
-        FeatureAccelerationEvent f = new FeatureAccelerationEventTestable();
-        f.detectEvent(FeatureAccelerationEvent.DetectableEvent.DOUBLE_TAP, true);
-        Assert.assertEquals(FeatureAccelerationEvent.DetectableEvent.DOUBLE_TAP,f.getEnabledEvent());
-    }
-
     @Test(expected= IllegalArgumentException.class)
     public void updateWithInvalidSize() throws Throwable {
         Feature f = new FeatureAccelerationEvent(null);

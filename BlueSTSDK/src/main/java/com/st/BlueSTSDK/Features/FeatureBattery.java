@@ -69,6 +69,7 @@ public class FeatureBattery extends Feature {
 
     private static final byte COMMAND_GET_BATTERY_CAPACITY = 0x01;
     private static final byte COMMAND_GET_MAX_ASSORBED_CURRENT = 0X02;
+    private static final short UNKOWN_CURRENT_VALUE = Short.MIN_VALUE;
 
     /**
      * create a feature Battery
@@ -154,12 +155,21 @@ public class FeatureBattery extends Feature {
 
 
     /**
-     * the most significative bit in the staus tell us if the current has an high resolution or not
+     * the most significative bit in the status tell us if the current has an high resolution or not
      * @param status battery status
      * @return true if the  MSB is 1 -> we use high precision current, false otherwise
      */
     private static boolean hasHeightResolutionCurrent(short status){
         return (status & 0x80)!=0;
+    }
+
+    /**
+     * when all the bit of the current are 1, it means unknown value
+     * @param status current value extracted from the notification
+     * @return true if the current is unknown
+     */
+    private static boolean hasUnknownCurrent(short status){
+        return status == UNKOWN_CURRENT_VALUE;
     }
 
     /***
@@ -169,6 +179,20 @@ public class FeatureBattery extends Feature {
      */
     private static byte getBatteryStatus(short status){
         return (byte)(status & 0x7F);
+    }
+
+    /**
+     * convert the current value from the notification
+     * @param currentValue current value extracted from the notificaiton
+     * @return nan if the current is unknow, otherwise the current used by the device
+     */
+    private float extractCurrentValue(short currentValue,boolean hightResolution){
+        if(hasUnknownCurrent(currentValue))
+            return Float.NaN;
+        if(hightResolution)
+            return (float)currentValue*0.1f; // current/10
+        else
+            return currentValue;
     }
 
     /**
@@ -184,9 +208,8 @@ public class FeatureBattery extends Feature {
             throw new IllegalArgumentException("There are no 7 bytes available to read");
 
         short tempStatus = NumberConversion.byteToUInt8(data,dataOffset + 6);
-        float current = NumberConversion.LittleEndian.bytesToInt16(data, dataOffset + 4);
-        if(hasHeightResolutionCurrent(tempStatus))
-            current=current/10;
+        short tempCurrent = NumberConversion.LittleEndian.bytesToInt16(data, dataOffset + 4);
+        float current =extractCurrentValue(tempCurrent,hasHeightResolutionCurrent(tempStatus));
 
         Sample temp = new Sample(timestamp,new Number[]{
                 (float) NumberConversion.LittleEndian.bytesToInt16(data,dataOffset) / 10.0f,
