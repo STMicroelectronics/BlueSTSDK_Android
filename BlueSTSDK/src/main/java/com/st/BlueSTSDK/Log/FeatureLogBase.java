@@ -51,12 +51,15 @@ import java.util.Locale;
  */
 public abstract class FeatureLogBase implements Feature.FeatureLoggerListener{
     private final static String TAG = FeatureLogBase.class.getCanonicalName();
+    final static SimpleDateFormat DATE_FIELD_FORMAT_PREFIX = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss.SSS",
+            Locale.getDefault());
 
-    final static SimpleDateFormat DATE_FORMAT_PREFIX = new SimpleDateFormat("yyyyMMdd_HHmmss",
+    final static SimpleDateFormat FILE_DATE_FORMAT_PREFIX = new SimpleDateFormat("yyyyMMdd_HHmmss",
             Locale.getDefault());
     final static SimpleDateFormat DATE_FORMAT_TO_HEADER = new SimpleDateFormat("yyyy-MM-dd " +
             "HH:mm:ss",Locale.getDefault());
 
+    protected static final String HOST_DATE_COLUMN ="Date";
     protected static final String HOST_TIMESTAMP_COLUMN ="HostTimestamp";
     protected static final String NODE_NAME_COLUMN ="NodeName";
     protected static final String NODE_TIMESTAMP_COLUMN ="NodeTimestamp";
@@ -92,7 +95,7 @@ public abstract class FeatureLogBase implements Feature.FeatureLoggerListener{
                 out.format(n.getFriendlyName() + ", ");
         out.format("\n");
 
-        out.format(HOST_TIMESTAMP_COLUMN + " (ms)," + NODE_NAME_COLUMN + "," + NODE_TIMESTAMP_COLUMN + "," +
+        out.format(HOST_DATE_COLUMN+","+HOST_TIMESTAMP_COLUMN + " (ms)," + NODE_NAME_COLUMN + "," + NODE_TIMESTAMP_COLUMN + "," +
                 "" + NODE_RAW_DATA_COLUMN + ",");
         for(Field field:fields){
             out.format(field.getName());
@@ -162,7 +165,7 @@ public abstract class FeatureLogBase implements Feature.FeatureLoggerListener{
         String logPrefixName = "";
         synchronized (mStartLog)
         {
-            logPrefixName = DATE_FORMAT_PREFIX.format(mStartLog);
+            logPrefixName = FILE_DATE_FORMAT_PREFIX.format(mStartLog);
         }
         return logPrefixName;
     }

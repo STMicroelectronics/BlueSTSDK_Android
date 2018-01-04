@@ -176,19 +176,16 @@ public class FeatureSDLogging  extends Feature{
         System.arraycopy(temp,0,message,1,temp.length);
         temp =NumberConversion.LittleEndian.uint32ToBytes(interval);
         System.arraycopy(temp,0,message,5,temp.length);
-        Log.d("SDLog","Write: "+Arrays.toString(message));
         writeData(message);
     }
 
     public void stopLogging(){
         byte message[] = {LOGGING_STOPPED,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
-        Log.d("SDLog","Write: "+Arrays.toString(message));
         writeData(message);
     }
 
     @Override
     protected ExtractResult extractData(long timestamp, byte[] data, int dataOffset) {
-        Log.d("SDLog","Read: "+Arrays.toString(data));
         if (data.length - dataOffset < 9)
             throw new IllegalArgumentException("There are no 9 bytes available to read");
 

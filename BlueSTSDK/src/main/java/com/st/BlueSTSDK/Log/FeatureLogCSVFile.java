@@ -33,6 +33,7 @@ import com.st.BlueSTSDK.Node;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Date;
 import java.util.Formatter;
 import java.util.HashMap;
 import java.util.List;
@@ -101,7 +102,10 @@ public class FeatureLogCSVFile extends FeatureLogBase {
     public void logFeatureUpdate(Feature feature, byte[] rawData, Feature.Sample data) {
         try {
             Formatter out = openDumpFile(feature);
+            String receivedTime = DATE_FIELD_FORMAT_PREFIX.format(new Date(data.notificationTime));
             synchronized (out) { // be secure that only one call write on the file
+                out.format(receivedTime); //date
+                out.format(",");
                 out.format(Long.toString(data.notificationTime - mStartLog.getTime()));  //HostTimestamp
                 out.format(",");
                 out.format(feature.getParentNode().getFriendlyName()); //NodeName
