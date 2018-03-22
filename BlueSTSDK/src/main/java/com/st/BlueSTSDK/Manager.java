@@ -33,9 +33,11 @@ import android.bluetooth.BluetoothDevice;
 
 import android.os.Build;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresPermission;
 import android.support.annotation.WorkerThread;
+import android.support.design.internal.ParcelableSparseArray;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -73,16 +75,9 @@ public class Manager {
     /**
      * map the device byte with the featureMask/Class array
      */
-    static final Map<Byte, SparseArray<Class<? extends Feature>>> sFeatureMapDecoder =
+    private static final Map<Byte, SparseArray<Class<? extends Feature>>> sFeatureMapDecoder =
             new HashMap<>();
     static{
-        sFeatureMapDecoder.put((byte) 0x00, BLENodeDefines.FeatureCharacteristics.genericDeviceFeatures);
-        sFeatureMapDecoder.put((byte) 0x01, BLENodeDefines.FeatureCharacteristics.STEVAL_WESU1_DeviceFeatures);
-        sFeatureMapDecoder.put((byte) 0x02, BLENodeDefines.FeatureCharacteristics
-                .SensorTile_DeviceFeatures);
-        sFeatureMapDecoder.put((byte) 0x03, BLENodeDefines.FeatureCharacteristics
-                .BlueCoin_DeviceFeatures);
-        sFeatureMapDecoder.put((byte) 0x80, BLENodeDefines.FeatureCharacteristics.Nucleo_Generic_Features);
         sFeatureMapDecoder.put((byte) 0x81, BLENodeDefines.FeatureCharacteristics
                 .Nucleo_Remote_Features);
     }
@@ -320,7 +315,9 @@ public class Manager {
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private void stopBleScan_post21() {
-        mBtAdapter.getBluetoothLeScanner().stopScan(mScanCallBack_post21);
+        if(mBtAdapter!=null && mBtAdapter.getBluetoothLeScanner()!=null) {
+            mBtAdapter.getBluetoothLeScanner().stopScan(mScanCallBack_post21);
+        }
     }
 
     /**
@@ -538,27 +535,21 @@ public class Manager {
     }
 
     /**
-     * check if a deviceId is recognize as valid
-     * @param deviceId device id to test
-     * @return true if the user register this device as valid,
-     */
-    public static boolean isValidDeviceId(byte deviceId){
-        return sFeatureMapDecoder.containsKey(deviceId);
-    }
-
-    /**
      * get a copy Features available for the deviceId
      * @param deviceId device type that will use the feature, it can be a new device id
      * @return null if the deviceId is not registered else the list of available feature for that
      * deviceId
      */
-    public static SparseArray<Class<? extends Feature>> getNodeFeatures(byte deviceId){
-        SparseArray<Class<? extends Feature>> featureList = null;
+    public static @NonNull SparseArray<Class<? extends Feature>> getNodeFeatures(byte deviceId){
+        SparseArray<Class<? extends Feature>> featureList;
 
         if(sFeatureMapDecoder.containsKey(deviceId)) {
             featureList = sFeatureMapDecoder.get(deviceId).clone();
+        }else{
+            featureList = BLENodeDefines.FeatureCharacteristics.DEFAULT_MASK_TO_FEATURE.clone();
         }
 
         return featureList;
     }
+
 }//Manager

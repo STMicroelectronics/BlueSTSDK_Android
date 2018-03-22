@@ -36,6 +36,7 @@ import com.st.BlueSTSDK.Features.FeatureAudioADPCM;
 import com.st.BlueSTSDK.Features.FeatureAudioADPCMSync;
 import com.st.BlueSTSDK.Features.FeatureBeamforming;
 import com.st.BlueSTSDK.Features.FeatureBattery;
+import com.st.BlueSTSDK.Features.FeatureCOSensor;
 import com.st.BlueSTSDK.Features.FeatureCarryPosition;
 import com.st.BlueSTSDK.Features.FeatureCompass;
 import com.st.BlueSTSDK.Features.FeatureDirectionOfArrival;
@@ -249,29 +250,9 @@ public class BLENodeDefines {
         }
 
         /**
-         * array that map a feature mask with a feature class, for the generic devices
-         */
-        public static final SparseArray<Class<? extends Feature>> genericDeviceFeatures =
-                new SparseArray<>();
-
-        /**
-         * array that map a feature mask with a feature class, for the STEVAL-WESU1 devices
-         */
-        public static final SparseArray<Class<? extends Feature>> STEVAL_WESU1_DeviceFeatures =
-                new SparseArray<>();
-
-        /**
-         * array that map a feature mask with a feature class, for the SensorTile devices
-         */
-        public static final SparseArray<Class<? extends Feature>> SensorTile_DeviceFeatures =
-                new SparseArray<>();
-        public static final SparseArray<Class<? extends Feature>> BlueCoin_DeviceFeatures =
-                new SparseArray<>();
-
-        /**
          * array that map a feature mask with a feature class, for a nucleo devices
          */
-        public static final SparseArray<Class<? extends Feature>> Nucleo_Generic_Features =
+        public static final SparseArray<Class<? extends Feature>> DEFAULT_MASK_TO_FEATURE =
                 new SparseArray<>();
 
         /**
@@ -281,113 +262,50 @@ public class BLENodeDefines {
                 new SparseArray<>();
 
         static {
+            //DEFAULT_MASK_TO_FEATURE.put(0x80000000, RFU);
+            DEFAULT_MASK_TO_FEATURE.put(0x40000000, FeatureAudioADPCMSync.class);
+            DEFAULT_MASK_TO_FEATURE.put(0x20000000, FeatureSwitch.class);
+            DEFAULT_MASK_TO_FEATURE.put(0x10000000, FeatureDirectionOfArrival.class);
 
-            STEVAL_WESU1_DeviceFeatures.put(0x00800000, FeatureAcceleration.class);
-            STEVAL_WESU1_DeviceFeatures.put(0x00400000, FeatureGyroscope.class);
-            STEVAL_WESU1_DeviceFeatures.put(0x00200000, FeatureMagnetometer.class);
-            STEVAL_WESU1_DeviceFeatures.put(0x00040000, FeatureTemperature.class);
-            STEVAL_WESU1_DeviceFeatures.put(0x00100000, FeaturePressure.class);
-            STEVAL_WESU1_DeviceFeatures.put(0x00020000, FeatureBattery.class);
-            STEVAL_WESU1_DeviceFeatures.put(0x00000400, FeatureAccelerationEvent.class);
-            STEVAL_WESU1_DeviceFeatures.put(0x00000200, FeatureFreeFall.class);
-            STEVAL_WESU1_DeviceFeatures.put(0x00000100, FeatureMemsSensorFusionCompact.class);
-            STEVAL_WESU1_DeviceFeatures.put(0x00000080, FeatureMemsSensorFusion.class);
-            STEVAL_WESU1_DeviceFeatures.put(0x00000010, FeatureActivity.class);
-            STEVAL_WESU1_DeviceFeatures.put(0x00000008, FeatureCarryPosition.class);
-            STEVAL_WESU1_DeviceFeatures.put(0x00000002, FeatureMemsGesture.class);
-            STEVAL_WESU1_DeviceFeatures.put(0x00000001, FeaturePedometer.class);
+            DEFAULT_MASK_TO_FEATURE.put(0x08000000, FeatureAudioADPCM.class);
+            DEFAULT_MASK_TO_FEATURE.put(0x04000000, FeatureMicLevel.class);
+            DEFAULT_MASK_TO_FEATURE.put(0x02000000, FeatureProximity.class);
+            DEFAULT_MASK_TO_FEATURE.put(0x01000000, FeatureLuminosity.class);
 
-            SensorTile_DeviceFeatures.put(0x40000000, FeatureAudioADPCMSync.class);
-            SensorTile_DeviceFeatures.put(0x20000000, FeatureSwitch.class);
-            SensorTile_DeviceFeatures.put(0x08000000, FeatureAudioADPCM.class);
-            SensorTile_DeviceFeatures.put(0x04000000, FeatureMicLevel.class); //1 mic
-            SensorTile_DeviceFeatures.put(0x00800000, FeatureAcceleration.class);
-            SensorTile_DeviceFeatures.put(0x00400000, FeatureGyroscope.class);
-            SensorTile_DeviceFeatures.put(0x00200000, FeatureMagnetometer.class);
-            SensorTile_DeviceFeatures.put(0x00100000, FeaturePressure.class);
-            SensorTile_DeviceFeatures.put(0x00080000, FeatureHumidity.class);
-            SensorTile_DeviceFeatures.put(0x00040000, FeatureTemperature.class);
-            SensorTile_DeviceFeatures.put(0x00020000, FeatureBattery.class);
-            SensorTile_DeviceFeatures.put(0x00010000, FeatureTemperature.class);
-            SensorTile_DeviceFeatures.put(0x00001000, FeatureSDLogging.class);
-            SensorTile_DeviceFeatures.put(0x00000400, FeatureAccelerationEvent.class);
-            SensorTile_DeviceFeatures.put(0x00000100, FeatureMemsSensorFusionCompact.class);
-            SensorTile_DeviceFeatures.put(0x00000040, FeatureCompass.class);
-            SensorTile_DeviceFeatures.put(0x00000020, FeatureMotionIntensity.class);
-            SensorTile_DeviceFeatures.put(0x00000010, FeatureActivity.class);
-            SensorTile_DeviceFeatures.put(0x00000008, FeatureCarryPosition.class);
-            SensorTile_DeviceFeatures.put(0x00000002, FeatureMemsGesture.class);
-            SensorTile_DeviceFeatures.put(0x00000001, FeaturePedometer.class);
+            DEFAULT_MASK_TO_FEATURE.put(0x00800000, FeatureAcceleration.class);
+            DEFAULT_MASK_TO_FEATURE.put(0x00400000, FeatureGyroscope.class);
+            DEFAULT_MASK_TO_FEATURE.put(0x00200000, FeatureMagnetometer.class);
+            DEFAULT_MASK_TO_FEATURE.put(0x00100000, FeaturePressure.class);
 
-            BlueCoin_DeviceFeatures.put(0x40000000, FeatureAudioADPCMSync.class);
-            BlueCoin_DeviceFeatures.put(0x20000000, FeatureSwitch.class);
-            BlueCoin_DeviceFeatures.put(0x10000000, FeatureDirectionOfArrival.class);
-            BlueCoin_DeviceFeatures.put(0x08000000, FeatureAudioADPCM.class);
-            BlueCoin_DeviceFeatures.put(0x04000000, FeatureMicLevel.class);//4 microphone
-            BlueCoin_DeviceFeatures.put(0x02000000, FeatureProximity.class);
-            BlueCoin_DeviceFeatures.put(0x00800000, FeatureAcceleration.class);
-            BlueCoin_DeviceFeatures.put(0x00400000, FeatureGyroscope.class);
-            BlueCoin_DeviceFeatures.put(0x00200000, FeatureMagnetometer.class);
-            BlueCoin_DeviceFeatures.put(0x00100000, FeaturePressure.class);
-            BlueCoin_DeviceFeatures.put(0x00040000, FeatureTemperature.class);
-            BlueCoin_DeviceFeatures.put(0x00020000, FeatureBattery.class);
-            BlueCoin_DeviceFeatures.put(0x00000800, FeatureBeamforming.class);
-            BlueCoin_DeviceFeatures.put(0x00000400, FeatureAccelerationEvent.class);
-            BlueCoin_DeviceFeatures.put(0x00000100, FeatureMemsSensorFusionCompact.class);
-            BlueCoin_DeviceFeatures.put(0x00000040, FeatureCompass.class);
-            BlueCoin_DeviceFeatures.put(0x00000010, FeatureActivity.class);
-            BlueCoin_DeviceFeatures.put(0x00000008, FeatureCarryPosition.class);
-            BlueCoin_DeviceFeatures.put(0x00000004, FeatureProximityGesture.class);
-            BlueCoin_DeviceFeatures.put(0x00000002, FeatureMemsGesture.class);
-            BlueCoin_DeviceFeatures.put(0x00000001, FeaturePedometer.class);
+            DEFAULT_MASK_TO_FEATURE.put(0x00080000, FeatureHumidity.class);
+            DEFAULT_MASK_TO_FEATURE.put(0x00040000, FeatureTemperature.class);
+            DEFAULT_MASK_TO_FEATURE.put(0x00020000, FeatureBattery.class);
+            DEFAULT_MASK_TO_FEATURE.put(0x00010000, FeatureTemperature.class);
 
-            Nucleo_Generic_Features.put(0x40000000, FeatureAudioADPCMSync.class);
-            Nucleo_Generic_Features.put(0x20000000, FeatureSwitch.class);
-            Nucleo_Generic_Features.put(0x10000000, FeatureDirectionOfArrival.class);
-            Nucleo_Generic_Features.put(0x08000000, FeatureAudioADPCM.class);
-            Nucleo_Generic_Features.put(0x04000000, FeatureMicLevel.class);
-            Nucleo_Generic_Features.put(0x02000000, FeatureProximity.class);
-            Nucleo_Generic_Features.put(0x01000000, FeatureLuminosity.class);
-            Nucleo_Generic_Features.put(0x00800000, FeatureAcceleration.class);
-            Nucleo_Generic_Features.put(0x00400000, FeatureGyroscope.class);
-            Nucleo_Generic_Features.put(0x00200000, FeatureMagnetometer.class);
-            Nucleo_Generic_Features.put(0x00100000, FeaturePressure.class);
-            Nucleo_Generic_Features.put(0x00080000, FeatureHumidity.class);
-            Nucleo_Generic_Features.put(0x00040000, FeatureTemperature.class);
-            Nucleo_Generic_Features.put(0x00010000, FeatureTemperature.class);
-            Nucleo_Generic_Features.put(0x00000800, FeatureBeamforming.class);
-            Nucleo_Generic_Features.put(0x00000400, FeatureAccelerationEvent.class);
-            Nucleo_Generic_Features.put(0x00000200, FeatureFreeFall.class);
-            Nucleo_Generic_Features.put(0x00000100, FeatureMemsSensorFusionCompact.class);
-            Nucleo_Generic_Features.put(0x00000080, FeatureMemsSensorFusion.class);
-            Nucleo_Generic_Features.put(0x00000040, FeatureCompass.class);
-            Nucleo_Generic_Features.put(0x00000020, FeatureMotionIntensity.class);
-            Nucleo_Generic_Features.put(0x00000010, FeatureActivity.class);
-            Nucleo_Generic_Features.put(0x00000008, FeatureCarryPosition.class);
-            Nucleo_Generic_Features.put(0x00000004, FeatureProximityGesture.class);
-            Nucleo_Generic_Features.put(0x00000002, FeatureMemsGesture.class);
-            Nucleo_Generic_Features.put(0x00000001, FeaturePedometer.class);
+            DEFAULT_MASK_TO_FEATURE.put(0x00008000, FeatureCOSensor.class);
+            //DEFAULT_MASK_TO_FEATURE.put(0x00004000, RFU);
+            //DEFAULT_MASK_TO_FEATURE.put(0x00002000, RFU);
+            DEFAULT_MASK_TO_FEATURE.put(0x00001000, FeatureSDLogging.class);
 
-            //only sensors data
-            genericDeviceFeatures.put(0x40000000, FeatureAudioADPCMSync.class);
-            genericDeviceFeatures.put(0x20000000, FeatureSwitch.class);
-            genericDeviceFeatures.put(0x08000000, FeatureAudioADPCM.class);
-            genericDeviceFeatures.put(0x04000000, FeatureMicLevel.class);
-            genericDeviceFeatures.put(0x02000000, FeatureProximity.class);
-            genericDeviceFeatures.put(0x01000000, FeatureLuminosity.class);
-            genericDeviceFeatures.put(0x00800000, FeatureAcceleration.class);
-            genericDeviceFeatures.put(0x00400000, FeatureGyroscope.class);
-            genericDeviceFeatures.put(0x00200000, FeatureMagnetometer.class);
-            genericDeviceFeatures.put(0x00100000, FeaturePressure.class);
-            genericDeviceFeatures.put(0x00080000, FeatureHumidity.class);
-            genericDeviceFeatures.put(0x00040000, FeatureTemperature.class);
-            genericDeviceFeatures.put(0x00000400, FeatureAccelerationEvent.class);
+            DEFAULT_MASK_TO_FEATURE.put(0x00000800, FeatureBeamforming.class);
+            DEFAULT_MASK_TO_FEATURE.put(0x00000400, FeatureAccelerationEvent.class);
+            DEFAULT_MASK_TO_FEATURE.put(0x00000200, FeatureFreeFall.class);
+            DEFAULT_MASK_TO_FEATURE.put(0x00000100, FeatureMemsSensorFusionCompact.class);
+
+            DEFAULT_MASK_TO_FEATURE.put(0x00000080, FeatureMemsSensorFusion.class);
+            DEFAULT_MASK_TO_FEATURE.put(0x00000020, FeatureMotionIntensity.class);
+            DEFAULT_MASK_TO_FEATURE.put(0x00000040, FeatureCompass.class);
+            DEFAULT_MASK_TO_FEATURE.put(0x00000010, FeatureActivity.class);
+
+            DEFAULT_MASK_TO_FEATURE.put(0x00000008, FeatureCarryPosition.class);
+            DEFAULT_MASK_TO_FEATURE.put(0x00000004, FeatureProximityGesture.class);
+            DEFAULT_MASK_TO_FEATURE.put(0x00000002, FeatureMemsGesture.class);
+            DEFAULT_MASK_TO_FEATURE.put(0x00000001, FeaturePedometer.class);
 
             Nucleo_Remote_Features.put(0x20000000, RemoteFeatureSwitch.class);
             Nucleo_Remote_Features.put(0x00100000, RemoteFeaturePressure.class);
             Nucleo_Remote_Features.put(0x00080000, RemoteFeatureHumidity.class);
             Nucleo_Remote_Features.put(0x00040000, RemoteFeatureTemperature.class);
-
         }//static
 
         private FeatureCharacteristics(){}

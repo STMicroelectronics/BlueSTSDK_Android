@@ -196,6 +196,16 @@ public class FeatureBattery extends Feature {
     }
 
     /**
+     * scale the battery charge percentage
+     * @param rawPercentage raw percentage read from the notification
+     * @return float percentage clamped between 0 and 100
+     */
+    private float extractPercentage(short rawPercentage){
+        float percentage = rawPercentage/10.0f;
+        return Math.max(0.0f, Math.min(100.0f, percentage));
+    }
+
+    /**
      * extract the battery information from 7 byte
      * @param data array where read the Field data
      * @param dataOffset offset where start to read the data
@@ -212,7 +222,7 @@ public class FeatureBattery extends Feature {
         float current =extractCurrentValue(tempCurrent,hasHeightResolutionCurrent(tempStatus));
 
         Sample temp = new Sample(timestamp,new Number[]{
-                (float) NumberConversion.LittleEndian.bytesToInt16(data,dataOffset) / 10.0f,
+                extractPercentage(NumberConversion.LittleEndian.bytesToInt16(data,dataOffset)),
                 NumberConversion.LittleEndian.bytesToInt16(data,dataOffset + 2) / 1000.0f,
                 current,
                 getBatteryStatus(tempStatus)

@@ -117,11 +117,6 @@ public class NodeTest {
     }
 
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void failConnect(){
-        createNode(null).connect();
-    }
-
     @Test
     public void connectEmptyNode(){
 

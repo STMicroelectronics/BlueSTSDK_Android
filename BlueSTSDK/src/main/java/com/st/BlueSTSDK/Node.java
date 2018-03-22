@@ -48,6 +48,7 @@ import android.util.SparseArray;
 import com.st.BlueSTSDK.Features.FeatureGenPurpose;
 import com.st.BlueSTSDK.Utils.BLENodeDefines;
 import com.st.BlueSTSDK.Utils.BleAdvertiseParser;
+import com.st.BlueSTSDK.Utils.ConnectionOption;
 import com.st.BlueSTSDK.Utils.InvalidBleAdvertiseFormat;
 import com.st.BlueSTSDK.Utils.NumberConversion;
 import com.st.BlueSTSDK.Utils.UnwrapTimestamp;
@@ -89,8 +90,10 @@ public class Node{
         STEVAL_WESU1,
         /** SensorTile board */
         SENSOR_TILE,
-
+        /** Blue Coin board */
         BLUE_COIN,
+        /** BlueNRG1 & BlueNRG2 ST eval board*/
+        STEVAL_IDB008VX,
         /** board based on a x NUCLEO board */
         NUCLEO
     }//Type
@@ -226,10 +229,13 @@ public class Node{
                         mBleThread.postDelayed(mScanServicesTask, RETRY_COMMAND_DELAY_MS);
                     }//if !pairing
                 }else if (newState == BluetoothGatt.STATE_DISCONNECTED){
-                    if(mConnection!=null) {
-                        mConnection.close();
-                    }//if
-                    cleanConnectionData();
+                    //if the auto connect is on, avoid to close and free resources
+                    if(!mConnectionOption.enableAutoConnect()) {
+                        if (mConnection != null) {
+                            mConnection.close();
+                        }//if
+                        cleanConnectionData();
+                    }
                     if (mUserAskToDisconnect){
                         //disconnect completed
                         Node.this.updateNodeStatus(State.Idle);
@@ -239,6 +245,13 @@ public class Node{
                     }//if else
                 }//if-else
             }else{
+                //https://stackoverflow.com/questions/33718807/forcefully-turning-off-ble-device-connected-to-android-app-fires-onconnectionsta
+                if(status==8 && // 8 = link lost
+                        newState == BluetoothGatt.STATE_DISCONNECTED &&
+                        mConnectionOption.enableAutoConnect()){
+                    Node.this.updateNodeStatus(State.Unreachable);
+                    return;
+                }
                 //close & clean the dead connection
                 if(mConnection!=null) {
                     mConnection.close();
@@ -288,8 +301,8 @@ public class Node{
                 return null;
         }//buildDebugService
 
-        private void buildKnowUuid(BluetoothGattCharacteristic characteristic,
-                                    List<Class<? extends Feature>> featureList){
+        private void buildFeaturesKnownUUID(BluetoothGattCharacteristic characteristic,
+                                            List<Class<? extends Feature>> featureList){
             List<Feature> temp = new ArrayList<>();
             for(Class<? extends Feature> feature : featureList){
                 Feature f = buildFeatureFromClass(feature);
@@ -308,7 +321,7 @@ public class Node{
          * build and add the exported features from a ble characteristics
          * @param characteristic characteristics that is handle by the sdk
          */
-        private void buildFeature(BluetoothGattCharacteristic characteristic){
+        private void buildFeatures(BluetoothGattCharacteristic characteristic){
 
             //extract the part of the uuid that contains the feature inside this
             // characteristics
@@ -336,7 +349,7 @@ public class Node{
             if(temp.size()!=0){
                 mCharFeatureMap.put(characteristic,temp);
             }//if
-        }//buildFeature
+        }//buildFeatures
 
         /**
          * build a generic feature from a compatible characteristics
@@ -417,13 +430,13 @@ public class Node{
                     for (BluetoothGattCharacteristic characteristic : service.getCharacteristics()) {
                         UUID uuid = characteristic.getUuid();
                         if (BLENodeDefines.FeatureCharacteristics.isFeatureCharacteristics(uuid))
-                            buildFeature(characteristic);
+                            buildFeatures(characteristic);
                         else if (BLENodeDefines.FeatureCharacteristics
                                 .isGeneralPurposeCharacteristics(uuid)) {
                             buildGenericFeature(characteristic);
                         }else if(mExternalCharFeatures!=null &&
                                 mExternalCharFeatures.containsKey(uuid))
-                            buildKnowUuid(characteristic,mExternalCharFeatures.get(uuid));
+                            buildFeaturesKnownUUID(characteristic,mExternalCharFeatures.get(uuid));
                     }//for
 
                 }//if-else-if-else
@@ -673,10 +686,12 @@ public class Node{
      */
     private boolean mIsFirstConnection=true;
 
-    /**
-     * true if the user ask to reset the device cache of this device
-     */
-    private boolean mResetCache=false;
+
+    public ConnectionOption getConnectionOption() {
+        return mConnectionOption;
+    }
+
+    private ConnectionOption mConnectionOption;
 
     /**
      * context used for open the connection
@@ -717,10 +732,12 @@ public class Node{
     private Runnable mConnectionTask = new Runnable() {
         @Override
         public void run() {
-            mConnection = mDevice.connectGatt(mContext,false,new GattNodeConnection());
+            mConnection = mDevice.connectGatt(mContext,
+                    mConnectionOption.enableAutoConnect(),
+                    new GattNodeConnection());
             if(mConnection==null){
                 mBleThread.postDelayed(this, RETRY_COMMAND_DELAY_MS);
-            } else if(mIsFirstConnection && mResetCache) {
+            } else if(mIsFirstConnection && mConnectionOption.resetCache()) {
                 refreshDeviceCache(mConnection);
                 mIsFirstConnection=false;
             }//
@@ -937,7 +954,7 @@ public class Node{
      */
     private void buildAvailableFeatures(){
         int featureMask = mAdvertise.getFeatureMap();
-        SparseArray<Class<? extends Feature>> decoder = Manager.sFeatureMapDecoder.get(
+        SparseArray<Class<? extends Feature>> decoder = Manager.getNodeFeatures(
                 mAdvertise.getDeviceId());
         mMaskToFeature = new HashMap<>(32);
         mAvailableFeature = new ArrayList<>(32);
@@ -1029,24 +1046,24 @@ public class Node{
     }
 
     /**
-     * implement for have an api equal to the ios one, not use it, use the version with the context
-     */
-    public void connect(){
-        throw new UnsupportedOperationException("The method is not implemented, " +
-                "use Connect(Context) instead.");
-    }//connect
-
-    /**
      * open a gatt connection
      * @param c context to use for open the connection
      */
     public void connect(Context c){
-        connect(c, false,null);
+        connect(c, ConnectionOption.builder().build());
     }//connect
 
+    /**
+     * @deprecated use {{@link #connect(Context, ConnectionOption)}}
+     */
+    @Deprecated
     public void connect(Context c,boolean resetCache){
-        connect(c, resetCache,null);
+        ConnectionOption option = ConnectionOption.builder()
+                .resetCache(resetCache)
+                .build();
+        connect(c, option);
     }//connect
+
 
     /**
      * open a gatt connection
@@ -1056,10 +1073,27 @@ public class Node{
      *                   call this function with the parameter true
      * @param userDefineFeature register the UUID in the map as know UUID that will be manage by
      *                          the node class as feature
+     * @deprecated use {{@link #connect(Context, ConnectionOption)}}
      */
+    @Deprecated
     public void connect(Context c,boolean resetCache,
                         @Nullable Map<UUID,List<Class< ? extends Feature>>> userDefineFeature){
+        ConnectionOption.ConnectionOptionBuilder optionBuilder = ConnectionOption.builder();
+        optionBuilder.resetCache(resetCache);
+        if(userDefineFeature!=null) {
+            for (Map.Entry<UUID, List<Class<? extends Feature>>> entry : userDefineFeature.entrySet()) {
+                optionBuilder.addFeature(entry.getKey(),entry.getValue());
+            }//forEach
+        }//if
+        connect(c, optionBuilder.build());
+
+    }//connect
+
+
+    public void connect(Context c, ConnectionOption options){
         updateNodeStatus(State.Connecting);
+        if(options == null)
+            options = ConnectionOption.buildDefault();
         //we start the connection so we will stop to receive advertise, so we delete the timeout
         if(mHandler!=null) mHandler.removeCallbacks(mSetNodeLost);
         mUserAskToDisconnect=false;
@@ -1071,10 +1105,10 @@ public class Node{
         mBleThread = new Handler(Looper.getMainLooper());
         mContext=c;
         setBoundListener(c.getApplicationContext());
-        mResetCache=resetCache;
-        addExternalCharacteristics(userDefineFeature);
+        mConnectionOption = options;
+        addExternalCharacteristics(options.getUserDefineFeature());
         mBleThread.post(mConnectionTask);
-    }//connect
+    }
 
     /**
      * describe as manage some specific UUID using a feature class, the uuid will be manage by
@@ -1089,6 +1123,7 @@ public class Node{
 
         mExternalCharFeatures.putAll(userDefineFeature);
     }//addExternalCharacteristics
+
 
     private BroadcastReceiver mBoundStateChange = null;
     private void setBoundListener(Context c){
@@ -1278,7 +1313,7 @@ public class Node{
                 if(!exatType.contains(feature))
                     exatType.add(feature);
         }// for list
-        return java.util.Collections.unmodifiableList(extendType);
+        return java.util.Collections.unmodifiableList(exatType);
     }//getFeatures
 
     /**
@@ -1577,7 +1612,7 @@ public class Node{
      * @return false if the feature is not handle by this node or disabled
      */
     public boolean disableNotification(Feature feature){
-        if(!feature.isEnabled() && feature.getParentNode()!=this)
+        if(!feature.isEnabled() || feature.getParentNode()!=this)
             return false;
         BluetoothGattCharacteristic featureChar =getCorrespondingChar(feature);
         if(charCanBeNotify(featureChar)) {
@@ -1597,7 +1632,7 @@ public class Node{
      * @return false if the feature is not handle by this node or disabled
      */
     public boolean enableNotification(Feature feature){
-        if(!feature.isEnabled() && feature.getParentNode()!=this)
+        if(!feature.isEnabled() || feature.getParentNode()!=this)
             return false;
         BluetoothGattCharacteristic featureChar =getCorrespondingChar(feature);
         if(charCanBeNotify(featureChar)) {
@@ -1764,11 +1799,10 @@ public class Node{
 
 
     private int extractFeatureMask(Feature f){
-        SparseArray<Class<? extends Feature>> decoder = Manager.sFeatureMapDecoder
-                .get(mAdvertise.getDeviceId());
+        SparseArray<Class<? extends Feature>> decoder = Manager.getNodeFeatures(
+                mAdvertise.getDeviceId());
         int index = decoder.indexOfValue(f.getClass());
         return decoder.keyAt(index);
-
     }
 
     /**

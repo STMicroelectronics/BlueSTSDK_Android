@@ -30,10 +30,10 @@ ext {
     // Sdk and tools
     targetSdkVersion = 25
     compileSdkVersion = 26
-    buildToolsVersion = '27.0.1'
+    buildToolsVersion = '27.0.3'
 
 // App dependencies
-    supportLibraryVersion = '27.0.2'
+    supportLibraryVersion = '27.1.0'
     constraintLayoutVersion = '1.0.2'
     junitVersion = '4.12'
     mockitoVersion = '1.9.5'

@@ -26,6 +26,7 @@
  ******************************************************************************/
 package com.st.BlueSTSDK.Utils;
 
+
 import com.st.BlueSTSDK.Manager;
 import com.st.BlueSTSDK.Node;
 
@@ -140,9 +141,6 @@ public class BleAdvertiseParser {
      * @throws InvalidBleAdvertiseFormat if is not a know board type
      */
     private static Node.Type getNodeType(byte nodeType) throws InvalidBleAdvertiseFormat {
-        if(!Manager.isValidDeviceId(nodeType))
-            throw new InvalidBleAdvertiseFormat("Unknown DeviceId value:  " + nodeType);
-
         short temp = (short) (nodeType & 0xFF);
         if (temp == 0x01)
             return Node.Type.STEVAL_WESU1;
@@ -150,6 +148,8 @@ public class BleAdvertiseParser {
             return Node.Type.SENSOR_TILE;
         if(temp == 0x03)
             return Node.Type.BLUE_COIN;
+        if(temp == 0x04)
+            return Node.Type.STEVAL_IDB008VX;
         if (temp >= 0x80 && temp <= 0xff)
             return Node.Type.NUCLEO;
         else // 0 or user defined
@@ -164,7 +164,7 @@ public class BleAdvertiseParser {
      * @return boolean false running true is sleeping
      */
     private static boolean getNodeSleepingState(byte nodeType) {
-        return( ((nodeType & 0x80) == 0x80)? false : ((nodeType & 0x40) == 0x40));
+        return((nodeType & 0x80) != 0x80 && ((nodeType & 0x40) == 0x40));
     }
 
     /**
@@ -174,7 +174,7 @@ public class BleAdvertiseParser {
      * @return boolean false if the device has Generic purpose servicess and char
      */
     private static boolean getHasGenericPurposeFeature(byte nodeType) {
-        return( ((nodeType & 0x80) == 0x80)? false : ((nodeType & 0x20) == 0x20));
+        return((nodeType & 0x80) != 0x80 && ((nodeType & 0x20) == 0x20));
     }
 
     /**
