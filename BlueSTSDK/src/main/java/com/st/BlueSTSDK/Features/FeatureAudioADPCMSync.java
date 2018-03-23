@@ -38,10 +38,10 @@ import com.st.BlueSTSDK.Node;
  */
 public class FeatureAudioADPCMSync extends Feature {
 
-    public static final String FEATURE_NAME = "AudioSyncFeature";
+    public static final String FEATURE_NAME = "Audio Sync";
 
     /** name of the exported data */
-    public static final String[] FEATURE_DATA_NAME = {"ADPCM_index", "ADPCM_predsample"};
+    public static final String[] FEATURE_DATA_NAME = {"ADPCM_index", "ADPCM_predSample"};
 
     /** index where you can find adpcm index value/description */
     public static final int ADPCM_INDEX_INDEX = 0;

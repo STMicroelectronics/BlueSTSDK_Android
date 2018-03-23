@@ -59,7 +59,7 @@ public class FeatureBeamforming extends Feature {
 
     private static final String FEATURE_NAME = "Beamforming";
 
-    private static final String FEATURE_UNIT = "";
+    private static final String FEATURE_UNIT = null;
     private static final String FEATURE_DATA_NAME = "Beamforming";
     private static final float DATA_MAX = 7;
     private static final float DATA_MIN = 0;

@@ -40,8 +40,8 @@ import com.st.BlueSTSDK.Utils.BVAudioSyncManager;
  */
 public class FeatureAudioADPCM extends Feature {
 
-    public static final String FEATURE_NAME = "AudioFeature";
-    public static final String FEATURE_DATA_NAME = "Audio";
+    public static final String FEATURE_NAME = "Audio";
+    public static final String FEATURE_DATA_NAME = "ADPCM";
 
     /**
      * number of sample received for each feature notification

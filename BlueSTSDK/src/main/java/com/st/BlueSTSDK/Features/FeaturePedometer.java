@@ -40,7 +40,7 @@ public class FeaturePedometer extends Feature{
 
     public static final String FEATURE_NAME = "Pedometer";
     public static final String FEATURE_UNIT[] = {null,"step/min"};
-    public static final String FEATURE_DATA_NAME[] ={"Steps","Freq"} ;
+    public static final String FEATURE_DATA_NAME[] ={"Steps","Frequency"} ;
     public static final Number DATA_MAX[] = {Integer.MAX_VALUE,Short.MAX_VALUE};
     public static final Number DATA_MIN[] = {0,0};
 

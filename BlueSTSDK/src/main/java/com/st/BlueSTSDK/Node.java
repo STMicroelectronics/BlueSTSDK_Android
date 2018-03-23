@@ -1124,7 +1124,6 @@ public class Node{
         mExternalCharFeatures.putAll(userDefineFeature);
     }//addExternalCharacteristics
 
-
     private BroadcastReceiver mBoundStateChange = null;
     private void setBoundListener(Context c){
         if(mBoundStateChange !=null)
@@ -1536,9 +1535,20 @@ public class Node{
         }//synchronized
     }//enqueueWriteDesc
 
-    void enqueueCharacteristicsWrite(BluetoothGattCharacteristic characteristic, byte
-            data[]){
+    void enqueueCharacteristicsWrite(BluetoothGattCharacteristic characteristic,
+                                     byte data[]){
         enqueueCharacteristicsWrite(new WriteCharCommand(characteristic,data));
+    }
+
+    /**
+     * Tell if the node write queue is empty or not
+     * @return true the queue is empty and a write equest will be handled immediately,
+     * false the write request will be added to a queue
+     */
+    public boolean writeQueueIsEmpty() {
+        synchronized (mCharacteristicWriteQueue) {
+            return mCharacteristicWriteQueue.isEmpty();
+        }
     }
 
     /**

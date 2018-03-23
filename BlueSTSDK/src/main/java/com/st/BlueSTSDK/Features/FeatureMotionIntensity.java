@@ -13,7 +13,7 @@ import com.st.BlueSTSDK.Node;
  * @version 1.0
  */
 public class FeatureMotionIntensity extends Feature {
-    public static final String FEATURE_NAME = "MotionIntensity";
+    public static final String FEATURE_NAME = "Motion Intensity";
     public static final String FEATURE_UNIT = null;
     public static final String FEATURE_DATA_NAME = "Intensity";
     public static final float DATA_MAX = 10;

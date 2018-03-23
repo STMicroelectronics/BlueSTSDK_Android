@@ -40,7 +40,7 @@ import com.st.BlueSTSDK.Node;
  */
 public class FeatureMemsGesture extends Feature {
 
-    public static final String FEATURE_NAME = "Gesture";
+    public static final String FEATURE_NAME = "MEMS Gesture";
     public static final String FEATURE_UNIT = null;
     public static final String FEATURE_DATA_NAME = "Gesture";
     public static final short DATA_MAX = 3;
