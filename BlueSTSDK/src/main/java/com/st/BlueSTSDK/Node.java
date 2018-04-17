@@ -1091,6 +1091,10 @@ public class Node{
 
 
     public void connect(Context c, ConnectionOption options){
+        //if we are already connected or we are connecting avoid do to send again the command
+        if(mState == State.Connected || mState==State.Connecting){
+            return;
+        }
         updateNodeStatus(State.Connecting);
         if(options == null)
             options = ConnectionOption.buildDefault();

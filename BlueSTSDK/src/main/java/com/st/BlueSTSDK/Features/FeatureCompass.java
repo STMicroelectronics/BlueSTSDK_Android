@@ -50,7 +50,7 @@ public class FeatureCompass extends FeatureAutoConfigurable {
      */
     public FeatureCompass(Node n) {
         super(FEATURE_NAME, n, new Field[]{
-                new Field(FEATURE_DATA_NAME,FEATURE_UNIT, Field.Type.Float,DATA_MIN,DATA_MAX)
+                new Field(FEATURE_DATA_NAME,FEATURE_UNIT, Field.Type.Float,DATA_MAX,DATA_MIN)
         });
     }
 

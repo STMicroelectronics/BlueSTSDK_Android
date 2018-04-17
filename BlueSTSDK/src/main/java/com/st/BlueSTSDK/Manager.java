@@ -510,7 +510,7 @@ public class Manager {
             throws InvalidFeatureBitMaskException {
         SparseArray<Class<? extends Feature>> updateMe;
         if(!sFeatureMapDecoder.containsKey(deviceId)){
-            updateMe = new SparseArray<>(32);
+            updateMe = BLENodeDefines.FeatureCharacteristics.DEFAULT_MASK_TO_FEATURE.clone();
             sFeatureMapDecoder.put(deviceId,updateMe);
         }else{
             updateMe = sFeatureMapDecoder.get(deviceId);

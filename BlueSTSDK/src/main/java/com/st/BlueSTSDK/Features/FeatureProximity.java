@@ -61,11 +61,11 @@ public class FeatureProximity extends Feature {
 
     private static final Field[] LOW_RANGE_FIELDS = new Field[] {
             new Field(FEATURE_DATA_NAME, FEATURE_UNIT,
-                    Field.Type.UInt16, DATA_MIN, LOW_RANGE_DATA_MAX)};
+                    Field.Type.UInt16, LOW_RANGE_DATA_MAX,DATA_MIN)};
 
     private static final Field[] HIGH_RANGE_FIELDS = new Field[] {
             new Field(FEATURE_DATA_NAME, FEATURE_UNIT,
-                    Field.Type.UInt16, DATA_MIN, HIGH_RANGE_DATA_MAX)};
+                    Field.Type.UInt16, HIGH_RANGE_DATA_MAX,DATA_MIN)};
 
     /**
      * build a proximity feature
