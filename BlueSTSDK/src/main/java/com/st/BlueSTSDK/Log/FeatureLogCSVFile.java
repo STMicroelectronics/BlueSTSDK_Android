@@ -26,6 +26,7 @@
  ******************************************************************************/
 package com.st.BlueSTSDK.Log;
 
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.st.BlueSTSDK.Feature;
@@ -35,6 +36,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 import java.util.Formatter;
+import java.util.FormatterClosedException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -99,29 +101,35 @@ public class FeatureLogCSVFile extends FeatureLogBase {
     }
 
     @Override
-    public void logFeatureUpdate(Feature feature, byte[] rawData, Feature.Sample data) {
+    public void logFeatureUpdate(Feature feature, byte[] rawData,@Nullable Feature.Sample data) {
         try {
             Formatter out = openDumpFile(feature);
-            String receivedTime = DATE_FIELD_FORMAT_PREFIX.format(new Date(data.notificationTime));
+            Date notificationTime = data !=null ? new Date(data.notificationTime) : new Date();
+            String receivedTime = DATE_FIELD_FORMAT_PREFIX.format(notificationTime);
+
             synchronized (out) { // be secure that only one call write on the file
                 out.format(receivedTime); //date
                 out.format(",");
-                out.format(Long.toString(data.notificationTime - mStartLog.getTime()));  //HostTimestamp
+                out.format(Long.toString(notificationTime.getTime() - mStartLog.getTime()));  //HostTimestamp
                 out.format(",");
                 out.format(feature.getParentNode().getFriendlyName()); //NodeName
                 out.format(",");
-                out.format(Long.toString(data.timestamp)); //NodeTimestamp
+                if(data!=null)
+                    out.format(Long.toString(data.timestamp)); //NodeTimestamp
                 out.format(",");
                 if (rawData != null)
                     storeBlobData(out, rawData);
                 out.format(",");
-                storeFeatureData(out, data.data);
+                if(data!=null)
+                    storeFeatureData(out, data.data);
                 out.format("\n");
                 out.flush();
             }//synchronized
         } catch (IOException e) {
             Log.e(TAG,"Error dumping data Feature: "+feature.getName()+"\n"+e.toString());
-        }//try-catch
+        } catch (FormatterClosedException e) {
+            Log.w(TAG,"Skip dumping data Feature: "+feature.getName()+"\n"+e.toString());
+        }
     }
 
     /**

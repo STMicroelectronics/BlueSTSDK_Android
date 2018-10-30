@@ -1,7 +1,5 @@
 package com.st.BlueSTSDK.Utils;
 
-import android.support.annotation.Nullable;
-
 import com.st.BlueSTSDK.Feature;
 import com.st.BlueSTSDK.Features.FeatureAcceleration;
 import com.st.BlueSTSDK.Features.FeatureGyroscope;
@@ -12,14 +10,11 @@ import junit.framework.Assert;
 import org.junit.Test;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 public class ConnectionOptionTest {
-
-
 
     @Test
     public void defaultBuilderDontResetCacheAndDisableAutoConnect(){

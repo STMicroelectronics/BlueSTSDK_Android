@@ -268,8 +268,7 @@ public class NodeScanActivity extends AppCompatActivity {
         switch (requestCode) {
             case REQUEST_LOCATION_ACCESS: {
                 // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     //we have the permission try to start the scan again
                     startNodeDiscovery(mLastTimeOut);
                 } else {

@@ -22,22 +22,30 @@ Currently used values are:
     - 0x02 is reserved for the [STEVAL-STLKT01V1 (SensorTile)](http://www.st.com/content/st_com/en/products/evaluation-tools/solution-evaluation-tools/sensor-solution-eval-boards/steval-stlkt01v1.html) board
     - 0x03 is reserved for the [STEVAL-BCNKT01V1 (BlueCoin)](http://www.st.com/content/st_com/en/products/evaluation-tools/solution-evaluation-tools/sensor-solution-eval-boards/steval-bcnkt01v1.html) board
     - 0x04 is reserved for the [STEVAL-IDB008V1/2 (BlueNRG-2)](http://www.st.com/content/st_com/en/products/evaluation-tools/solution-evaluation-tools/communication-and-connectivity-solution-eval-boards/steval-idb008v2.html) board
-    - 0x80 for a generic Nucleo board
-    - 0x81 for a Nucleo board exporting remote feature
+    - 0x05 is reserved for the [STEVAL-BCN002V1B (BlueNRG-Tile)](https://www.st.com/content/st_com/en/products/evaluation-tools/solution-evaluation-tools/sensor-solution-eval-boards/steval-bcn002v1b.html) board
+    - 0x80 to 0x8A for a differents ST Functional pack based on Nucleo boards
 
-  You should use a value between 0x04 and 0x7F for your custom board, as values between 0x80 and 0xFF are reserved for ST Nucleo boards.
+  You should use a value between 0x05 and 0x7F for your custom board, as values between 0x80 and 0xFF are reserved for ST Nucleo boards.
  
  - The feature mask is a bit field that provides information regarding what characteristics/features are exported by the board.
 Currently, bits are mapped in the following way:
   
-   |Bit|31|30|29|28|27|26|25|24|23|22|21|20|19|18|17|16|
-   |:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-   |Feature|RFU|ADPCM Sync|Switch|Direction of arrival|ADPC Audio|MicLevel|Proximity|Lux|Acc|Gyro|Mag|Pressure|Humidity|Temperature|Battery|Second Temperature|
+   |Bit|31|30|29|28|27|26|25|24|
+   |:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+   |Feature|RFU|ADPCM Sync|Switch|Direction of arrival|ADPC Audio|MicLevel|Proximity|Lux|
+
+   |Bit|23|22|21|20|19|18|17|16|
+   |:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+   |Feature|Acc|Gyro|Mag|Pressure|Humidity|Temperature|Battery|Second Temperature|
    
-   |Bit|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1|0|
-   |:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-   |Feature|CO Sensor|RFU|RFU|SD Logging|Beam forming|AccEvent|FreeFall|Sensor Fusion Compact|Sensor Fusion|Motion intensity|Compass|Activity|Carry Position|ProximityGesture|MemsGesture|Pedometer|
-You can use one of the RFU bits or define a new device and decide how to map the feature. 
+   |Bit|15|14|13|12|11|10|9|8|
+   |:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+   |Feature|CO Sensor|STM32WB Thread Reboot bit | STM32WB OTA Reboot bit|SD Logging|Beam forming|AccEvent|FreeFall|Sensor Fusion Compact|
+
+   |Bit|7|6|5|4|3|2|1|0|
+   |:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+   |Feature|Sensor Fusion|Motion intensity|Compass|Activity|Carry Position|ProximityGesture|MemsGesture|Pedometer|
+
 To see how the data is exported by pre-defined features, consult the export method [<code> Feature.ExtractResult Feature.extractData(long,byte[],int)</code>](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Feature.html#extractData-long-byte:A-int-).  within the feature class definition.
 
 
@@ -45,11 +53,14 @@ To see how the data is exported by pre-defined features, consult the export meth
 
 
 ### Characteristics/Features
- The characteristics managed by the SDK must have a UUID such as: <code>*XXXXXXXX*-0001-11e1-ac36-0002a5d5c51b</code>.
- The SDK will scan all the services, searching for characteristics that match that pattern. 
- 
- The first part of the UUID will have the bit set to 1 for each feature exported by the characteristics.
- 
+
+ A bluetooth characteristics can export multiple features. The SDK is searching in all the services the know characteristics.
+ The features that are present in the advertise feature mask have an UUID such as: <code>*XXXXXXXX*-0001-11e1-ac36-0002a5d5c51b</code>, and are called "Basic Feature"
+ The first 32bits are interpreted as the feature mask, if they are set to 1 it meas that the characteristics is exporting the data of
+ that feature.
+
+ The other ST characteristics have the format: <code>*XXXXXXXX*-0002-11e1-ac36-0002a5d5c51b</code> and are called "extended Feature"
+
  In case of multiple features mapped in a single characteristic, the data must be in the same order as the bit mask.
  
  The characteristic data format must be:
@@ -61,6 +72,8 @@ To see how the data is exported by pre-defined features, consult the export meth
  The first 2 bytes are used to communicate a time stamp. This is especially useful for recognizing any data loss.
  
  Since the BLE packet max length is 20 bytes, the max size for a feature data field is 18 bytes.
+
+ To see how to define a new Feature or how to add a new UUID to a defined feature see [here](#### How to add a new Feature)
  
 #### Remote Feature
 This type of Feature are created for handle the case when the node collect information from 
@@ -83,6 +96,7 @@ If available, the debug service must have the UUID <code>00000000-000E-11e1-9ab4
 - <code>00000002-000E-11e1-ac36-0002a5d5c51b</code> (Notify) is used by the board to notify the user of an error message.
 
 #### Configuration
+This service is used to communicate commands to the ST characteristics.
 If available, the configuration service must have the UUID <code>00000000-000F-11e1-9ab4-0002a5d5c51b</code> and will contain 2 characteristics:
 
 - <code>00000002-000F-11e1-ac36-0002a5d5c51b</code> (Notify/Write): it can be used to send command/data to a specific feature.
@@ -184,9 +198,26 @@ Available features can be retrieved from [Features package](https://stmicroelect
     2.	Create a constructor that accepts only the node as a parameter. From this constructor call the [super constructor](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Feature.html#Feature-java.lang.String-com.st.BlueSTSDK.Node-com.st.BlueSTSDK.Features.Field:A-), passing the feature name and the feature field.
     3.  Implement the method [<code> Feature.ExtractResult Feature.extractData(long,byte[],int)</code>](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Feature.html#extractData-long-byte:A-int-). 
     4.  Create a utility static method that extracts the data from the Feature.Sample class 
- 2. If you want to use the advertise feature bitmask and our characteristics UUID format, before
-    start the scanning register the new feature:
- 
+ 2. Register the feature before the node connection using the ConnectionOption class:
+     ```Java
+            UUIDToFeatureMap myMap = new UUIDToFeatureMap();
+            map.put(UUID.fromString("00002a37-0000-1000-8000-00805f9b34fb"), FeatureHeartRate.class);
+
+        ConnectionOption.ConnectionOptionBuilder optionsBuilder = ConnectionOption.builder()
+                    .setFeatureMap(myMap);
+        ConnectionOption options = optionsBuilder.build();
+
+        node.connect(context,options)
+     ```
+or
+    ```Java
+    Node node=...
+    UUIDToFeatureMap map = new UUIDToFeatureMap();
+    map.put(UUID.fromString("00002a37-0000-1000-8000-00805f9b34fb"), FeatureHeartRate.class);
+    node.addExternalCharacteristics(map)
+    ```
+ To reuse one Basic Feature register use the manager class:
+
     ```Java
     // add the feature to the Nucleo device
     byte deviceId = (byte) 0x80;
@@ -200,15 +231,6 @@ Available features can be retrieved from [Features package](https://stmicroelect
     	e.printStackTrace();
     }
     ```
-
-    Otherwise you can register the characteristics before call the connect method:
-    ```Java
-    Node node=...
-    UUIDToFeatureMap map = new UUIDToFeatureMap();
-    map.put(UUID.fromString("00002a37-0000-1000-8000-00805f9b34fb"), FeatureHeartRate.class);
-    node.addExternalCharacteristics(map)
-    ```
-
 ## Log
 The SDK defines some class that will log the feature data.
 Using the class [FeatureLogCSVFile](https://stmicroelectronics-centrallabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Log/FeatureLogCSVFile.html) each feature will have its file, and the data logged will be:

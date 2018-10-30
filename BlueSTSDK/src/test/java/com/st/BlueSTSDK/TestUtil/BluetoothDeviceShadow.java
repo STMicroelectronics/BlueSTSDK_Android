@@ -34,12 +34,9 @@ import android.bluetooth.BluetoothGattService;
 import android.content.Context;
 import android.support.annotation.Nullable;
 
-import org.robolectric.ShadowsAdapter;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
-import org.robolectric.internal.Shadow;
-import org.robolectric.internal.ShadowExtractor;
-import org.robolectric.internal.bytecode.ShadowMap;
+import org.robolectric.shadow.api.Shadow;
 import org.robolectric.shadows.ShadowBluetoothDevice;
 
 import java.util.ArrayList;
@@ -90,8 +87,7 @@ public class BluetoothDeviceShadow extends ShadowBluetoothDevice {
     @Implementation
     public BluetoothGatt connectGatt(Context c,boolean b,BluetoothGattCallback callback){
         mGattConnection = spy(Shadow.newInstanceOf(BluetoothGatt.class));
-        BluetoothGattShadow shadowGatt =
-                ((BluetoothGattShadow)ShadowExtractor.extract(mGattConnection));
+        BluetoothGattShadow shadowGatt = Shadow.extract(mGattConnection);
         shadowGatt.setGattCallBack(callback);
         shadowGatt.setServices(mServices);
         mGattConnection.connect();

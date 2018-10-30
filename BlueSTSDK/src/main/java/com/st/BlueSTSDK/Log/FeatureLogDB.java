@@ -33,6 +33,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.AsyncTask;
 import android.provider.BaseColumns;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -83,7 +84,7 @@ public class FeatureLogDB extends  FeatureLogBase {
     }//FeatureLogDb
 
     @Override
-    public void logFeatureUpdate(Feature feature, byte[] rawData, Feature.Sample data) {
+    public void logFeatureUpdate(Feature feature, byte[] rawData,@Nullable Feature.Sample data) {
         mDb.insert(sanitizeString(feature.getName()),null,
                 getFeatureRow(feature, rawData, data));
     }

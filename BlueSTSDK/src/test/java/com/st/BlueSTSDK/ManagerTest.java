@@ -279,20 +279,6 @@ public class ManagerTest {
         Manager.addFeatureToNode((byte) 0x00, invalidMask);
     }
 
-    @Test
-    public void insertNewDevice() throws InvalidFeatureBitMaskException{
-        SparseArray<Class<? extends Feature>> featureList = new SparseArray<>(1);
-        featureList.append(2,Feature.class);
-
-        Manager.addFeatureToNode((byte) 0xFF, featureList);
-
-        //Assert.assertEquals(featureList,Manager.sFeatureMapDecoder.get((byte) 0xFF));
-
-        Assert.assertTrue(TestUtil.sparseArrayEqual(featureList, Manager.sFeatureMapDecoder.get(
-                (byte) 0xFF)));
-        
-    }
-
     private static Node buildNodeWithId(byte deviceID) throws InvalidBleAdvertiseFormat {
         return new Node(null, 10,
                 new byte[]{0x07, (byte) 0xFF, (byte) 0x01, deviceID, (byte)
@@ -310,18 +296,13 @@ public class ManagerTest {
 
         Assert.assertEquals(Node.Type.NUCLEO, node.getType());
 
-        Manager.addFeatureToNode((byte) 0x04, featureList);
+        Manager.addFeatureToNode((byte) 0x79, featureList);
 
-        node = buildNodeWithId((byte) 0x04);
+        node = buildNodeWithId((byte) 0x79);
 
         Assert.assertEquals(Node.Type.GENERIC, node.getType());
 
 
-    }
-
-    @Test(expected = InvalidBleAdvertiseFormat.class)
-    public void checkInvalidDeviceType() throws InvalidBleAdvertiseFormat {
-        buildNodeWithId((byte) 0xFD);
     }
 
 }

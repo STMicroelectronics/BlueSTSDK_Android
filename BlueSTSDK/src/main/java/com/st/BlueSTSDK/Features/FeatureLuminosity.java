@@ -90,7 +90,7 @@ public class FeatureLuminosity extends Feature {
         if (data.length - dataOffset < 2)
             throw new IllegalArgumentException("There are no 2 bytes available to read");
         Sample temp = new Sample(timestamp,new Number[]{
-                NumberConversion.LittleEndian.bytesToInt16(data, dataOffset)
+                NumberConversion.LittleEndian.bytesToUInt16(data, dataOffset)
         },getFieldsDesc());
         return new ExtractResult(temp,2);
     }//update

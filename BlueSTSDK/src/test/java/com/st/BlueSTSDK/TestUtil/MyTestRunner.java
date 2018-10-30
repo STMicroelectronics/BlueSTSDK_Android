@@ -29,6 +29,7 @@ package com.st.BlueSTSDK.TestUtil;
 
 import android.support.annotation.NonNull;
 
+import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
@@ -50,7 +51,7 @@ public class MyTestRunner extends RobolectricTestRunner {
 
     @NonNull
     @Override
-    public InstrumentationConfiguration createClassLoaderConfig(Config config) {
+    public InstrumentationConfiguration createClassLoaderConfig(FrameworkMethod config) {
         InstrumentationConfiguration.Builder builder = InstrumentationConfiguration.newBuilder();
         for(Class c : CUSTOM_SHADOW_TARGETS)
             builder.addInstrumentedClass(c.getName());

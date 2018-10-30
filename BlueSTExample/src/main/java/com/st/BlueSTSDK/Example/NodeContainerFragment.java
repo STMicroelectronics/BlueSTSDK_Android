@@ -84,6 +84,7 @@ public class NodeContainerFragment extends Fragment {
                     public void run() {
                         //close the progress dialog
                         mConnectionWait.dismiss();
+                        mConnectionWait  = null;
                     }
                 });
             //error state -> show a toast message and start a new connection
@@ -111,7 +112,11 @@ public class NodeContainerFragment extends Fragment {
                 activity.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        if (!mConnectionWait.isShowing())
+                        if(mConnectionWait == null) {
+                            setUpProgressDialog(node.getName());
+                            mConnectionWait.show();
+                        }
+                        else if (!mConnectionWait.isShowing())
                             mConnectionWait.show();
                         Toast.makeText(activity, msg, Toast.LENGTH_LONG).show();
                         mNode.connect(getActivity());

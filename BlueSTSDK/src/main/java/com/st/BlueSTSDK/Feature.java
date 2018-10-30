@@ -116,7 +116,7 @@ public abstract class Feature {
      * @return true if sample is not null and has a non null value into the index position
      */
     protected static boolean hasValidIndex(Sample s, int index){
-        return ((s != null) && (s.data.length > index) && (s.data[index]!=null));
+        return (index >=0 && (s != null) && (s.data.length > index) && (s.data[index]!=null));
     }
 
     /**
@@ -251,7 +251,9 @@ public abstract class Feature {
      * </p>
      * @param sample new data that we have to notify to the listener
      */
-    protected void notifyUpdate(final Sample sample) {
+    protected void notifyUpdate(final @Nullable Sample sample) {
+        if(sample==null)
+            return;
         for (final FeatureListener listener : mFeatureListener) {
             sThreadPool.execute(new Runnable() {
                 @Override
@@ -275,7 +277,7 @@ public abstract class Feature {
      * @param rawData raw data that we have used for extract the feature field, can be null
      * @param sample sample that we have to log
      */
-    protected void logFeatureUpdate(final byte rawData[],final Sample sample) {
+    protected void logFeatureUpdate(final byte rawData[],@Nullable final Sample sample) {
         for (final FeatureLoggerListener listener : mFeatureLogger) {
             sThreadPool.execute(new Runnable() {
                 @Override
@@ -304,11 +306,13 @@ public abstract class Feature {
      */
     protected int update_priv(long timeStamp, byte[] data, int dataOffset) {
         //acquire the write permission
-        Sample newSample; //keep a reference for the notification
+        Sample newSample=null; //keep a reference for the notification
         mWriteLock.lock(); // made the update atomic
             mLastUpdate = new Date();
             ExtractResult res = extractData(timeStamp, data, dataOffset);
-            newSample = mLastSample = res.newSample;
+            if(res.newSample!=null) {
+                newSample = mLastSample = res.newSample;
+            }
         mWriteLock.unlock();
 
         //notify to all the listener that the new data arrived
@@ -359,14 +363,14 @@ public abstract class Feature {
         /** number of read bytes */
         final int nReadByte;
         /** data extracted from the byte stream */
-        final Sample newSample;
+        final @Nullable Sample newSample;
 
         /**
          * create a new object
          * @param newSample data extracted
          * @param nReadByte number of byte used for extract the data
          */
-        public ExtractResult(Sample newSample,int nReadByte){
+        public ExtractResult(@Nullable Sample newSample,int nReadByte){
             this.nReadByte=nReadByte;
             this.newSample=newSample;
         }//ExtractResult
@@ -383,7 +387,7 @@ public abstract class Feature {
          * data extracted by the feature
          * @return data extracted by the raw bytes stream
          */
-        public Sample getNewSample(){
+        public @Nullable Sample getNewSample(){
             return newSample;
         }
     }//ExtractResult
@@ -408,7 +412,7 @@ public abstract class Feature {
     abstract protected ExtractResult extractData(long timestamp, byte[] data, int dataOffset);
 
     /**
-     * in case the corrispondig characteristics has the write permission you can send some data
+     * in case the corresponding characteristics has the write permission you can send some data
      * to the feature
      * @param data raw data to write
      * @return true if the write command is send correctly, false otherwise
@@ -418,7 +422,20 @@ public abstract class Feature {
     }//writeData
 
     /**
+     * write the data into the corresponding characteristics and call the callback when the system
+     * do it
+     * @param data data to write
+     * @param onWriteComplete callback to do when the write data is done
+     * @return true if the write command is send correctly, false otherwise
+     */
+    protected boolean writeData(@NonNull byte[] data, @Nullable Runnable onWriteComplete) {
+        return mParent.writeFeatureData(this, data, onWriteComplete);
+    }//writeData
+
+    /**
      * this method can be used for send data to the command characteristic,
+     * for the extended feature use the {@link Feature#writeData(byte[], Runnable)}  method
+     *
      * @param commandType integer that identify the command to execute
      * @param data array of data to send as command parameters, can be an empty array
      * @return true if the node has the command characteristic
@@ -495,7 +512,7 @@ public abstract class Feature {
          */
         @WorkerThread
         void logFeatureUpdate( Feature feature, byte[] rawData,
-                               Sample sample);
+                               @Nullable Sample sample);
     }
 
     /**

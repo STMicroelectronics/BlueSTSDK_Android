@@ -43,6 +43,10 @@ public class UnwrapTimestamp {
     /** last raw ts received from the board, it is a number between 0 and 2^16-1 */
     private int mLastTs=0;
 
+    synchronized public long getNext(){
+        return unwrap(mLastTs+1);
+    }
+
     /**
      * If necessary it adds a multiple of (1&lt;&lt;16) for hide the timestamp reset
      * @param ts timestamp

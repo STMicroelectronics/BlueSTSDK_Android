@@ -97,7 +97,7 @@ public class FeatureHumidity extends Feature {
 
         //it has 1 decimal value -> divide by 10
         Sample temp = new Sample(timestamp,new Number[]{
-                NumberConversion.LittleEndian.bytesToInt16(data, dataOffset)/10.0f
+                NumberConversion.LittleEndian.bytesToUInt16(data, dataOffset)/10.0f
         },getFieldsDesc());
 
         return new ExtractResult(temp,2);

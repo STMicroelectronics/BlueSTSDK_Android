@@ -36,7 +36,6 @@ import android.bluetooth.BluetoothGattService;
 import android.util.SparseArray;
 
 import com.st.BlueSTSDK.Features.Field;
-import com.st.BlueSTSDK.Node;
 import com.st.BlueSTSDK.TestUtil.BluetoothDeviceShadow;
 import com.st.BlueSTSDK.TestUtil.BluetoothGattShadow;
 import com.st.BlueSTSDK.TestUtil.MyTestRunner;
@@ -52,8 +51,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
-import org.robolectric.internal.Shadow;
-import org.robolectric.internal.ShadowExtractor;
+import org.robolectric.shadow.api.Shadow;
 
 import java.util.Random;
 import java.util.UUID;
@@ -63,7 +61,6 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
 @RunWith(MyTestRunner.class)
@@ -137,7 +134,7 @@ public class NodeTest {
     public void connectNodeWithDebug(){
 
         BluetoothDevice device = spy(Shadow.newInstanceOf(BluetoothDevice.class));
-        BluetoothDeviceShadow shadowDevice = (BluetoothDeviceShadow)ShadowExtractor.extract(device);
+        BluetoothDeviceShadow shadowDevice = Shadow.extract(device);
 
         BluetoothGattService debugService = new BluetoothGattService(BLENodeDefines.Services
                 .Debug.DEBUG_SERVICE_UUID,BluetoothGattService.SERVICE_TYPE_PRIMARY);
@@ -206,12 +203,12 @@ public class NodeTest {
         }
 
         BluetoothDevice device = spy(Shadow.newInstanceOf(BluetoothDevice.class));
-        BluetoothDeviceShadow shadowDevice = (BluetoothDeviceShadow)ShadowExtractor.extract(device);
+        BluetoothDeviceShadow shadowDevice = Shadow.extract(device);
         BluetoothGattService dataService = new BluetoothGattService(
                 UUID.randomUUID(),
                 BluetoothGattService.SERVICE_TYPE_PRIMARY);
         dataService.addCharacteristic(createReadNotifyChar(
-                UUID.fromString("000000001-"+BLENodeDefines.FeatureCharacteristics.COMMON_FEATURE_UUID)
+                UUID.fromString("000000001-"+BLENodeDefines.FeatureCharacteristics.BASE_FEATURE_COMMON_UUID)
         ));
         shadowDevice.addService(dataService);
         Node n = createNode(device);
@@ -238,12 +235,12 @@ public class NodeTest {
         }
 
         BluetoothDevice device = spy(Shadow.newInstanceOf(BluetoothDevice.class));
-        BluetoothDeviceShadow shadowDevice = (BluetoothDeviceShadow)ShadowExtractor.extract(device);
+        BluetoothDeviceShadow shadowDevice = Shadow.extract(device);
         BluetoothGattService dataService = new BluetoothGattService(
                 UUID.randomUUID(),
                 BluetoothGattService.SERVICE_TYPE_PRIMARY);
         BluetoothGattCharacteristic dataChar = createReadNotifyChar(
-                UUID.fromString("000000001-" + BLENodeDefines.FeatureCharacteristics.COMMON_FEATURE_UUID)
+                UUID.fromString("000000001-" + BLENodeDefines.FeatureCharacteristics.BASE_FEATURE_COMMON_UUID)
         );
         dataService.addCharacteristic(dataChar);
         shadowDevice.addService(dataService);
@@ -277,12 +274,12 @@ public class NodeTest {
         }
 
         BluetoothDevice device = spy(Shadow.newInstanceOf(BluetoothDevice.class));
-        BluetoothDeviceShadow shadowDevice = (BluetoothDeviceShadow)ShadowExtractor.extract(device);
+        BluetoothDeviceShadow shadowDevice = Shadow.extract(device);
         BluetoothGattService dataService = new BluetoothGattService(
                 UUID.randomUUID(),
                 BluetoothGattService.SERVICE_TYPE_PRIMARY);
         BluetoothGattCharacteristic dataChar = createReadNotifyChar(
-                UUID.fromString("000000001-" + BLENodeDefines.FeatureCharacteristics.COMMON_FEATURE_UUID)
+                UUID.fromString("000000001-" + BLENodeDefines.FeatureCharacteristics.BASE_FEATURE_COMMON_UUID)
         );
         dataService.addCharacteristic(dataChar);
         shadowDevice.addService(dataService);
@@ -319,7 +316,7 @@ public class NodeTest {
                 UUID.fromString("00000000-0001-11e1-9ab4-0002a5d5c51b"),
                 BluetoothGattService.SERVICE_TYPE_PRIMARY);
         dataService.addCharacteristic(createReadNotifyChar(
-                UUID.fromString("000000001-" + BLENodeDefines.FeatureCharacteristics.COMMON_FEATURE_UUID)
+                UUID.fromString("000000001-" + BLENodeDefines.FeatureCharacteristics.BASE_COMMON_FEATURE_UUID)
         ));
         shadowDevice.addService(dataService);
         Node node = createNode(device);

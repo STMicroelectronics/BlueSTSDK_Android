@@ -141,6 +141,7 @@ public class BleAdvertiseParser {
      * @throws InvalidBleAdvertiseFormat if is not a know board type
      */
     private static Node.Type getNodeType(byte nodeType) throws InvalidBleAdvertiseFormat {
+
         short temp = (short) (nodeType & 0xFF);
         if (temp == 0x01)
             return Node.Type.STEVAL_WESU1;
@@ -150,6 +151,8 @@ public class BleAdvertiseParser {
             return Node.Type.BLUE_COIN;
         if(temp == 0x04)
             return Node.Type.STEVAL_IDB008VX;
+        if(temp == 0x05)
+            return Node.Type.STEVAL_BCN002V1;
         if (temp >= 0x80 && temp <= 0xff)
             return Node.Type.NUCLEO;
         else // 0 or user defined

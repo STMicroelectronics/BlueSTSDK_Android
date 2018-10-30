@@ -62,6 +62,11 @@ import com.st.BlueSTSDK.Features.remote.RemoteFeaturePressure;
 import com.st.BlueSTSDK.Features.remote.RemoteFeatureSwitch;
 import com.st.BlueSTSDK.Features.remote.RemoteFeatureTemperature;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -198,20 +203,26 @@ public class BLENodeDefines {
 
     /**
      * This class define the characteristics associated with the features
-     * <p>A feature characteristics must have the format XXXXXXXX-0001-11e1-ac36-0002a5d5c51b</p>
-     * <p>XXXXXXXX is a number where only one bit is 1, if multiple bit is at 1 this means that
-     * this characteristics will send the union of that features</p>
-     * <p>The general purpose feature will be created if there is a characteristics with the format
-     * XXXXXXXX-0003-11e1-ac36-0002a5d5c51b, in this case the the feature data are not parsed, but
-     * just notify to the user as an array of byte
-     * </p>
+     * There are 3 types of features:
+     * <li>
+     *     <ul>Base Feature: this feature has an uuid in the format  XXXXXXXX-0001-11e1-ac36-0002a5d5c51b,
+     *     each bit of the first part tell witch feature is present inside the characteristics, and the presence
+     *     of the feature is advertised inside the node feature mask field inside the advertise </ul>
+     *     <ul>Extended feature: this feature has an uuid in the format XXXXXXXX-0002-11e1-ac36-0002a5d5c51b,
+     *     this feature are not advertised inside the feature mask
+     *     </ul>
+     *      <ul>The general purpose feature will be created if there is a characteristics with the format
+     *      XXXXXXXX-0003-11e1-ac36-0002a5d5c51b, in this case the the feature data are not parsed, but
+     *      just notify to the user as an array of byte </ul>
+     * </li>
      * @author STMicroelectronics - Central Labs.
      */
     public static class FeatureCharacteristics {
         /**
          * all the valid characteristics have to finish with this value
          */
-        public static final String COMMON_FEATURE_UUID = "0001" + COMMON_CHAR_UUID;
+        public static final String BASE_FEATURE_COMMON_UUID = "0001" + COMMON_CHAR_UUID;
+        public static final String EXTENDED_FEATURE_COMMON_UUID = "0002" + COMMON_CHAR_UUID;
 
         /**
          * extract the fist 32 bits from the characteristics UUID
@@ -227,17 +238,30 @@ public class BLENodeDefines {
          * return true if the UUID can be a valid feature UUID
          *
          * @param uuid characteristics uuid to test
-         * @return true if the uuid end with \code{COMMON_FEATURE_UUID}
+         * @return true if the uuid end with \code{BASE_COMMON_FEATURE_UUID}
          */
-        public static boolean isFeatureCharacteristics(UUID uuid) {
+        public static boolean isBaseFeatureCharacteristics(UUID uuid) {
             String uuidString = uuid.toString();
-            return uuidString.endsWith(COMMON_FEATURE_UUID);
+            return uuidString.endsWith(BASE_FEATURE_COMMON_UUID);
         }//isKnowService
+
+        public static boolean isExtendedFeatureCharacteristics(UUID uuid) {
+            return EXTENDED_FEATURE_MAP.containsKey(uuid);
+        }//isKnowService
+
+        public static List<Class<? extends Feature>> getExtendedFeatureFor(UUID uuid) {
+            return Collections.unmodifiableList(EXTENDED_FEATURE_MAP.get(uuid));
+        }//isKnowService
+
+        public static UUID buildExtendedFeatureCharacteristics(long header){
+            String uuid = String.format("%08X-"+EXTENDED_FEATURE_COMMON_UUID,header);
+            return UUID.fromString(uuid);
+        }
 
         /**
          * all the valid general purpose characteristics have to finish with this value
          */
-        public static final String GP_FEATURE_UUID = "0003" + COMMON_CHAR_UUID;
+        static final String GP_FEATURE_UUID = "0003" + COMMON_CHAR_UUID;
 
         /**
          * return true if the UUID can be a valid general purpose characteristics
@@ -261,7 +285,10 @@ public class BLENodeDefines {
         public static final SparseArray<Class<? extends Feature>> Nucleo_Remote_Features =
                 new SparseArray<>();
 
-        static {
+        private static final Map<UUID,List<Class<? extends Feature>>> EXTENDED_FEATURE_MAP = new HashMap<>();
+
+
+        private static void buildDefaultBaseFeatureMask(){
             //DEFAULT_MASK_TO_FEATURE.put(0x80000000, RFU);
             DEFAULT_MASK_TO_FEATURE.put(0x40000000, FeatureAudioADPCMSync.class);
             DEFAULT_MASK_TO_FEATURE.put(0x20000000, FeatureSwitch.class);
@@ -284,7 +311,7 @@ public class BLENodeDefines {
 
             DEFAULT_MASK_TO_FEATURE.put(0x00008000, FeatureCOSensor.class);
             //DEFAULT_MASK_TO_FEATURE.put(0x00004000, RFU);
-            //DEFAULT_MASK_TO_FEATURE.put(0x00002000, RFU);
+            //DEFAULT_MASK_TO_FEATURE.put(0x00002000, RFU); // stm32 ota reboot
             DEFAULT_MASK_TO_FEATURE.put(0x00001000, FeatureSDLogging.class);
 
             DEFAULT_MASK_TO_FEATURE.put(0x00000800, FeatureBeamforming.class);
@@ -301,6 +328,20 @@ public class BLENodeDefines {
             DEFAULT_MASK_TO_FEATURE.put(0x00000004, FeatureProximityGesture.class);
             DEFAULT_MASK_TO_FEATURE.put(0x00000002, FeatureMemsGesture.class);
             DEFAULT_MASK_TO_FEATURE.put(0x00000001, FeaturePedometer.class);
+        }
+
+        @SafeVarargs
+        private static List<Class<? extends Feature>> asList(Class<? extends Feature> ... args){
+            return Arrays.asList(args);
+        }
+
+        private static void buildExtendedFeatureMask(){
+            //EXTENDED_FEATURE_MAP.put(buildExtendedFeatureCharacteristics(0x400), asList(FeatureAccelerationEvent.class));
+        }
+
+        static {
+            buildDefaultBaseFeatureMask();
+            buildExtendedFeatureMask();
 
             Nucleo_Remote_Features.put(0x20000000, RemoteFeatureSwitch.class);
             Nucleo_Remote_Features.put(0x00100000, RemoteFeaturePressure.class);

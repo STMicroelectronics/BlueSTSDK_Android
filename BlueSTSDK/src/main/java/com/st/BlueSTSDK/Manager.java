@@ -31,6 +31,9 @@ import android.annotation.TargetApi;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 
+import android.bluetooth.le.BluetoothLeScanner;
+import android.bluetooth.le.ScanFilter;
+import android.bluetooth.le.ScanSettings;
 import android.os.Build;
 import android.os.Handler;
 import android.support.annotation.NonNull;
@@ -49,6 +52,7 @@ import com.st.BlueSTSDK.Utils.ScanCallbackBridge;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -290,7 +294,14 @@ public class Manager {
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private void startBleScan_post21() {
         mScanCallBack_post21 = new ScanCallbackBridge(mScanCallBack_pre21);
-        mBtAdapter.getBluetoothLeScanner().startScan(mScanCallBack_post21);
+        if(mBtAdapter!=null && mBtAdapter.getBluetoothLeScanner()!=null) {
+            ScanSettings settings = new ScanSettings.Builder()
+                    .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
+                    .build();
+            List<ScanFilter> noFilter = Collections.emptyList();
+            mBtAdapter.getBluetoothLeScanner().startScan(noFilter,settings,mScanCallBack_post21);
+
+        }
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
@@ -428,7 +439,7 @@ public class Manager {
      * @param tag unique string that identify a node
      * @return the node with that tag or null if is not present on the list of the discovered node
      */
-    public @Nullable Node getNodeWithTag(String tag) {
+    public @Nullable Node getNodeWithTag(@NonNull String tag) {
         synchronized (mDiscoverNode) {
             for (Node n : mDiscoverNode) {
                 if (n.getTag().equals(tag))

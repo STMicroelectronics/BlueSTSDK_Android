@@ -101,4 +101,20 @@ public class BLENodeDefinesTest {
         );
     }
 
+    @Test
+    public void theHeaderIsCorrectlyInsertIntoanExtendedFeature(){
+        UUID uuid = BLENodeDefines.FeatureCharacteristics.buildExtendedFeatureCharacteristics(0);
+        UUID expected = UUID.fromString("00000000-0002-11e1-ac36-0002a5d5c51b");
+        Assert.assertEquals(expected,uuid);
+
+        uuid = BLENodeDefines.FeatureCharacteristics.buildExtendedFeatureCharacteristics(1);
+        expected = UUID.fromString("00000001-0002-11e1-ac36-0002a5d5c51b");
+        Assert.assertEquals(expected,uuid);
+
+        uuid = BLENodeDefines.FeatureCharacteristics.buildExtendedFeatureCharacteristics(0xFFFFFFFFL);
+        expected = UUID.fromString("FFFFFFFF-0002-11e1-ac36-0002a5d5c51b");
+        Assert.assertEquals(expected,uuid);
+
+    }
+
 }
