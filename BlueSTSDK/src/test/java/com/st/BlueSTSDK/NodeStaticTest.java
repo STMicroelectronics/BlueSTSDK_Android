@@ -30,15 +30,15 @@ public class NodeStaticTest {
     @Test
     public void nodeExportFeatureUseTheDefaultMapToWork(){
         Node n = createNodeWithFeatureMask(0x20000000);
-        Assert.assertTrue(Node.exportFeature(n, FeatureSwitch.class));
-        Assert.assertFalse(Node.exportFeature(n, FeatureTemperature.class));
+        Assert.assertTrue(n.isExportingFeature(FeatureSwitch.class));
+        Assert.assertFalse(n.isExportingFeature(FeatureTemperature.class));
     }
 
     @Test
     public void nodeExportFeatureworksWithMultipleFeature(){
         Node n = createNodeWithFeatureMask(0x20000000);
-        Assert.assertTrue(Node.exportFeature(n, FeatureSwitch.class));
-        Assert.assertFalse(Node.exportFeature(n, FeatureTemperature.class));
+        Assert.assertTrue(n.isExportingFeature(FeatureSwitch.class));
+        Assert.assertFalse(n.isExportingFeature(FeatureTemperature.class));
     }
 
 }

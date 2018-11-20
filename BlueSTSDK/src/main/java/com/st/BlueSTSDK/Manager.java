@@ -84,6 +84,8 @@ public class Manager {
     static{
         sFeatureMapDecoder.put((byte) 0x81, BLENodeDefines.FeatureCharacteristics
                 .Nucleo_Remote_Features);
+        sFeatureMapDecoder.put((byte) 0x06, BLENodeDefines.FeatureCharacteristics
+                .DEVBOARD_MASK_TO_FEATURE);
     }
 
 

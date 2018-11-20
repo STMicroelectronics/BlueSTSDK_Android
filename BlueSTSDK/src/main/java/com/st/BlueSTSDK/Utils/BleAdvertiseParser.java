@@ -153,6 +153,8 @@ public class BleAdvertiseParser {
             return Node.Type.STEVAL_IDB008VX;
         if(temp == 0x05)
             return Node.Type.STEVAL_BCN002V1;
+        if(temp == 0x06)
+            return Node.Type.STEVAL_DEVBOARD;
         if (temp >= 0x80 && temp <= 0xff)
             return Node.Type.NUCLEO;
         else // 0 or user defined

@@ -36,19 +36,19 @@ public class TestFreeFallFeature {
 
     @Test
     public void testNullFreeFallStatus(){
-        Assert.assertEquals(false, FeatureFreeFall.getFreeFallStatus(null));
+        Assert.assertFalse(FeatureFreeFall.getFreeFallStatus(null));
     }
 
     @Test
     public void testInvalidFreeFallStatus(){
         Feature.Sample s = new Feature.Sample(100,new Number[]{}, new Field[]{});
-        Assert.assertEquals(false, FeatureFreeFall.getFreeFallStatus(s));
+        Assert.assertFalse(FeatureFreeFall.getFreeFallStatus(s));
     }
 
     @Test
     public void testSampleActivity(){
         Feature.Sample s = new Feature.Sample(100,new Number[]{1}, new Field[]{});
-        Assert.assertEquals(true, FeatureFreeFall.getFreeFallStatus(s));
+        Assert.assertTrue(FeatureFreeFall.getFreeFallStatus(s));
     }
 
 
@@ -75,13 +75,13 @@ public class TestFreeFallFeature {
         UpdateFeatureUtil.callUpdate(f, 2, data, offset);
 
         Assert.assertEquals(2, f.getSample().timestamp);
-        Assert.assertEquals(true, FeatureFreeFall.getFreeFallStatus(f.getSample()));
+        Assert.assertTrue(FeatureFreeFall.getFreeFallStatus(f.getSample()));
 
         data[offset]=0;
 
         UpdateFeatureUtil.callUpdate(f, 2, data, offset);
         Assert.assertEquals(2, f.getSample().timestamp);
-        Assert.assertEquals(false, FeatureFreeFall.getFreeFallStatus(f.getSample()));
+        Assert.assertFalse(FeatureFreeFall.getFreeFallStatus(f.getSample()));
     }
 
     @Test
@@ -94,13 +94,13 @@ public class TestFreeFallFeature {
         UpdateFeatureUtil.callUpdate(f, 2, data, offset);
 
         Assert.assertEquals(2, f.getSample().timestamp);
-        Assert.assertEquals(true, FeatureFreeFall.getFreeFallStatus(f.getSample()));
+        Assert.assertTrue(FeatureFreeFall.getFreeFallStatus(f.getSample()));
 
         data[offset]=0;
 
         UpdateFeatureUtil.callUpdate(f, 2, data, offset);
         Assert.assertEquals(2, f.getSample().timestamp);
-        Assert.assertEquals(false, FeatureFreeFall.getFreeFallStatus(f.getSample()));
+        Assert.assertFalse(FeatureFreeFall.getFreeFallStatus(f.getSample()));
 
     }
 

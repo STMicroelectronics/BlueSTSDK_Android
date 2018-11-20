@@ -31,6 +31,7 @@ import android.support.annotation.Nullable;
 
 import com.st.BlueSTSDK.Feature;
 import com.st.BlueSTSDK.Node;
+import com.st.BlueSTSDK.Utils.NumberConversion;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -50,9 +51,9 @@ import java.util.Locale;
 public class FeatureActivity extends Feature {
 
     public static final String FEATURE_NAME = "Activity Recognition";
-    public static final String FEATURE_UNIT[] = {null,"ms"};
-    public static final String FEATURE_DATA_NAME[] = {"Activity","Date"};
-    public static final float DATA_MAX = 6;
+    public static final String FEATURE_UNIT[] = {null,"ms",null};
+    public static final String FEATURE_DATA_NAME[] = {"Activity","Date","Algorithm"};
+    public static final float DATA_MAX = 7;
     public static final float DATA_MIN = 0;
 
     /**
@@ -94,6 +95,10 @@ public class FeatureActivity extends Feature {
          */
         DRIVING,
         /**
+         * the person is doing the stairs
+         */
+        STAIRS,
+        /**
          * invalid state
          */
         ERROR
@@ -105,31 +110,29 @@ public class FeatureActivity extends Feature {
      * @return type of activity detected by the node
      */
     public static ActivityType getActivityStatus(Sample sample){
-        if(sample!=null)
-            if(sample.data.length>0)
-                if (sample.data[0] != null){
-                    int activityId = sample.data[0].byteValue();
-                    switch (activityId){
-                        case 0x00:
-                            return ActivityType.NO_ACTIVITY;
-                        case 0x01:
-                            return ActivityType.STATIONARY;
-                        case 0x02:
-                            return ActivityType.WALKING;
-                        case 0x03:
-                            return ActivityType.FASTWALKING;
-                        case 0x04:
-                            return ActivityType.JOGGING;
-                        case 0x05:
-                            return ActivityType.BIKING;
-                        case 0x06:
-                            return ActivityType.DRIVING;
-                        default:
-                            return ActivityType.ERROR;
-                    }//switch
-                }//if
-            //if data.length
-        //if sample!=null
+        if(hasValidIndex(sample,0)){
+            int activityId = sample.data[0].byteValue();
+            switch (activityId){
+                case 0x00:
+                    return ActivityType.NO_ACTIVITY;
+                case 0x01:
+                    return ActivityType.STATIONARY;
+                case 0x02:
+                    return ActivityType.WALKING;
+                case 0x03:
+                    return ActivityType.FASTWALKING;
+                case 0x04:
+                    return ActivityType.JOGGING;
+                case 0x05:
+                    return ActivityType.BIKING;
+                case 0x06:
+                    return ActivityType.DRIVING;
+                case 0x07:
+                    return ActivityType.STAIRS;
+                default:
+                    return ActivityType.ERROR;
+            }//switch
+        }//if
         return ActivityType.ERROR;
     }//getActivityStatus
 
@@ -139,14 +142,18 @@ public class FeatureActivity extends Feature {
      * @return local time when we receive the data, or null if it is an invalid sample
      */
     public static @Nullable Date getActivityDate(Sample sample){
-        if(sample!=null)
-            if (sample.data.length > 1)
-                if (sample.data[1] != null)
-                    return new Date(sample.data[1].longValue());
-
+        if(hasValidIndex(sample,1))
+            return new Date(sample.data[1].longValue());
         //else
         return null;
     }//getActivityDate
+
+    public static short getAlgorithmType(Sample sample){
+        if(hasValidIndex(sample,2)){
+            return sample.data[2].shortValue();
+        }
+        return 0;
+    }
 
 
     /**
@@ -159,9 +166,28 @@ public class FeatureActivity extends Feature {
                         DATA_MAX,DATA_MIN),
                 new Field(FEATURE_DATA_NAME[1], FEATURE_UNIT[1], Field.Type.Int64,
                         Long.MAX_VALUE,0),
+                new Field(FEATURE_DATA_NAME[1], FEATURE_UNIT[1], Field.Type.UInt8,
+                        0xFF,0),
         });
     }//FeatureActivity
 
+
+    private ExtractResult extractActivity(long timestamp,byte data[], int dataOffset){
+        Sample temp = new Sample(timestamp, new Number[]{
+                data[dataOffset],
+                System.currentTimeMillis()
+        }, getFieldsDesc());
+        return new ExtractResult(temp, 1);
+    }
+
+    private ExtractResult extractActivityAndAlgorithm(long timestamp,byte data[], int dataOffset){
+        Sample temp = new Sample(timestamp, new Number[]{
+                data[dataOffset],
+                System.currentTimeMillis(),
+                NumberConversion.byteToUInt8(data,dataOffset+1)
+        }, getFieldsDesc());
+        return new ExtractResult(temp, 2);
+    }
 
     /**
      * read a byte with the activity data send from the node
@@ -173,13 +199,14 @@ public class FeatureActivity extends Feature {
      */
     @Override
     protected ExtractResult extractData(long timestamp, @NonNull byte[] data, int dataOffset) {
-        if (data.length - dataOffset < 1)
+        int byteAvailable = data.length - dataOffset;
+        if ( byteAvailable< 1)
             throw new IllegalArgumentException("There are no 1 byte available to read");
-        Sample temp = new Sample(timestamp,new Number[]{
-                data[dataOffset],
-                System.currentTimeMillis()
-        },getFieldsDesc());
-        return new ExtractResult(temp,1);
+        if(byteAvailable == 1 ) {
+            return extractActivity(timestamp,data,dataOffset);
+        }else{
+            return extractActivityAndAlgorithm(timestamp,data,dataOffset);
+        }
     }//extractData
 
     @Override
@@ -189,7 +216,8 @@ public class FeatureActivity extends Feature {
             return FEATURE_NAME+":\n"+
                     "\tTimestamp: "+ sample.timestamp+"\n" +
                     "\tActivity: "+ getActivityStatus(sample)+"\n" +
-                    "\tDate: "+ DATA_FORMAT.format(getActivityDate(sample));
+                    "\tDate: "+ DATA_FORMAT.format(getActivityDate(sample))+
+                    "\tAlgorithm: "+ getAlgorithmType(sample);
         }else{
             return super.toString();
         }

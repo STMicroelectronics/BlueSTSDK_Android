@@ -85,10 +85,15 @@ public class Node{
     public boolean isExportingFeature(Class<? extends Feature> featureClass) {
         SparseArray<Class<? extends Feature>> decoder = Manager.getNodeFeatures(
                 getTypeId());
-
-        long mask = decoder.keyAt(decoder.indexOfValue(featureClass));
-
-        return (getAdvertiseBitMask() & mask)!=0;
+        long advertiseBitMask = getAdvertiseBitMask();
+        for (int i = 0 ; i< decoder.size(); i++){
+            if(featureClass == decoder.valueAt(i)){
+                long mask = decoder.keyAt(i);
+                if((advertiseBitMask & mask) != 0)
+                    return true;
+            }
+        }
+        return false;
     }
 
     /** Node type: type the board that is advertising connection */
@@ -105,6 +110,8 @@ public class Node{
         STEVAL_IDB008VX,
         /** ST BlueNRG-Tile eval board*/
         STEVAL_BCN002V1,
+
+        STEVAL_DEVBOARD,
         /** board based on a x NUCLEO board */
         NUCLEO
     }//Type
@@ -355,7 +362,7 @@ public class Node{
             for(int i=0; i<32; i++ ) {
                 if ((featureMask & mask) != 0) { //if the bit is up
                     Class<? extends Feature> featureClass = decoder.get((int)mask);
-                    if (featureClass != null) { //and the decoder has a name for that bit
+                    if (featureClass != null && isExportingFeature(featureClass)) { //and the decoder has a name for that bit
                         Feature f = buildFeatureFromClass(featureClass);
                         if(f!=null) {
                             mAvailableFeature.add(f);
@@ -452,12 +459,12 @@ public class Node{
 
                     for (BluetoothGattCharacteristic characteristic : service.getCharacteristics()) {
                         UUID uuid = characteristic.getUuid();
-                        if (BLENodeDefines.FeatureCharacteristics.isBaseFeatureCharacteristics(uuid))
+                        if (BLENodeDefines.FeatureCharacteristics.isBaseFeatureCharacteristics(uuid)) {
                             buildFeatures(characteristic);
-                        if (BLENodeDefines.FeatureCharacteristics.isExtendedFeatureCharacteristics(uuid))
+                        }else if (BLENodeDefines.FeatureCharacteristics.isExtendedFeatureCharacteristics(uuid)) {
                             buildFeaturesKnownUUID(characteristic,
                                     BLENodeDefines.FeatureCharacteristics.getExtendedFeatureFor(uuid));
-                        else if (BLENodeDefines.FeatureCharacteristics
+                        }else if (BLENodeDefines.FeatureCharacteristics
                                 .isGeneralPurposeCharacteristics(uuid)) {
                             buildGenericFeature(characteristic);
                         }else if(mExternalCharFeatures!=null &&
@@ -1479,7 +1486,7 @@ public class Node{
                     }
                     if (Arrays.equals(desc.getValue(), BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE))
                         mConnection.setCharacteristicNotification(desc.getCharacteristic(), false);
-                    if (!mConnection.writeDescriptor(desc) && mBleThread != null)
+                   if (!mConnection.writeDescriptor(desc) && mBleThread != null)
                         mBleThread.postDelayed(this, RETRY_COMMAND_DELAY_MS);
                 }//if size
             }//synchronized

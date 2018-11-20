@@ -29,20 +29,24 @@ package com.st.BlueSTSDK.Utils;
 import android.util.SparseArray;
 
 import com.st.BlueSTSDK.Feature;
+import com.st.BlueSTSDK.Features.FeatureAILogging;
 import com.st.BlueSTSDK.Features.FeatureAcceleration;
 import com.st.BlueSTSDK.Features.FeatureAccelerationEvent;
 import com.st.BlueSTSDK.Features.FeatureActivity;
 import com.st.BlueSTSDK.Features.FeatureAudioADPCM;
 import com.st.BlueSTSDK.Features.FeatureAudioADPCMSync;
+import com.st.BlueSTSDK.Features.FeatureAudioSceneClassification;
 import com.st.BlueSTSDK.Features.FeatureBeamforming;
 import com.st.BlueSTSDK.Features.FeatureBattery;
 import com.st.BlueSTSDK.Features.FeatureCOSensor;
 import com.st.BlueSTSDK.Features.FeatureCarryPosition;
 import com.st.BlueSTSDK.Features.FeatureCompass;
 import com.st.BlueSTSDK.Features.FeatureDirectionOfArrival;
+import com.st.BlueSTSDK.Features.FeatureEulerAngle;
 import com.st.BlueSTSDK.Features.FeatureFreeFall;
 import com.st.BlueSTSDK.Features.FeatureGyroscope;
 import com.st.BlueSTSDK.Features.FeatureHumidity;
+import com.st.BlueSTSDK.Features.FeatureFFTAmplitude;
 import com.st.BlueSTSDK.Features.FeatureLuminosity;
 import com.st.BlueSTSDK.Features.FeatureMagnetometer;
 import com.st.BlueSTSDK.Features.FeatureMemsGesture;
@@ -279,6 +283,9 @@ public class BLENodeDefines {
         public static final SparseArray<Class<? extends Feature>> DEFAULT_MASK_TO_FEATURE =
                 new SparseArray<>();
 
+        public static final SparseArray<Class<? extends Feature>> DEVBOARD_MASK_TO_FEATURE =
+                new SparseArray<>();
+
         /**
          * array that map a feature mask with a feature class, for a nucleo devices
          */
@@ -330,18 +337,63 @@ public class BLENodeDefines {
             DEFAULT_MASK_TO_FEATURE.put(0x00000001, FeaturePedometer.class);
         }
 
+        private static void buildDevBoardFeatureMask(){
+            DEVBOARD_MASK_TO_FEATURE.put(0x80000000, FeatureFFTAmplitude.class);
+            DEVBOARD_MASK_TO_FEATURE.put(0x40000000, FeatureAudioADPCMSync.class);
+            DEVBOARD_MASK_TO_FEATURE.put(0x20000000, FeatureSwitch.class);
+            DEVBOARD_MASK_TO_FEATURE.put(0x10000000, FeatureDirectionOfArrival.class);
+
+            DEVBOARD_MASK_TO_FEATURE.put(0x08000000, FeatureAudioADPCM.class);
+            DEVBOARD_MASK_TO_FEATURE.put(0x04000000, FeatureMicLevel.class);
+            DEVBOARD_MASK_TO_FEATURE.put(0x02000000, FeatureProximity.class);
+            DEVBOARD_MASK_TO_FEATURE.put(0x01000000, FeatureLuminosity.class);
+
+            DEVBOARD_MASK_TO_FEATURE.put(0x00800000, FeatureAcceleration.class);
+            DEVBOARD_MASK_TO_FEATURE.put(0x00400000, FeatureGyroscope.class);
+            DEVBOARD_MASK_TO_FEATURE.put(0x00200000, FeatureMagnetometer.class);
+            DEVBOARD_MASK_TO_FEATURE.put(0x00100000, FeaturePressure.class);
+
+            DEVBOARD_MASK_TO_FEATURE.put(0x00080000, FeatureHumidity.class);
+            DEVBOARD_MASK_TO_FEATURE.put(0x00040000, FeatureTemperature.class);
+            DEVBOARD_MASK_TO_FEATURE.put(0x00020000, FeatureBattery.class);
+            DEVBOARD_MASK_TO_FEATURE.put(0x00010000, FeatureTemperature.class);
+
+            DEVBOARD_MASK_TO_FEATURE.put(0x00008000, FeatureCOSensor.class);
+            DEVBOARD_MASK_TO_FEATURE.put(0x00004000, FeatureEulerAngle.class);
+            //DEFAULT_MASK_TO_FEATURE.put(0x00002000, RFU); // stm32 ota reboot
+            DEVBOARD_MASK_TO_FEATURE.put(0x00001000, FeatureSDLogging.class);
+
+            DEVBOARD_MASK_TO_FEATURE.put(0x00000800, FeatureBeamforming.class);
+            DEVBOARD_MASK_TO_FEATURE.put(0x00000400, FeatureAccelerationEvent.class);
+            DEVBOARD_MASK_TO_FEATURE.put(0x00000200, FeatureFreeFall.class);
+            DEVBOARD_MASK_TO_FEATURE.put(0x00000100, FeatureMemsSensorFusionCompact.class);
+
+            DEVBOARD_MASK_TO_FEATURE.put(0x00000080, FeatureMemsSensorFusion.class);
+            DEVBOARD_MASK_TO_FEATURE.put(0x00000020, FeatureMotionIntensity.class);
+            DEVBOARD_MASK_TO_FEATURE.put(0x00000040, FeatureCompass.class);
+            DEVBOARD_MASK_TO_FEATURE.put(0x00000010, FeatureActivity.class);
+
+            DEVBOARD_MASK_TO_FEATURE.put(0x00000008, FeatureCarryPosition.class);
+            DEVBOARD_MASK_TO_FEATURE.put(0x00000004, FeatureProximityGesture.class);
+            DEVBOARD_MASK_TO_FEATURE.put(0x00000002, FeatureMemsGesture.class);
+            DEVBOARD_MASK_TO_FEATURE.put(0x00000001, FeaturePedometer.class);
+        }
+
         @SafeVarargs
         private static List<Class<? extends Feature>> asList(Class<? extends Feature> ... args){
             return Arrays.asList(args);
         }
 
         private static void buildExtendedFeatureMask(){
-            //EXTENDED_FEATURE_MAP.put(buildExtendedFeatureCharacteristics(0x400), asList(FeatureAccelerationEvent.class));
+            EXTENDED_FEATURE_MAP.put(buildExtendedFeatureCharacteristics(0x03), asList(FeatureAudioSceneClassification.class));
+            EXTENDED_FEATURE_MAP.put(buildExtendedFeatureCharacteristics(0x04), asList(FeatureAILogging.class));
         }
 
         static {
             buildDefaultBaseFeatureMask();
             buildExtendedFeatureMask();
+
+            buildDevBoardFeatureMask();
 
             Nucleo_Remote_Features.put(0x20000000, RemoteFeatureSwitch.class);
             Nucleo_Remote_Features.put(0x00100000, RemoteFeaturePressure.class);

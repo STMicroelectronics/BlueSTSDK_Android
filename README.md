@@ -132,8 +132,8 @@ The SDK is compatible with different ST firmware as:
  - [FP-NET-BLESTAR1](http://www.st.com/content/st_com/en/products/embedded-software/mcus-embedded-software/stm32-embedded-software/stm32-ode-function-pack-sw/fp-net-blestar1.html): STM32 ODE function pack for creating a BLE star network connected via Wi-Fi to IBM Watson IoT cloud
 
 And it is used in different application as:
- - [ST BlueMS](https://github.com/STMicroelectronics-CentralLabs/STBlueMS_Android)
- - [ST SensNet](https://github.com/STMicroelectronics-CentralLabs/STSensNet_Android)
+ - [ST BLE Sensor](https://github.com/STMicroelectronics-CentralLabs/STBlueMS_Android)
+ - [ST BLE StarNet](https://github.com/STMicroelectronics-CentralLabs/STSensNet_Android)
 
 ## How to install the library
 ### As an external library

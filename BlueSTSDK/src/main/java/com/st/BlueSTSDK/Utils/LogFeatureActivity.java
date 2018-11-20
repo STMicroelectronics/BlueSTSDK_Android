@@ -29,6 +29,7 @@ package com.st.BlueSTSDK.Utils;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
@@ -349,11 +350,11 @@ public abstract class LogFeatureActivity extends AppCompatActivity {
 
     /**
      * Compose and send a mail with all the log files as attached
-     * @param a activity used for send the mail intent
+     * @param ctx activity used for send the mail intent
      * @param folder folder where the log file are stored
      * @param logFiles log files to send as attached
      */
-    private static void sendLogByMail(Activity a, String folder, File[] logFiles) {
+    private static void sendLogByMail(Context ctx, String folder, File[] logFiles) {
         final Intent emailIntent =
                 new Intent(Intent.ACTION_SEND_MULTIPLE);
         emailIntent.setType("message/rfc822");
@@ -361,8 +362,8 @@ public abstract class LogFeatureActivity extends AppCompatActivity {
         String strAppName = "BlueSTSDK";
         String strAppPackage = "com.st.BlueSTSDK";
         try {
-            PackageInfo pInfo = a.getPackageManager().getPackageInfo(a.getPackageName(), 0);
-            strAppName = a.getPackageManager().getApplicationLabel(pInfo.applicationInfo).toString();
+            PackageInfo pInfo = ctx.getPackageManager().getPackageInfo(ctx.getPackageName(), 0);
+            strAppName = ctx.getPackageManager().getApplicationLabel(pInfo.applicationInfo).toString();
             strAppPackage = pInfo.packageName;
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
@@ -372,7 +373,7 @@ public abstract class LogFeatureActivity extends AppCompatActivity {
 
         Log.d(TAG, strAppName);
         try {
-            PackageInfo pInfo = a.getPackageManager().getPackageInfo(a.getPackageName(), 0);
+            PackageInfo pInfo = ctx.getPackageManager().getPackageInfo(ctx.getPackageName(), 0);
             strAppName += " " + pInfo.versionName + " (" +pInfo.versionCode+")";
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
@@ -389,12 +390,12 @@ public abstract class LogFeatureActivity extends AppCompatActivity {
         ArrayList<Uri> uris = new ArrayList<>();
         // convert from paths to Android friendly Parcelable Uri's
         for (File file : logFiles) {
-            Uri temp = FileProvider.getUriForFile(a,strAppPackage+".logFileProvider",file);
+            Uri temp = FileProvider.getUriForFile(ctx,strAppPackage+".logFileProvider",file);
             //Uri temp = Uri.fromFile(file)
             uris.add(temp);
         }
         emailIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
-        a.startActivity(Intent.createChooser(emailIntent, "Sent mail"));
+        ctx.startActivity(Intent.createChooser(emailIntent, "Sent mail"));
     }//sendLogByMail
 
 
