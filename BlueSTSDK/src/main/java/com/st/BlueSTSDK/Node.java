@@ -110,8 +110,8 @@ public class Node{
         STEVAL_IDB008VX,
         /** ST BlueNRG-Tile eval board*/
         STEVAL_BCN002V1,
-
-        STEVAL_DEVBOARD,
+        /** SensorTile.101 board */
+        SENSOR_TILE_101,
         /** board based on a x NUCLEO board */
         NUCLEO
     }//Type

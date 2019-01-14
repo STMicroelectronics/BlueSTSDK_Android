@@ -27,7 +27,6 @@
 package com.st.BlueSTSDK.Utils;
 
 
-import com.st.BlueSTSDK.Manager;
 import com.st.BlueSTSDK.Node;
 
 /**
@@ -154,7 +153,7 @@ public class BleAdvertiseParser {
         if(temp == 0x05)
             return Node.Type.STEVAL_BCN002V1;
         if(temp == 0x06)
-            return Node.Type.STEVAL_DEVBOARD;
+            return Node.Type.SENSOR_TILE_101;
         if (temp >= 0x80 && temp <= 0xff)
             return Node.Type.NUCLEO;
         else // 0 or user defined

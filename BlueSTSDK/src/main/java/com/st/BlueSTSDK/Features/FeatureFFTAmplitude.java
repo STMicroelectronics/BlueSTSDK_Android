@@ -1,9 +1,15 @@
 package com.st.BlueSTSDK.Features;
 
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 import com.st.BlueSTSDK.Node;
 import com.st.BlueSTSDK.Utils.NumberConversion;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 public class FeatureFFTAmplitude extends DeviceTimestampFeature {
     public static final String FEATURE_NAME = "FFT Amplitude";
@@ -31,7 +37,7 @@ public class FeatureFFTAmplitude extends DeviceTimestampFeature {
         return false;
     }
 
-    public static int getDataLoadPercentage(Sample s){
+    public static byte getDataLoadPercentage(Sample s){
         if (s instanceof  FFTSample){
             return ((FFTSample) s).getDataLoadPercentage();
         }
@@ -80,12 +86,25 @@ public class FeatureFFTAmplitude extends DeviceTimestampFeature {
         return new float[0];
     }
 
+    public static List<float[]> getComponents(Sample s){
+        if (!(s instanceof  FFTSample)){
+            return Collections.emptyList();
+        }
+        FFTSample sample = (FFTSample)s;
+        int nComponents = sample.nComponents;
+        List<float[]>components = new ArrayList<>(nComponents);
+        for (int i = 0; i < nComponents; i++) {
+            components.add(sample.getComponent(i));
+        }
+        return Collections.unmodifiableList(components);
+    }
+
 
     private static class FFTSample extends Sample{
 
-        public final int nSample;
-        public final short nComponents;
-        public final float freqStep;
+        final int nSample;
+        final short nComponents;
+        final float freqStep;
 
         private byte[] rawData;
         private int nLastData;
@@ -100,15 +119,17 @@ public class FeatureFFTAmplitude extends DeviceTimestampFeature {
         }
 
         void appendData(byte[] data , int offset){
-            int dataToCopy = data.length - offset;
+            int spaceAvailable = rawData.length-nLastData;
+            int dataAvailable = data.length - offset;
+            int dataToCopy = Math.min(spaceAvailable,dataAvailable);
             System.arraycopy(data,offset,rawData,nLastData,dataToCopy);
             nLastData += dataToCopy;
         }
 
-        int getDataLoadPercentage(){
+        byte getDataLoadPercentage(){
             if(rawData.length == 0)
                 return 0;
-            return (nLastData*100)/rawData.length;
+            return (byte) ((nLastData*100)/rawData.length);
         }
 
         boolean isComplete(){
@@ -133,10 +154,13 @@ public class FeatureFFTAmplitude extends DeviceTimestampFeature {
 
     }
 
+    private FFTSample mPartialSample;
+
     private FFTSample readHeaderData(long timestamp, byte[] data, int dataOffset){
         if(data.length-dataOffset < 7){
             throw new IllegalArgumentException("There are no 7 bytes available to read");
         }
+        Log.d("FFT",Arrays.toString(data));
 
         int nSample =  NumberConversion.LittleEndian.bytesToUInt16(data, dataOffset);
         short nComponents =  NumberConversion.byteToUInt8(data, dataOffset+2);
@@ -149,8 +173,17 @@ public class FeatureFFTAmplitude extends DeviceTimestampFeature {
         return sample;
     }
 
+    @Override
+    public void enableNotification() {
+        mPartialSample=null;
+        super.enableNotification();
+    }
 
-    private FFTSample mPartialSample;
+    @Override
+    public void disableNotification(){
+        mPartialSample=null;
+        super.disableNotification();
+    }
 
     @Override
     protected ExtractResult extractData(long timestamp, byte[] data, int dataOffset) {

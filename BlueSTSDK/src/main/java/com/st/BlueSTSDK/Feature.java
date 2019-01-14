@@ -241,6 +241,14 @@ public abstract class Feature {
         mIsEnabled = enable;
     }//setEnable
 
+    public void enableNotification(){
+        mParent.enableNotification(this);
+    }
+
+    public void disableNotification(){
+        mParent.disableNotification(this);
+    }
+
     /**
      * call the method {@link com.st.BlueSTSDK.Feature.FeatureListener#onUpdate(Feature,
      * Feature.Sample)} for each listener that subscribe to this feature.

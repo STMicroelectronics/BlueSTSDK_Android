@@ -31,7 +31,6 @@ import android.annotation.TargetApi;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 
-import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanSettings;
 import android.os.Build;
@@ -40,7 +39,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresPermission;
 import android.support.annotation.WorkerThread;
-import android.support.design.internal.ParcelableSparseArray;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -85,7 +83,7 @@ public class Manager {
         sFeatureMapDecoder.put((byte) 0x81, BLENodeDefines.FeatureCharacteristics
                 .Nucleo_Remote_Features);
         sFeatureMapDecoder.put((byte) 0x06, BLENodeDefines.FeatureCharacteristics
-                .DEVBOARD_MASK_TO_FEATURE);
+                .SENSOT_TILE_101_MASK_TO_FEATURE);
     }
 
 

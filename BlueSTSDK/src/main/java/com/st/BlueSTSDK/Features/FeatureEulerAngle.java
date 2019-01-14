@@ -25,7 +25,7 @@ public class FeatureEulerAngle extends Feature {
      * create a feature that export the euler angle data with a different name
      * @param node node that will export the data
      */
-    protected FeatureEulerAngle(Node node) {
+    public FeatureEulerAngle(Node node) {
         super(FEATURE_NAME, node, new Field[]{
                 new Field(FEATURE_DATA_NAME[YAW_INDEX], FEATURE_UNIT[YAW_INDEX], Field.Type.Float,
                         DATA_MAX[YAW_INDEX], DATA_MIN[YAW_INDEX]),
