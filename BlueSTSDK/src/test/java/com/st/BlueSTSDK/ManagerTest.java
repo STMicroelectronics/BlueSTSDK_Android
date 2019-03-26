@@ -31,7 +31,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.util.SparseArray;
 
 import com.st.BlueSTSDK.TestUtil.TestUtil;
-import com.st.BlueSTSDK.Utils.InvalidBleAdvertiseFormat;
+import com.st.BlueSTSDK.Utils.advertise.InvalidBleAdvertiseFormat;
 import com.st.BlueSTSDK.Utils.InvalidFeatureBitMaskException;
 
 import junit.framework.Assert;
@@ -40,7 +40,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;

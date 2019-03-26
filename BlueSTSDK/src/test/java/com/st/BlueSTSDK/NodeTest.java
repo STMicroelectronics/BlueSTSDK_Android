@@ -41,7 +41,7 @@ import com.st.BlueSTSDK.TestUtil.BluetoothGattShadow;
 import com.st.BlueSTSDK.TestUtil.MyTestRunner;
 import com.st.BlueSTSDK.TestUtil.TestUtil;
 import com.st.BlueSTSDK.Utils.BLENodeDefines;
-import com.st.BlueSTSDK.Utils.InvalidBleAdvertiseFormat;
+import com.st.BlueSTSDK.Utils.advertise.InvalidBleAdvertiseFormat;
 import com.st.BlueSTSDK.Utils.InvalidFeatureBitMaskException;
 
 import junit.framework.Assert;

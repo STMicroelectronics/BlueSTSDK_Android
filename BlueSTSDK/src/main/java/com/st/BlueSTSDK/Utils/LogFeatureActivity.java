@@ -38,6 +38,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -291,6 +292,12 @@ public abstract class LogFeatureActivity extends AppCompatActivity {
         return mCurrentLogger!=null;
     }
 
+    public @Nullable String getLoggingSessionPrefix(){
+        if(mCurrentLogger instanceof  FeatureLogBase){
+            return ((FeatureLogBase) mCurrentLogger).logSessionPrefix();
+        }
+        return null;
+    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

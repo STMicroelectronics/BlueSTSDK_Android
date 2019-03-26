@@ -23,6 +23,9 @@ Currently used values are:
     - 0x03 is reserved for the [STEVAL-BCNKT01V1 (BlueCoin)](http://www.st.com/content/st_com/en/products/evaluation-tools/solution-evaluation-tools/sensor-solution-eval-boards/steval-bcnkt01v1.html) board
     - 0x04 is reserved for the [STEVAL-IDB008V1/2 (BlueNRG-2)](http://www.st.com/content/st_com/en/products/evaluation-tools/solution-evaluation-tools/communication-and-connectivity-solution-eval-boards/steval-idb008v2.html) board
     - 0x05 is reserved for the [STEVAL-BCN002V1B (BlueNRG-Tile)](https://www.st.com/content/st_com/en/products/evaluation-tools/solution-evaluation-tools/sensor-solution-eval-boards/steval-bcn002v1b.html) board
+    - 0x05 is reserved for the [STEVAL-BCN002V1B (BlueNRG-Tile)](https://www.st.com/content/st_com/en/products/evaluation-tools/solution-evaluation-tools/sensor-solution-eval-boards/steval-bcn002v1b.html) board
+    - 0x06 is reserved for the SensorTile.101 board
+    - 0x07 is reserved for the [B-L475E-IOT01A](https://www.st.com/en/evaluation-tools/b-l475e-iot01a.html) board
     - 0x80 to 0x8A for a differents ST Functional pack based on Nucleo boards
 
   You should use a value between 0x05 and 0x7F for your custom board, as values between 0x80 and 0xFF are reserved for ST Nucleo boards.
@@ -89,7 +92,7 @@ For this type of feature the characteristic data format must be:
 
 
 ### Special Services
-#### [Debug](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Debug.html)
+#### [Debug](https://stmicroelectronics.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Debug.html)
 If available, the debug service must have the UUID <code>00000000-000E-11e1-9ab4-0002a5d5c51b</code> and will contains 2 characteristics:
 
 - <code>00000001-000E-11e1-ac36-0002a5d5c51b</code> (Notify/Write) is used to send string commands to the board and to notify the user of the result.
@@ -115,7 +118,7 @@ If available, the configuration service must have the UUID <code>00000000-000F-1
     |:------:|:---------:|:-------------------:|:----------:|:-----------:|
     |  Name  | Timestamp | Sender Feature Mask | Command Id | Answer Data |
     
-  From the SDK point of view the messages are sent using the method [Feature.sendCommand](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Feature.html#sendCommand-byte-byte:A-) and the answer is notified with a callback passed through the method [Feature.parseCommandResponse](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Feature.html#parseCommandResponse-int-byte-byte:A-).
+  From the SDK point of view the messages are sent using the method [Feature.sendCommand](https://stmicroelectronics.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Feature.html#sendCommand-byte-byte:A-) and the answer is notified with a callback passed through the method [Feature.parseCommandResponse](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Feature.html#parseCommandResponse-int-byte-byte:A-).
 
   If this characteristic does not exist, but the characteristics that export the feature is in 
   write mode, the *command id* and the *command data* are sending directly to the feature 
@@ -132,8 +135,8 @@ The SDK is compatible with different ST firmware as:
  - [FP-NET-BLESTAR1](http://www.st.com/content/st_com/en/products/embedded-software/mcus-embedded-software/stm32-embedded-software/stm32-ode-function-pack-sw/fp-net-blestar1.html): STM32 ODE function pack for creating a BLE star network connected via Wi-Fi to IBM Watson IoT cloud
 
 And it is used in different application as:
- - [ST BLE Sensor](https://github.com/STMicroelectronics-CentralLabs/STBlueMS_Android)
- - [ST BLE StarNet](https://github.com/STMicroelectronics-CentralLabs/STSensNet_Android)
+ - [ST BLE Sensor](https://github.com/STMicroelectronics/STBlueMS_Android)
+ - [ST BLE StarNet](https://github.com/STMicroelectronics/STSensNet_Android)
 
 ## How to install the library
 ### As an external library
@@ -151,14 +154,14 @@ And it is used in different application as:
 
 ## Main library actors
 
-### [Manager](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Manager.html)
+### [Manager](https://stmicroelectronics.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Manager.html)
 This is a singleton class that starts/stops the discovery process and stores the retrieved nodes.
 Before starting the scanning process, it is also possible to define a new deviceId and to register/add new features to already-defined devices
 
 The Manager will notify a node discovery through the [<code>Manager.ManagerListener</code>](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Manager.ManagerListener.html) class.
 Note that each callback is performed asynchronously by a background thread.
 
-### [Node](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Node.html)
+### [Node](https://stmicroelectronics.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Node.html)
 This class represents a remote device.
 
 From this class you can recover what features are exported by a node and read/write data from/to the device.
@@ -178,25 +181,25 @@ A node can be in one of following states:
 Note that each callback is performed asynchronously by a background thread.
 
 
-### [Feature](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Feature.html)
+### [Feature](https://stmicroelectronics.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Feature.html)
 This class represents data exported by the node.
 
-Each Feature has an array of  [<code>Field</code>](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Features/Field.html) that describes the data exported.
+Each Feature has an array of  [<code>Field</code>](https://stmicroelectronics.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Features/Field.html) that describes the data exported.
 
-Data are received from a BLE characteristic and contained in a class  [<code>Feature.Sample</code>](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Feature.Sample.html). The user is notified of data using a listener pattern.
+Data are received from a BLE characteristic and contained in a class  [<code>Feature.Sample</code>](https://stmicroelectronics.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Feature.Sample.html). The user is notified of data using a listener pattern.
 
 The data exported by the Sample can be extracted using the static utility methods of the class.
 
 Note that each callback is performed asynchronously by a background thread.
 
-Available features can be retrieved from [Features package](https://stmicroelectronics-centrallabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Features/package-summary.html).
+Available features can be retrieved from [Features package](https://stmicroelectronics.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Features/package-summary.html).
 
 #### How to add a new Feature
 
  1. Extend the class Feature: 
-    1.	Create an array of [<code>Feature.Field</code>](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Features/Field.html) that will describe the data exported by the new feature
-    2.	Create a constructor that accepts only the node as a parameter. From this constructor call the [super constructor](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Feature.html#Feature-java.lang.String-com.st.BlueSTSDK.Node-com.st.BlueSTSDK.Features.Field:A-), passing the feature name and the feature field.
-    3.  Implement the method [<code> Feature.ExtractResult Feature.extractData(long,byte[],int)</code>](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Feature.html#extractData-long-byte:A-int-). 
+    1.	Create an array of [<code>Feature.Field</code>](https://stmicroelectronics.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Features/Field.html) that will describe the data exported by the new feature
+    2.	Create a constructor that accepts only the node as a parameter. From this constructor call the [super constructor](https://stmicroelectronics.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Feature.html#Feature-java.lang.String-com.st.BlueSTSDK.Node-com.st.BlueSTSDK.Features.Field:A-), passing the feature name and the feature field.
+    3.  Implement the method [<code> Feature.ExtractResult Feature.extractData(long,byte[],int)</code>](https://stmicroelectronics.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Feature.html#extractData-long-byte:A-int-). 
     4.  Create a utility static method that extracts the data from the Feature.Sample class 
  2. Register the feature before the node connection using the ConnectionOption class:
      ```Java
@@ -233,14 +236,14 @@ or
     ```
 ## Log
 The SDK defines some class that will log the feature data.
-Using the class [FeatureLogCSVFile](https://stmicroelectronics-centrallabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Log/FeatureLogCSVFile.html) each feature will have its file, and the data logged will be:
+Using the class [FeatureLogCSVFile](https://stmicroelectronics.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Log/FeatureLogCSVFile.html) each feature will have its file, and the data logged will be:
 - Node address (on Android) or name (on iOS)
 - Timestamp, the message id
 - RawData, the data received by the feature extractData method
 - one colunm for each data extracted by the feature
 
 ## Docs
-You can find the documentation at this link: [JavaDoc](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc)
+You can find the documentation at this link: [JavaDoc](https://stmicroelectronics.github.io/BlueSTSDK_Android/javadoc)
 
 
 

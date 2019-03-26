@@ -35,7 +35,7 @@
  * OF SUCH DAMAGE.
  */
 
-package com.st.BlueSTSDK.Utils;
+package com.st.BlueSTSDK.Utils.advertise;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.le.ScanCallback;

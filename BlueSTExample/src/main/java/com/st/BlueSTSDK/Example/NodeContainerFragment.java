@@ -196,7 +196,7 @@ public class NodeContainerFragment extends Fragment {
     public void onPause() {
 
         //dismiss the dialog if we are showing it
-        if (mConnectionWait.isShowing()) {
+        if (mConnectionWait!=null && mConnectionWait.isShowing()) {
             mConnectionWait.dismiss();
         }//if
 

@@ -120,6 +120,19 @@ public abstract class Feature {
     }
 
     /**
+     * extract a float number from the sample
+     * @param s sample that contains the data
+     * @param i data index
+     * @return value or nan if the value is not present
+     */
+    protected static float getFloatFromIndex(Sample s, int i){
+        if(hasValidIndex(s,i)){
+            return s.data[i].floatValue();
+        }
+        return Float.NaN;
+    }
+
+    /**
      * build a new disabled feature, that doesn't need to be initialized in the node side
      *
      * @param name     name of the feature
@@ -494,7 +507,7 @@ public abstract class Feature {
          * @param sample new data received from the feature
          */
         @WorkerThread
-        void onUpdate( Feature f, Sample sample);
+        void onUpdate(@NonNull Feature f,@Nullable Sample sample);
 
     }//FeatureListener
 

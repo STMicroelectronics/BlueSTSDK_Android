@@ -31,49 +31,62 @@ import android.support.annotation.NonNull;
 import com.st.BlueSTSDK.Feature;
 import com.st.BlueSTSDK.Node;
 
-/**
- * Feature that use the osxMotionID library for detect the use motion intensity.
- * The intensity is a number between 0 and 10
- *
- * @author STMicroelectronics - Central Labs.
- * @version 1.0
- */
-public class FeatureMotionIntensity extends Feature {
-    public static final String FEATURE_NAME = "VerticalContext Intensity";
+public class FeatureDeskTypeDetection extends Feature {
+    public static final String FEATURE_NAME = "Pose Detection";
     public static final String FEATURE_UNIT = null;
-    public static final String FEATURE_DATA_NAME = "Intensity";
-    public static final float DATA_MAX = 10;
+    public static final String FEATURE_DATA_NAME = "Pose";
+    public static final float DATA_MAX = 3;
     public static final float DATA_MIN = 0;
 
     /**
-     * extract the motion intensity from the sample
-     * @param sample data read from the node
-     * @return motion intensity or a negative number
+     * Enum containing the possible result of the carry position detection
      */
-    public static byte getMotionIntensity(Sample sample){
-        if(hasValidIndex(sample,0))
-            return sample.data[0].byteValue();
-        return -1;
-    }//getMotionIntensity
+    public enum DesktopType {
+        UNKNOWN,
+        SITTING,
+        STANDING,
+    }//Pose
 
     /**
-     * build a activity feature
+     * extract the position from a sensor sample
+     * @param sample data read from the node
+     * @return position detected by the node
+     */
+    public static DesktopType getDescktopType(Sample sample){
+        if(hasValidIndex(sample,0)){
+            int poseId = sample.data[0].byteValue();
+            switch (poseId){
+                case 0x00:
+                    return DesktopType.UNKNOWN;
+                case 0x01:
+                    return DesktopType.SITTING;
+                case 0x02:
+                    return DesktopType.STANDING;
+                default:
+                    return DesktopType.UNKNOWN;
+
+            }//switch
+        }//if
+        return DesktopType.UNKNOWN;
+    }//getPosition
+
+    /**
+     * build a carry position feature
      * @param n node that will send data to this feature
      */
-    public FeatureMotionIntensity(Node n) {
+    public FeatureDeskTypeDetection(Node n) {
         super(FEATURE_NAME, n, new Field[]{
                 new Field(FEATURE_DATA_NAME, FEATURE_UNIT, Field.Type.UInt8,
-                        DATA_MAX,DATA_MIN),
+                        DATA_MAX,DATA_MIN)
         });
-    }//FeatureMotionIntensity
-
+    }//FeatureVerticalContextDetection
 
     /**
-     * read a byte with the activity data send from the node
+     * read a byte with the carry position data send from the node
      * @param timestamp data timestamp
      * @param data       array where read the data
      * @param dataOffset offset where start to read the data
-     * @return number of read byte (1) and data extracted (the motion intensity)
+     * @return number of read byte (1) and data extracted (the desktop type information)
      * @throws IllegalArgumentException if the data array has not enough data
      */
     @Override
@@ -85,5 +98,4 @@ public class FeatureMotionIntensity extends Feature {
         },getFieldsDesc());
         return new ExtractResult(temp,1);
     }//extractData
-
 }

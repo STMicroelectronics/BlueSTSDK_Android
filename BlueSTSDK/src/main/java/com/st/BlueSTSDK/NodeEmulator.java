@@ -55,7 +55,7 @@ import com.st.BlueSTSDK.Features.emul.FeatureRandomProximityGesture;
 import com.st.BlueSTSDK.Features.emul.FeatureRandomTemperature;
 import com.st.BlueSTSDK.Features.emul.standardCharacateristics.FeatureRandomHeartRate;
 import com.st.BlueSTSDK.Utils.BLENodeDefines;
-import com.st.BlueSTSDK.Utils.InvalidBleAdvertiseFormat;
+import com.st.BlueSTSDK.Utils.advertise.InvalidBleAdvertiseFormat;
 
 import java.util.ArrayList;
 import java.util.Collections;

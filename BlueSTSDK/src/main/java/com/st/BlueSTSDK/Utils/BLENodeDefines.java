@@ -34,14 +34,17 @@ import com.st.BlueSTSDK.Features.FeatureAcceleration;
 import com.st.BlueSTSDK.Features.FeatureAccelerationEvent;
 import com.st.BlueSTSDK.Features.FeatureAccelerationNorm;
 import com.st.BlueSTSDK.Features.FeatureActivity;
-import com.st.BlueSTSDK.Features.FeatureAudioADPCM;
-import com.st.BlueSTSDK.Features.FeatureAudioADPCMSync;
+import com.st.BlueSTSDK.Features.Audio.ADPCM.FeatureAudioADPCM;
+import com.st.BlueSTSDK.Features.Audio.ADPCM.FeatureAudioADPCMSync;
+import com.st.BlueSTSDK.Features.Audio.Opus.FeatureAudioOpus;
+import com.st.BlueSTSDK.Features.Audio.Opus.FeatureAudioOpusConf;
 import com.st.BlueSTSDK.Features.FeatureAudioSceneClassification;
 import com.st.BlueSTSDK.Features.FeatureBeamforming;
 import com.st.BlueSTSDK.Features.FeatureBattery;
 import com.st.BlueSTSDK.Features.FeatureCOSensor;
 import com.st.BlueSTSDK.Features.FeatureCarryPosition;
 import com.st.BlueSTSDK.Features.FeatureCompass;
+import com.st.BlueSTSDK.Features.FeatureDeskTypeDetection;
 import com.st.BlueSTSDK.Features.FeatureDirectionOfArrival;
 import com.st.BlueSTSDK.Features.FeatureEulerAngle;
 import com.st.BlueSTSDK.Features.FeatureFreeFall;
@@ -59,6 +62,11 @@ import com.st.BlueSTSDK.Features.FeatureMicLevel;
 import com.st.BlueSTSDK.Features.FeatureMotionIntensity;
 import com.st.BlueSTSDK.Features.FeatureMotorTimeParameter;
 import com.st.BlueSTSDK.Features.FeaturePedometer;
+import com.st.BlueSTSDK.Features.FeaturePoseDetection;
+import com.st.BlueSTSDK.Features.FeatureVerticalContextDetection;
+import com.st.BlueSTSDK.Features.predictive.FeaturePredictiveFrequencyDomainStatus;
+import com.st.BlueSTSDK.Features.predictive.FeaturePredictiveAccelerationStatus;
+import com.st.BlueSTSDK.Features.predictive.FeaturePredictiveSpeedStatus;
 import com.st.BlueSTSDK.Features.FeaturePressure;
 import com.st.BlueSTSDK.Features.FeatureProximity;
 import com.st.BlueSTSDK.Features.FeatureProximityGesture;
@@ -389,10 +397,20 @@ public class BLENodeDefines {
         }
 
         private static void buildExtendedFeatureMask(){
+            EXTENDED_FEATURE_MAP.put(buildExtendedFeatureCharacteristics(0x01), asList(FeatureAudioOpus.class));
+            EXTENDED_FEATURE_MAP.put(buildExtendedFeatureCharacteristics(0x02), asList(FeatureAudioOpusConf.class));
             EXTENDED_FEATURE_MAP.put(buildExtendedFeatureCharacteristics(0x03), asList(FeatureAudioSceneClassification.class));
             EXTENDED_FEATURE_MAP.put(buildExtendedFeatureCharacteristics(0x04), asList(FeatureAILogging.class));
             EXTENDED_FEATURE_MAP.put(buildExtendedFeatureCharacteristics(0x05), asList(FeatureFFTAmplitude.class));
             EXTENDED_FEATURE_MAP.put(buildExtendedFeatureCharacteristics(0x06), asList(FeatureMotorTimeParameter.class));
+            EXTENDED_FEATURE_MAP.put(buildExtendedFeatureCharacteristics(0x07), asList(FeaturePredictiveSpeedStatus.class));
+            EXTENDED_FEATURE_MAP.put(buildExtendedFeatureCharacteristics(0x08), asList(FeaturePredictiveAccelerationStatus.class));
+            EXTENDED_FEATURE_MAP.put(buildExtendedFeatureCharacteristics(0x09), asList(FeaturePredictiveFrequencyDomainStatus.class));
+            EXTENDED_FEATURE_MAP.put(buildExtendedFeatureCharacteristics(0x0A), asList(FeatureVerticalContextDetection.class));
+            EXTENDED_FEATURE_MAP.put(buildExtendedFeatureCharacteristics(0x0B), asList(FeaturePoseDetection.class));
+            EXTENDED_FEATURE_MAP.put(buildExtendedFeatureCharacteristics(0x0C), asList(FeatureDeskTypeDetection.class));
+            EXTENDED_FEATURE_MAP.put(buildExtendedFeatureCharacteristics(0x0D), asList(FeatureEulerAngle.class));
+            //EXTENDED_FEATURE_MAP.put(buildExtendedFeatureCharacteristics(0x0E),asList(FeatureFitnessActivity.class));
         }
 
         static {

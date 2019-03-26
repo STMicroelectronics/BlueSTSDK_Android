@@ -31,8 +31,6 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v7.app.ActionBar;
-import android.util.Log;
 
 import com.st.BlueSTSDK.Utils.BLENodeDefines;
 
@@ -72,6 +70,8 @@ public class Debug {
      */
     private final CopyOnWriteArrayList<DebugOutputListener> mListener = new CopyOnWriteArrayList<>();
 
+    private static final Charset CHARSET = Charset.forName("ISO-8859-1"); //ACII
+
     /**
      * Max size of string to sent in the input char
      */
@@ -107,7 +107,7 @@ public class Debug {
      * @return number of char sent in Terminal standard characteristic
      */
     public int write(String message) {
-        return write(message.getBytes());
+        return write(stringToByte(message));
     }
 
     /**
@@ -177,9 +177,12 @@ public class Debug {
         addDebugOutputListener(listener);
     }
 
-    private String encodeMessageString(byte[] value){
-        //convert to standard ascii characters
-        return new String(value, Charset.forName("ISO-8859-1"));
+    public static String byteToString(byte[] value){
+        return new String(value, CHARSET);
+    }
+
+    public static byte[] stringToByte(String str){
+        return str.getBytes(CHARSET);
     }
 
     /**
@@ -192,7 +195,7 @@ public class Debug {
         if (mListener.isEmpty())
             return;
         UUID charUuid = characteristic.getUuid();
-        final String msg = encodeMessageString(characteristic.getValue());
+        final String msg = byteToString(characteristic.getValue());
         if (charUuid.equals(BLENodeDefines.Services.Debug.DEBUG_STDERR_UUID)) {
            // mListener.onStdErrReceived(Debug.this, characteristic.getStringValue(0));
             mNotifyThread.post(new Runnable() {
@@ -229,7 +232,7 @@ public class Debug {
         UUID charUuid = characteristic.getUuid();
 
         if (charUuid.equals(BLENodeDefines.Services.Debug.DEBUG_TERM_UUID)) {
-            final String str = encodeMessageString(data);
+            final String str = byteToString(data);
             if(str.length()>MAX_STRING_SIZE_TO_SENT) {
                 mNotifyThread.post(new Runnable() {
                     @Override
@@ -273,7 +276,7 @@ public class Debug {
          * @param debug   object that send the message
          * @param message message that someone write in the debug console
          */
-        void onStdOutReceived(Debug debug, String message);
+        void onStdOutReceived(@NonNull Debug debug,@NonNull String message);
 
         /**
          * a new message appear on the standard error
@@ -281,7 +284,7 @@ public class Debug {
          * @param debug   object that send the message
          * @param message message that someone write in the error console
          */
-        void onStdErrReceived(Debug debug, String message);
+        void onStdErrReceived(@NonNull Debug debug,@NonNull String message);
 
         /**
          * call when a message is send to the debug console
@@ -290,7 +293,7 @@ public class Debug {
          * @param message     message that someone write in the debug console
          * @param writeResult true if the message is correctly send
          */
-        void onStdInSent(Debug debug, String message, boolean writeResult);
+        void onStdInSent(@NonNull Debug debug,@NonNull String message, boolean writeResult);
 
     }//DebugOutputListener
 

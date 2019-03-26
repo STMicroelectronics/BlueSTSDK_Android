@@ -26,8 +26,13 @@
  ******************************************************************************/
 package com.st.BlueSTSDK.Utils;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
 import com.st.BlueSTSDK.BuildConfig;
 import com.st.BlueSTSDK.Node;
+import com.st.BlueSTSDK.Utils.advertise.BleAdvertiseInfo;
+import com.st.BlueSTSDK.Utils.advertise.InvalidBleAdvertiseFormat;
 
 import junit.framework.Assert;
 
@@ -40,158 +45,181 @@ import org.robolectric.annotation.Config;
 @Config(constants = BuildConfig.class,manifest = "src/main/AndroidManifest.xml", sdk = 23)
 public class BleAdvertiseParserTest {
 
+    private static @Nullable
+    BleAdvertiseInfo parse(byte data[]){
+        return new BlueSTSDKAdvertiseFilter().filter(data);
+    }
+
     @Test
-    public void testTransmissionPower() throws Exception{
+    public void testTransmissionPower(){
         byte advertise[] = new byte[]{
                 7,(byte)0xFF,(byte)0x01,(byte)0x80, (byte)0x00, (byte)0x00, (byte)0x00,
                 (byte)0x00, //vendor data is mandatory
                 2,0x0A,0x40 /* 64dB? */, // Trasmission Power
         };
-        BleAdvertiseParser parser = new BleAdvertiseParser(advertise);
-        Assert.assertEquals(64,parser.getTxPower());
+        BleAdvertiseInfo info = parse(advertise);
+        Assert.assertNotNull(info);
+        Assert.assertEquals(64,info.getTxPower());
 
         advertise = new byte[]{
                 7,(byte)0xFF,(byte)0x01,(byte)0x80, (byte)0x00, (byte)0x00, (byte)0x00,
                 (byte)0x00, //vendor data is mandatory
                 2,0x0A,(byte)0x7F /* 127? */, // Trasmission Power
         };
-        parser = new BleAdvertiseParser(advertise);
-        Assert.assertEquals(127,parser.getTxPower());
+        info = parse(advertise);
+        Assert.assertNotNull(info);
+        Assert.assertEquals(127,info.getTxPower());
 
         advertise = new byte[]{
                 7,(byte)0xFF,(byte)0x01,(byte)0x80, (byte)0x00, (byte)0x00, (byte)0x00,
                 (byte)0x00, //vendor data is mandatory
                 2,0x0A,(byte)0x80 /* -128 */, // Trasmission Power
         };
-        parser = new BleAdvertiseParser(advertise);
-        Assert.assertEquals(-128,parser.getTxPower());
+        info = parse(advertise);
+        Assert.assertNotNull(info);
+        Assert.assertEquals(-128,info.getTxPower());
     }
 
     @Test
-    public void testBoardName() throws Exception{
+    public void testBoardName(){
         byte advertise[] = new byte[]{
                 7,(byte)0xFF,(byte)0x01,(byte)0x80, (byte)0x00, (byte)0x00, (byte)0x00,
                 (byte)0x00, //vendor data is mandatory
                 2,0x09,'c'
         };
-        BleAdvertiseParser parser = new BleAdvertiseParser(advertise);
-        Assert.assertEquals("c",parser.getName());
+        BleAdvertiseInfo info = parse(advertise);
+        Assert.assertNotNull(info);
+        Assert.assertEquals("c",info.getName());
 
         advertise = new byte[]{
                 7,(byte)0xFF,(byte)0x01,(byte)0x80, (byte)0x00, (byte)0x00, (byte)0x00,
                 (byte)0x00, //vendor data is mandatory
                 6,0x09,'h','e','l','l','o'
         };
-        parser = new BleAdvertiseParser(advertise);
-        Assert.assertEquals("hello",parser.getName());
+        info = parse(advertise);
+        Assert.assertNotNull(info);
+        Assert.assertEquals("hello",info.getName());
     }
 
     @Test
-    public void testProtocolVersion() throws Exception{
+    public void testProtocolVersion(){
         byte advertise[] = new byte[]{
                 7,(byte)0xFF,(byte)0x01,(byte)0x00,(byte)0x80, (byte)0x00, (byte)0x00, (byte)0x00,
                 (byte)0x00, //vendor data is mandatory
         };
-        BleAdvertiseParser parser = new BleAdvertiseParser(advertise);
-        Assert.assertEquals(1,parser.getProtocolVersion());
+        BleAdvertiseInfo info = parse(advertise);
+        Assert.assertNotNull(info);
+        Assert.assertEquals(1,info.getProtocolVersion());
     }
 
-    @Test(expected= InvalidBleAdvertiseFormat.class)
-    public void testWrongProtocolVersion() throws Exception{
+    @Test
+    public void testWrongProtocolVersion(){
         byte advertise[] = new byte[]{
                 7,(byte)0xFF,(byte)0xFF,(byte)0x80, (byte)0x00, (byte)0x00, (byte)0x00,
                 (byte)0x00, //vendor data is mandatory
         };
-        new BleAdvertiseParser(advertise);
+        BleAdvertiseInfo info = parse(advertise);
+        Assert.assertNull(info);
     }
 
     @Test
-    public void testBoardAddress() throws Exception{
+    public void testBoardAddress(){
         byte advertise[] = new byte[]{
                 13,(byte)0xFF,(byte)0x01,(byte)0x80, (byte)0x00, (byte)0x00, (byte)0x00,
                 (byte)0x00,(byte)0xEF, (byte)0xBE, (byte)0x00, (byte)0xAD, (byte)0xDE, (byte)0x02
         };
-        BleAdvertiseParser parser = new BleAdvertiseParser(advertise);
-        Assert.assertEquals("EF:BE:00:AD:DE:02",parser.getAddress());
+        BleAdvertiseInfo info = parse(advertise);
+        Assert.assertNotNull(info);
+        Assert.assertEquals("EF:BE:00:AD:DE:02",info.getAddress());
     }
 
     @Test
-    public void testBoardAddressAbsent() throws Exception{
+    public void testBoardAddressAbsent(){
         byte advertise[] = new byte[]{
                 7,(byte)0xFF,(byte)0x01,(byte)0x80, (byte)0x00, (byte)0x00, (byte)0x00,
                 (byte)0x00
         };
-        BleAdvertiseParser parser = new BleAdvertiseParser(advertise);
-        Assert.assertEquals(null,parser.getAddress());
+        BleAdvertiseInfo info = parse(advertise);
+        Assert.assertNotNull(info);
+        Assert.assertNull(info.getAddress());
     }
 
     @Test
-    public void testVendorField() throws Exception{
+    public void testVendorField(){
         byte advertise[] = new byte[]{
                 7,(byte)0xFF,(byte)0x01,(byte)0x80, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00
         };
-        BleAdvertiseParser parser = new BleAdvertiseParser(advertise);
-        Assert.assertEquals(0,parser.getFeatureMap());
-        Assert.assertEquals(Node.Type.NUCLEO,parser.getBoardType());
-        Assert.assertEquals((byte)0x80,parser.getDeviceId());
+        BleAdvertiseInfo info = parse(advertise);
+        Assert.assertNotNull(info);
+        Assert.assertEquals(0,info.getFeatureMap());
+        Assert.assertEquals(Node.Type.NUCLEO,info.getBoardType());
+        Assert.assertEquals((byte)0x80,info.getDeviceId());
 
         advertise = new byte[]{
                 7,(byte)0xFF,(byte)0x01,(byte)0x00, (byte)0x00, (byte)0xFF, (byte)0x00, (byte)0x00
         };
-        parser = new BleAdvertiseParser(advertise);
-        Assert.assertEquals(0xFF0000,parser.getFeatureMap());
-        Assert.assertEquals( Node.Type.GENERIC,parser.getBoardType());
-        Assert.assertEquals(0x00,parser.getDeviceId());
+        info = parse(advertise);
+        Assert.assertNotNull(info);
+        Assert.assertEquals(0xFF0000,info.getFeatureMap());
+        Assert.assertEquals( Node.Type.GENERIC,info.getBoardType());
+        Assert.assertEquals(0x00,info.getDeviceId());
 
         advertise = new byte[]{
                 7,(byte)0xFF,(byte)0x01,(byte)0x01, (byte)0xFF, (byte)0xFF, (byte)0x00, (byte)0x00
         };
-        parser = new BleAdvertiseParser(advertise);
-        Assert.assertEquals(0xFFFF0000,parser.getFeatureMap());
-        Assert.assertEquals(Node.Type.STEVAL_WESU1,parser.getBoardType() );
-        Assert.assertEquals(0x01,parser.getDeviceId());
+        info = parse(advertise);
+        Assert.assertNotNull(info);
+        Assert.assertEquals(0xFFFF0000,info.getFeatureMap());
+        Assert.assertEquals(Node.Type.STEVAL_WESU1,info.getBoardType() );
+        Assert.assertEquals(0x01,info.getDeviceId());
 
     }
 
-    @Test(expected= InvalidBleAdvertiseFormat.class)
-    public void testVendorFieldSmallSize() throws Exception {
+    @Test
+    public void testVendorFieldSmallSize() {
         byte[] advertise = new byte[]{
                 5,(byte) 0xFF, (byte) 0xEF, (byte) 0xBE, (byte) 0x00, (byte) 0xAD,
                 0x1B, (byte) 0xEF, (byte) 0xBE, (byte) 0x00, (byte) 0xAD //fake datas
         };
-        new BleAdvertiseParser(advertise);
+        BleAdvertiseInfo info = parse(advertise);
+        Assert.assertNull(info);
     }
 
-    @Test(expected= InvalidBleAdvertiseFormat.class)
-    public void testVendorFieldBigSize() throws Exception {
+    @Test
+    public void testVendorFieldBigSize() {
         byte[] advertise = new byte[]{
                 7, (byte)0xFF, (byte) 0xEF, (byte) 0xBE, (byte) 0x00, (byte) 0xAD, (byte) 0xDE,
                 (byte) 0x02,(byte) 0x02
         };
-        new BleAdvertiseParser(advertise);
+        BleAdvertiseInfo info = parse(advertise);
+        Assert.assertNull(info);
     }
 
-    @Test(expected= InvalidBleAdvertiseFormat.class)
-    public void testEmptyAdvertise() throws Exception {
-        new BleAdvertiseParser(new byte[]{});
+    @Test
+    public void testEmptyAdvertise(){
+        BleAdvertiseInfo info = parse(new byte[]{});
+        Assert.assertNull(info);
     }
 
-    @Test(expected= InvalidBleAdvertiseFormat.class)
-    public void testInvalidNodeType() throws Exception {
+    @Test
+    public void testInvalidNodeType() {
         byte advertise[]  = new byte[]{
                 7,(byte)0xFF,(byte)0x01,(byte)0x10, (byte)0xFF, (byte)0xFF, (byte)0x00, (byte)0x00
         };
-        new BleAdvertiseParser(advertise);
+        BleAdvertiseInfo info = parse(new byte[]{});
+        Assert.assertNull(info);
     }
 
-    @Test(expected= InvalidBleAdvertiseFormat.class)
-    public void testNoVendorSpecific() throws Exception {
+    @Test
+    public void testNoVendorSpecific() {
         byte advertise[]  = new byte[]{
                 //vendor specific is 0xff we have 0xfe
                 7,(byte)0xFE,(byte)0x01,(byte)0x80, (byte)0x00, (byte)0x00, (byte)0x00,
                 (byte)0x00,
                 6,0x09,'h','e','l','l','o'
         };
-        new BleAdvertiseParser(advertise);
+        BleAdvertiseInfo info = parse(new byte[]{});
+        Assert.assertNull(info);
     }
+
 }

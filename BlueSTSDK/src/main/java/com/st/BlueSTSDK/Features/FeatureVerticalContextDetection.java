@@ -31,49 +31,77 @@ import android.support.annotation.NonNull;
 import com.st.BlueSTSDK.Feature;
 import com.st.BlueSTSDK.Node;
 
-/**
- * Feature that use the osxMotionID library for detect the use motion intensity.
- * The intensity is a number between 0 and 10
- *
- * @author STMicroelectronics - Central Labs.
- * @version 1.0
- */
-public class FeatureMotionIntensity extends Feature {
-    public static final String FEATURE_NAME = "VerticalContext Intensity";
+public class FeatureVerticalContextDetection extends Feature {
+    public static final String FEATURE_NAME = "Vertical VerticalContext";
     public static final String FEATURE_UNIT = null;
-    public static final String FEATURE_DATA_NAME = "Intensity";
-    public static final float DATA_MAX = 10;
+    public static final String FEATURE_DATA_NAME = "Vertical VerticalContext";
+    public static final float DATA_MAX = 5;
     public static final float DATA_MIN = 0;
 
     /**
-     * extract the motion intensity from the sample
-     * @param sample data read from the node
-     * @return motion intensity or a negative number
+     * Enum containing the possible result of the carry position detection
      */
-    public static byte getMotionIntensity(Sample sample){
-        if(hasValidIndex(sample,0))
-            return sample.data[0].byteValue();
-        return -1;
-    }//getMotionIntensity
+    public enum VerticalContext {
+        /** In case of no pressure sensor data or reliable data */
+        UNKNOWN,
+        /** When walking on flat surface */
+        FLOOR,
+        /** If significant change observed in height but not sufficient to declare as stairs or elevator */
+        UP_DOWN,
+        /** Detection of stairs */
+        STAIRS,
+        /** Elevator */
+        ELEVATOR,
+        /** Detect Escalator provided no walking on escalator */
+        ESCALATOR
+    }//Position
 
     /**
-     * build a activity feature
+     * extract the position from a sensor sample
+     * @param sample data read from the node
+     * @return position detected by the node
+     */
+    public static VerticalContext getVerticalContext(Sample sample){
+        if(hasValidIndex(sample,0)){
+            int activityId = sample.data[0].byteValue();
+            switch (activityId){
+                case 0x00:
+                    return VerticalContext.UNKNOWN;
+                case 0x01:
+                    return VerticalContext.FLOOR;
+                case 0x02:
+                    return VerticalContext.UP_DOWN;
+                case 0x03:
+                    return VerticalContext.STAIRS;
+                case 0x04:
+                    return VerticalContext.ELEVATOR;
+                case 0x05:
+                    return VerticalContext.ESCALATOR;
+                default:
+                    return VerticalContext.UNKNOWN;
+
+            }//switch
+        }//if
+        return VerticalContext.UNKNOWN;
+    }//getPosition
+
+    /**
+     * build a carry position feature
      * @param n node that will send data to this feature
      */
-    public FeatureMotionIntensity(Node n) {
+    public FeatureVerticalContextDetection(Node n) {
         super(FEATURE_NAME, n, new Field[]{
                 new Field(FEATURE_DATA_NAME, FEATURE_UNIT, Field.Type.UInt8,
-                        DATA_MAX,DATA_MIN),
+                        DATA_MAX,DATA_MIN)
         });
-    }//FeatureMotionIntensity
-
+    }//FeatureVerticalContextDetection
 
     /**
-     * read a byte with the activity data send from the node
+     * read a byte with the carry position data send from the node
      * @param timestamp data timestamp
      * @param data       array where read the data
      * @param dataOffset offset where start to read the data
-     * @return number of read byte (1) and data extracted (the motion intensity)
+     * @return number of read byte (1) and data extracted (the motion information)
      * @throws IllegalArgumentException if the data array has not enough data
      */
     @Override

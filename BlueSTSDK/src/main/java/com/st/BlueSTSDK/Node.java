@@ -37,19 +37,23 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Build;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
 import android.support.annotation.WorkerThread;
 import android.util.Log;
 import android.util.SparseArray;
 
 import com.st.BlueSTSDK.Features.FeatureGenPurpose;
 import com.st.BlueSTSDK.Utils.BLENodeDefines;
-import com.st.BlueSTSDK.Utils.BleAdvertiseParser;
+import com.st.BlueSTSDK.Utils.BlueSTSDKAdvertiseFilter;
 import com.st.BlueSTSDK.Utils.ConnectionOption;
-import com.st.BlueSTSDK.Utils.InvalidBleAdvertiseFormat;
+import com.st.BlueSTSDK.Utils.advertise.BleAdvertiseInfo;
+import com.st.BlueSTSDK.Utils.advertise.InvalidBleAdvertiseFormat;
 import com.st.BlueSTSDK.Utils.NumberConversion;
 import com.st.BlueSTSDK.Utils.UnwrapTimestamp;
 
@@ -81,6 +85,14 @@ public class Node{
      * wait this time before retry to send a command to the ble api
      */
     private static final long RETRY_COMMAND_DELAY_MS = 300;
+    private static final long RETRY_SERVICE_SCAN_MS = 2000; //2s
+    private final static UUID SERVICE_CHANGED_SERVICE_UUID = UUID.fromString("00001801-0000-1000-8000-00805f9b34fb");
+    private final static UUID SERVICE_CHANGED_CHAR_UUID = UUID.fromString("00002A05-0000-1000-8000-00805f9b34fb");
+
+    private static final HandlerThread sBackgroundThread = new HandlerThread("BackgroundNode");
+    static {
+        sBackgroundThread.start();
+    }
 
     public boolean isExportingFeature(Class<? extends Feature> featureClass) {
         SparseArray<Class<? extends Feature>> decoder = Manager.getNodeFeatures(
@@ -94,6 +106,10 @@ public class Node{
             }
         }
         return false;
+    }
+
+    public @NonNull BleAdvertiseInfo getAdvertiseInfo() {
+        return mAdvertise;
     }
 
     /** Node type: type the board that is advertising connection */
@@ -112,9 +128,12 @@ public class Node{
         STEVAL_BCN002V1,
         /** SensorTile.101 board */
         SENSOR_TILE_101,
+        /** B-L475E-IOT01A board */
+        DISCOVERY_IOT01A,
         /** board based on a x NUCLEO board */
         NUCLEO
     }//Type
+
 
     /** State of the node */
     public enum State {
@@ -153,12 +172,11 @@ public class Node{
         void onRSSIChanged(Node node,int newRSSIValue);
 
         /**
-         * method call when we have new information about the tx power
-         * @param node node that update its tx power
-         * @param newPower  new transmission power
+         * method call when the mtu request was accepted
+         * @param node node that update the mtu
+         * @param newMtu the new mtu used by the connection
          */
-        @SuppressWarnings("UnusedDeclaration")
-        void onTxPowerChange(Node node, int newPower);
+        void onMtuChange(Node node, int newMtu);
     }//BleConnectionParamUpdateListener
 
     /**
@@ -174,7 +192,7 @@ public class Node{
          * @param prevState previous node status
          */
         @WorkerThread
-        void onStateChange(Node node, State newState, State prevState);
+        void onStateChange(@NonNull Node node,@NonNull State newState,@NonNull State prevState);
     }//NodeStateListener
 
 
@@ -226,6 +244,17 @@ public class Node{
     private class GattNodeConnection extends BluetoothGattCallback {
 
         private UnwrapTimestamp mUnwrapTimestamp = new UnwrapTimestamp();
+
+        @Override
+        public void onMtuChanged(BluetoothGatt gatt, int mtu, int status) {
+            super.onMtuChanged(gatt, mtu, status);
+            if(status==BluetoothGatt.GATT_SUCCESS){
+                updateMtu(mtu);
+            }else{
+                //if fail we use the last value
+                updateMtu(mLastMtu);
+            }
+        }
 
         /**
          * if we are connecting it start to scan the device service/characteristics otherwise it
@@ -404,6 +433,26 @@ public class Node{
             mCharFeatureMap.put(characteristic, temp);
         }//buildGenericFeature
 
+        private boolean checkServiceChangedCharacteristics(BluetoothGatt gatt){
+
+            BluetoothGattService genericGatt = gatt.getService(SERVICE_CHANGED_SERVICE_UUID);
+            if (genericGatt == null)
+                return false;
+
+            BluetoothGattCharacteristic serviceChangeChar = genericGatt.getCharacteristic(SERVICE_CHANGED_CHAR_UUID);
+            if (serviceChangeChar == null)
+                return false;
+
+            BluetoothGattDescriptor desc = serviceChangeChar.getDescriptor(NOTIFY_CHAR_DESC_UUID);
+            if (desc == null)
+                return  false;
+
+            enqueueWriteDesc(new WriteDescCommand(desc,BluetoothGattDescriptor.ENABLE_INDICATION_VALUE));
+            return true;
+        }
+
+        private  boolean needCheckService = true;
+
         /**
          * scan all the service searching for know characteristics + enable the found feature
          * @param gatt connection with the device
@@ -440,6 +489,17 @@ public class Node{
                 mNScanRequest.decrementAndGet();
                 return;
             }//if
+
+
+            if(needCheckService) { // if it is the first time
+                //force the request for the service changed, and wait 2s before scan again
+                if (checkServiceChangedCharacteristics(gatt)) {
+                    mNScanRequest.decrementAndGet();
+                    needCheckService = false;
+                    mBleThread.postDelayed(mScanServicesTask, RETRY_SERVICE_SCAN_MS);
+                    return;
+                }
+            }
 
             mCharFeatureMap.clear();
             for(BluetoothGattService service : nodeServices){
@@ -481,7 +541,6 @@ public class Node{
                 Node.this.updateNodeStatus(State.Connected);
 
         }//onServicesDiscovered
-
 
         /**
          * we have to do a linear search into the hash map since the BluetoothGattCharacteristic
@@ -572,7 +631,7 @@ public class Node{
          */
         @Override
         public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
-            Log.d(TAG,"Read Char: "+characteristic.getUuid().toString());
+            //Log.d(TAG,"Read Char: "+characteristic.getUuid().toString());
             if(status == BluetoothGatt.GATT_SUCCESS) {
                 if (mDebugConsole != null &&
                         BLENodeDefines.Services.Debug.isDebugCharacteristics(characteristic.getUuid()))
@@ -592,13 +651,18 @@ public class Node{
 
         @Override
         public void onDescriptorWrite(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status) {
+            /*Log.d(TAG, "onDescriptorWrite: "+
+                    descriptor.getCharacteristic().getUuid()+
+                    "size: "+mWriteDescQueue.size()+
+                    "success: "+(status == BluetoothGatt.GATT_SUCCESS));
+            */
             //descriptor write -> remove from the queue
             if(status == BluetoothGatt.GATT_SUCCESS)
                 dequeueWriteDesc(new WriteDescCommand(descriptor,descriptor.getValue()));
             else{
                 if(!isPairing()) {
-                    Log.e(TAG,"onDescriptorWrite Error writing the descriptor: "+descriptor
-                            .getCharacteristic());
+                    Log.e(TAG,"onDescriptorWrite Error writing the descriptor for char: "+descriptor
+                            .getCharacteristic().getUuid());
                     Node.this.updateNodeStatus(State.Dead);
                 }//if
             }//if-else
@@ -627,10 +691,10 @@ public class Node{
                 mConfigControl.characteristicsWriteUpdate(out.characteristic,out.data, writeSuccess);
             else{
                 if(out.onWriteComplete!=null && writeSuccess)
-                    mHandler.post(out.onWriteComplete);
+                    mBackGroundHandler.post(out.onWriteComplete);
             }
-
         }
+
     }//GattNodeConnection
 
     /** device associated with this node */
@@ -718,6 +782,7 @@ public class Node{
     private Runnable mScanServicesTask = new Runnable() {
         @Override
         public void run() {
+            //Log.d("Gatt","DescQueue: "+mWriteDescQueue.size());
             if (mConnection != null && !isPairing()){
                 if (mConnection.discoverServices()) {
                     mNScanRequest.incrementAndGet();
@@ -800,9 +865,10 @@ public class Node{
     private NodeStateListener mNotifyCommandChange = new NodeStateListener() {
 
         @Override
-        public void onStateChange(Node node, State newState, State prevState) {
+        public void onStateChange(@NonNull Node node, @NonNull State newState, @NonNull State prevState) {
             if(newState == State.Connected && mFeatureCommand !=null) {
                 changeNotificationStatus(mFeatureCommand,true);
+
             }//if
             //error during connection (connecting ->dead or connected -> dead )
             if((prevState == State.Connecting || prevState== State.Connected ) && newState==State
@@ -914,7 +980,7 @@ public class Node{
     /** true when the user ask to disconnect form the device */
     private boolean mUserAskToDisconnect;
     /** class that contains the advertise information */
-    private BleAdvertiseParser mAdvertise;
+    private BleAdvertiseInfo mAdvertise;
 
     /** list of all the feature that are available in the advertise */
     private ArrayList<Feature> mAvailableFeature = new ArrayList<>(32);
@@ -941,10 +1007,12 @@ public class Node{
 
     private String mFriendlyName = null;
 
+    private int mLastMtu = 20; //default ble length
+
     /** ms to wait before declare a node as lost */
     private static long NODE_LOST_TIMEOUT_MS=4000;
     /** thread where wait the timeout */
-    private Handler mHandler;  //NOTE: since the handler is crate in a thread,
+    private Handler mBackGroundHandler;  //NOTE: since the handler is crate in a thread,
     // is better check that the class is not null in the case we try to use it before the thread
     // got exec
     /** task to run when the timeout expire, it will set the node status as lost */
@@ -970,6 +1038,14 @@ public class Node{
             listener.onRSSIChanged(this, rssi);
         }//for
     }//updateRssi
+
+    private void updateMtu(int mtu){
+        mLastMtu = mtu;
+        for(BleConnectionParamUpdateListener listener : mBleConnectionListeners){
+            listener.onMtuChange(this,mLastMtu);
+        }
+
+    }
 
     /**
      * store the new node status and call the call back if needed
@@ -1011,16 +1087,7 @@ public class Node{
      * node go out of scope
      */
     private void initHandler(){
-        new Thread( new Runnable() {
-            @Override
-            public void run() {
-                Looper.prepare();
-                mHandler = new Handler(); //create the handler
-                //put the first item
-                mHandler.postDelayed(mSetNodeLost,NODE_LOST_TIMEOUT_MS);
-                Looper.loop(); //start exec the item in the queue
-            }//run
-        }).start(); //run the thread
+        mBackGroundHandler = new Handler(sBackgroundThread.getLooper());
     }//initHandler
 
     /**
@@ -1029,9 +1096,13 @@ public class Node{
      * @param rssi rssi of the advertise message
      * @param advertise advertise message for this node
      * @throws  InvalidBleAdvertiseFormat if the advertise is not well formed
+     * @deprecated use {@link #Node(BluetoothDevice, int, BleAdvertiseInfo)}
      */
+    @Deprecated
     public Node(BluetoothDevice device,int rssi,byte advertise[]) throws InvalidBleAdvertiseFormat{
-        mAdvertise = new BleAdvertiseParser(advertise);
+        mAdvertise = new BlueSTSDKAdvertiseFilter().filter(advertise);
+        if(mAdvertise==null)
+            throw new InvalidBleAdvertiseFormat("Invalid Advertise Data format");
         mDevice = device;
         mExternalCharFeatures= new HashMap<>();
         updateRssi(rssi);
@@ -1041,9 +1112,26 @@ public class Node{
         Log.i(TAG, mAdvertise.toString());
     }
 
+    public Node(BluetoothDevice device, int rssi, @NonNull BleAdvertiseInfo advertiseInfo){
+        mAdvertise = advertiseInfo;
+        mDevice = device;
+        mExternalCharFeatures= new HashMap<>();
+        updateRssi(rssi);
+        updateNodeStatus(State.Idle);
+        initHandler();
+        addNodeStateListener(mNotifyCommandChange);
+    }
+
+    @Deprecated
     public void upDateAdvertising(byte advertise[]){
         try {
-            mAdvertise = new BleAdvertiseParser(advertise);
+            mAdvertise = new BlueSTSDKAdvertiseFilter().filter(advertise);
+        }catch (Exception e){Log.e(TAG,"Error updating advertising for:"+ getName());}
+    }
+
+    public void upDateAdvertising(@NonNull BleAdvertiseInfo updateInfo){
+        try {
+            mAdvertise = updateInfo;
         }catch (Exception e){Log.e(TAG,"Error updating advertising for:"+ getName());}
     }
 
@@ -1054,7 +1142,7 @@ public class Node{
      * mandatory that the advertise contains also the mac address
      */
     public Node(byte advertise[]) throws InvalidBleAdvertiseFormat{
-        mAdvertise = new BleAdvertiseParser(advertise);
+        mAdvertise = new BlueSTSDKAdvertiseFilter().filter(advertise);
         String bleAddress = mAdvertise.getAddress();
         if(bleAddress==null){
             throw  new InvalidBleAdvertiseFormat("Device Address non present in the advertise");
@@ -1122,7 +1210,7 @@ public class Node{
         if(options == null)
             options = ConnectionOption.buildDefault();
         //we start the connection so we will stop to receive advertise, so we delete the timeout
-        if(mHandler!=null) mHandler.removeCallbacks(mSetNodeLost);
+        if(mBackGroundHandler !=null) mBackGroundHandler.removeCallbacks(mSetNodeLost);
         mUserAskToDisconnect=false;
         /*
         HandlerThread thread = new HandlerThread("NodeConnection");
@@ -1190,11 +1278,11 @@ public class Node{
         // run the waitCompleteAllWriteRequest in a different handler for avoid to block the
         // ble/main thread, we use the handle used for update the rssi, since during disconnection
         // is not used
-        mHandler.post(new Runnable() {
+        mBackGroundHandler.post(new Runnable() {
             @Override
             public void run() {
                 waitCompleteAllDescriptorWriteRequest(mDisconnectTask);
-                mHandler.postDelayed(mSetNodeLost, NODE_LOST_TIMEOUT_MS);
+                mBackGroundHandler.postDelayed(mSetNodeLost, NODE_LOST_TIMEOUT_MS);
             }
         });
 
@@ -1209,12 +1297,13 @@ public class Node{
         return mAdvertise.getBoardType();
     }//getType
 
+
     /**
      * node sleeping state
      * @return false running, true device is sleeping
      */
     public boolean isSleeping(){
-        return mAdvertise.getBoardSleeping();
+        return mAdvertise.isBoardSleeping();
     }//getType
 
     /**
@@ -1222,7 +1311,7 @@ public class Node{
      * @return true if general purpsoe available else false.
      */
     public boolean hasGeneralPurpose(){
-        return mAdvertise.getBoardHasGP();
+        return mAdvertise.isHasGeneralPurpose();
     }//getType
 
     public byte getTypeId(){return mAdvertise.getDeviceId();}//getTypeId
@@ -1419,7 +1508,7 @@ public class Node{
         //since we have to wait that the write description are done, we have to wait a thread -> we
         //can not run directly in the bleThread, so we use the handler for the rssi, since the
         // load on that thread will be low
-        mHandler.post(new Runnable() {
+        mBackGroundHandler.post(new Runnable() {
             @Override
             public void run() {
             final Runnable readChar = this;
@@ -1430,11 +1519,11 @@ public class Node{
                     @Override
                     public void run() {
                         if (!mConnection.readCharacteristic(characteristic))
-                            mHandler.postDelayed(readChar, RETRY_COMMAND_DELAY_MS);
+                            mBackGroundHandler.postDelayed(readChar, RETRY_COMMAND_DELAY_MS);
                     }//run
                 });
             }else{
-                mHandler.postDelayed(readChar, RETRY_COMMAND_DELAY_MS);
+                mBackGroundHandler.postDelayed(readChar, RETRY_COMMAND_DELAY_MS);
             }
         }//run
     });
@@ -1466,6 +1555,11 @@ public class Node{
         }//synchronized
     }//waitCompleteAllDescriptorWriteRequest
 
+    private boolean isGattConnectionOpen(){
+        return mState == State.Connecting ||
+                mState == State.Connected ||
+                mState == State.Disconnecting;
+    }
 
     /**
      * take the fist element in the mWriteDescQueue and call the writeDescriptor, if it fail it
@@ -1474,7 +1568,7 @@ public class Node{
     private Runnable mWriteDescriptorTask = new Runnable() {
         @Override
         public void run() {
-        if(mConnection!=null &&  (isConnected() || mState==State.Disconnecting) && !isPairing()) {
+        if(mConnection!=null &&  isGattConnectionOpen() && !isPairing()) {
             synchronized (mWriteDescQueue) {
                 if(mConnection!=null && !mWriteDescQueue.isEmpty()) {
                     WriteDescCommand command = mWriteDescQueue.peek();
@@ -1716,7 +1810,7 @@ public class Node{
         //since we have to wait that the write description are done, we have to wait a thread -> we
         //can not run directly in the bleThread, so we use the handler for the rssi, since the load
         // on that thread will be low
-        mHandler.post(new Runnable() {
+        mBackGroundHandler.post(new Runnable() {
             @Override
             public void run() {
                 final Runnable writeChar = this;
@@ -1728,14 +1822,13 @@ public class Node{
                         public void run() {
                             //set the value to write and write it
                             cmd.characteristic.setValue(cmd.data);
-                            // Log.d(TAG, "char:"+cmd.characteristic.getUuid()+" value: "+Arrays.toString(cmd.data));
                             if (!mConnection.writeCharacteristic(cmd.characteristic)) {
-                                mHandler.postDelayed(writeChar, RETRY_COMMAND_DELAY_MS);
+                                mBackGroundHandler.postDelayed(writeChar, RETRY_COMMAND_DELAY_MS);
                             }//if
                         }//run
                     });
                 }else{
-                    mHandler.postDelayed(writeChar, RETRY_COMMAND_DELAY_MS);
+                    mBackGroundHandler.postDelayed(writeChar, RETRY_COMMAND_DELAY_MS);
                 }//if-else
             }//run
         });
@@ -1834,10 +1927,10 @@ public class Node{
      */
     void isAlive(int rssi){
         //remove the set lost task
-        if(mHandler!=null) mHandler.removeCallbacks(mSetNodeLost);
+        if(mBackGroundHandler !=null) mBackGroundHandler.removeCallbacks(mSetNodeLost);
         updateRssi(rssi);
         //start a new set lost task
-        if(mHandler!=null) mHandler.postDelayed(mSetNodeLost,NODE_LOST_TIMEOUT_MS);
+        if(mBackGroundHandler !=null) mBackGroundHandler.postDelayed(mSetNodeLost,NODE_LOST_TIMEOUT_MS);
 
     }//isAlive
 
@@ -1933,5 +2026,40 @@ public class Node{
         return mAdvertise.getFeatureMap();
     }
 
+    public int getLastMtu(){ return mLastMtu;}
+
+    public boolean requestNewMtu(int newMtu){
+        if(!isConnected())
+            return false;
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            return  mConnection.requestMtu(newMtu);
+        }else{
+            return false;
+        }
+    }
+
+    @RequiresApi(21)
+    private boolean changeConnectionPriority(int newConnectionPriority){
+        if(!isConnected())
+            return false;
+        return  mConnection.requestConnectionPriority(newConnectionPriority);
+
+    }
+
+    public boolean requestLowerConnectionInterval(){
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            return  changeConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_HIGH);
+        }else{
+            return false;
+        }
+    }
+
+    public boolean requestNormalConnectionInterval(){
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            return  changeConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_BALANCED);
+        }else{
+            return false;
+        }
+    }
 
 }//Node

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * COPYRIGHT(c) 2015 STMicroelectronics
+ * COPYRIGHT(c) 2019 STMicroelectronics
  *
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
@@ -24,17 +24,45 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  ******************************************************************************/
-package com.st.BlueSTSDK.Utils;
+package com.st.BlueSTSDK.Utils.advertise;
 
-/**
- * Exception throw when a ble device has a wrong advertise format
- *
- * @author STMicroelectronics - Central Labs.
- * @version 1.0
- */
-public class InvalidBleAdvertiseFormat extends Exception {
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.support.annotation.Nullable;
 
-    public InvalidBleAdvertiseFormat(String msg){
-        super(msg);
+import com.st.BlueSTSDK.Manager;
+import com.st.BlueSTSDK.Node;
+
+import java.util.List;
+
+public class LeScanCallback implements BluetoothAdapter.LeScanCallback {
+
+    private Manager mBleManager;
+    private List<AdvertiseFilter> mAdvFilters;
+
+
+    public LeScanCallback(Manager bleManager, List<AdvertiseFilter> advFilters) {
+        this.mBleManager = bleManager;
+        this.mAdvFilters = advFilters;
+    }
+
+    private @Nullable BleAdvertiseInfo matchAdvertise(byte[] advertise){
+        for (AdvertiseFilter filter : mAdvFilters){
+            BleAdvertiseInfo res = filter.filter(advertise);
+            if (res!=null)
+                return res;
+        }
+        return null;
+    }
+
+    @Override
+    public void onLeScan(BluetoothDevice bluetoothDevice, int rssi, byte[] advetiseData) {
+        BleAdvertiseInfo info = matchAdvertise(advetiseData);
+        if(info == null){
+            return;
+        } // else
+        Node node = new Node(bluetoothDevice,rssi,info);
+        mBleManager.addNode(node);
+
     }
 }

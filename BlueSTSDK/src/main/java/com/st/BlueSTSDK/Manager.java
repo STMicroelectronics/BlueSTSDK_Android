@@ -43,12 +43,16 @@ import android.util.Log;
 import android.util.SparseArray;
 
 import com.st.BlueSTSDK.Utils.BLENodeDefines;
+import com.st.BlueSTSDK.Utils.BlueSTSDKAdvertiseFilter;
 import com.st.BlueSTSDK.Utils.BtAdapterNotFound;
-import com.st.BlueSTSDK.Utils.InvalidBleAdvertiseFormat;
+import com.st.BlueSTSDK.Utils.advertise.AdvertiseFilter;
+import com.st.BlueSTSDK.Utils.advertise.InvalidBleAdvertiseFormat;
 import com.st.BlueSTSDK.Utils.InvalidFeatureBitMaskException;
-import com.st.BlueSTSDK.Utils.ScanCallbackBridge;
+import com.st.BlueSTSDK.Utils.advertise.LeScanCallback;
+import com.st.BlueSTSDK.Utils.advertise.ScanCallbackBridge;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -87,6 +91,11 @@ public class Manager {
     }
 
 
+    public static List<AdvertiseFilter> buildDefaultAdvertiseList(){
+        List<AdvertiseFilter> list = new ArrayList<>(1);
+        list.add(new BlueSTSDKAdvertiseFilter());
+        return list;
+    }
 
     /**
      * singleton instance of the manager
@@ -132,7 +141,7 @@ public class Manager {
      */
     private Node.NodeStateListener mDebugNodeStatus = new Node.NodeStateListener() {
         @Override
-        public void onStateChange(Node node, Node.State newState, Node.State prevState) {
+        public void onStateChange(@NonNull Node node, @NonNull Node.State newState, @NonNull Node.State prevState) {
             Log.d("NodeStateListener", node.getName() + " " + prevState + "->" + newState);
         }
     };
@@ -156,42 +165,7 @@ public class Manager {
     /**
      * class that contains the ble callback
      */
-    private BluetoothAdapter.LeScanCallback mScanCallBack_pre21 = new BluetoothAdapter.LeScanCallback() {
-
-        /**
-         * call when an advertise package is received,
-         * <p>it will notify a new node only the first time that the advertise is received,
-         * and only for the nodes with a compatible advertise message.
-         * if device is already build we update its the rssi value.
-         * </p>
-         * @param device Android remote ble device
-         * @param rssi signal power
-         * @param advertisedData device advertise package
-         */
-        @Override
-        public void onLeScan(final BluetoothDevice device, int rssi, byte[] advertisedData) {
-            final String deviceAddr = device.getAddress();
-            synchronized (mDiscoverNode) {
-                for (Node node : mDiscoverNode) {
-                    if (node.getTag().equals(deviceAddr)) {
-                        //we already add this node, we set that it is alive with a new rssi
-                        node.isAlive(rssi);
-                        node.upDateAdvertising(advertisedData);
-                        return;
-                    }//if
-                }//for
-            }//synchronized
-            //else we found a new node
-            try {
-                final Node newNode = new Node(device, rssi, advertisedData);
-                newNode.addNodeStateListener(mDebugNodeStatus);
-                addNode(newNode);
-            } catch (InvalidBleAdvertiseFormat e) {
-                //if the node is invalid we didn't insert it
-            }
-        }//onLeScan
-
-    };//LeScanCallback
+    private BluetoothAdapter.LeScanCallback mScanCallBack_pre21;
 
     /**
      * ble Callback calss to use for api 21+ it fallback to pre 21 api.
@@ -233,8 +207,17 @@ public class Manager {
             Manifest.permission.BLUETOOTH,
             Manifest.permission.BLUETOOTH_ADMIN})
     public boolean startDiscovery() {
+
         return startDiscovery(-1);
     }//startDiscovery;
+
+    @RequiresPermission(allOf = {
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.BLUETOOTH,
+            Manifest.permission.BLUETOOTH_ADMIN})
+    public boolean startDiscovery(int timeoutMs){
+        return startDiscovery(timeoutMs,buildDefaultAdvertiseList());
+    }
 
     /**
      * notify to each listener that the discovery process change its status
@@ -263,8 +246,8 @@ public class Manager {
             Manifest.permission.ACCESS_COARSE_LOCATION,
             Manifest.permission.BLUETOOTH,
             Manifest.permission.BLUETOOTH_ADMIN})
-    public boolean startDiscovery(int timeoutMs) {
-
+    public boolean startDiscovery(int timeoutMs,List<AdvertiseFilter> filters) {
+        mScanCallBack_pre21 = new LeScanCallback(this,filters);
         if (mBtAdapter != null && mBtAdapter.isEnabled()) {
             if (mIsScanning)
                 return false;
@@ -352,11 +335,16 @@ public class Manager {
     public boolean addNode(final Node newNode){
         synchronized (mDiscoverNode) {
             String newTag = newNode.getTag();
-            for(final Node n : mDiscoverNode){
-                if(newTag.equals(n.getTag()))
-                    return false;
-            }//for
-            mDiscoverNode.add(newNode);
+            Node n = this.getNodeWithTag(newTag);
+            if(n!=null){
+                //copy the last info to the old node
+                n.upDateAdvertising(newNode.getAdvertiseInfo());
+                n.isAlive(newNode.getLastRssi());
+                return false;
+            }else {
+                newNode.addNodeStateListener(mDebugNodeStatus);
+                mDiscoverNode.add(newNode);
+            }
         }//synchronized
         notifyNewNodeDiscovered(newNode);
         return true;
