@@ -32,7 +32,7 @@ import android.util.SparseArray;
 
 import com.st.BlueSTSDK.Node;
 import com.st.BlueSTSDK.Utils.advertise.AdvertiseFilter;
-import com.st.BlueSTSDK.Utils.advertise.BleAdvertiseInfo;
+import com.st.BlueSTSDK.Utils.advertise.BlueSTSDKAdvertiseInfo;
 
 import static com.st.BlueSTSDK.Utils.advertise.AdvertiseParser.DEVICE_NAME_TYPE;
 import static com.st.BlueSTSDK.Utils.advertise.AdvertiseParser.TX_POWER_TYPE;
@@ -53,7 +53,7 @@ public class BlueSTSDKAdvertiseFilter implements AdvertiseFilter {
 
     @Nullable
     @Override
-    public BleAdvertiseInfo filter(byte[] advData) {
+    public BlueSTSDKAdvertiseInfo filter(byte[] advData) {
         SparseArray<byte[]> splitAdv = split(advData);
         byte data[]  = splitAdv.get(TX_POWER_TYPE);
         byte txPower;
@@ -95,7 +95,7 @@ public class BlueSTSDKAdvertiseFilter implements AdvertiseFilter {
                         data[9], data[ 10],
                         data[11]);
             }
-            return new BleAdvertiseInfo(name,txPower, address, featureMap, deviceId, protocolVersion, boardType, boardSleeping, hasGeneralPurpose);
+            return new BlueSTSDKAdvertiseInfo(name,txPower, address, featureMap, deviceId, protocolVersion, boardType, boardSleeping, hasGeneralPurpose);
         }else{
             return null;
         }
@@ -121,7 +121,9 @@ public class BlueSTSDKAdvertiseFilter implements AdvertiseFilter {
         if(temp == 0x05)
             return Node.Type.STEVAL_BCN002V1;
         if(temp == 0x06)
-            return Node.Type.SENSOR_TILE_101;
+            return Node.Type.SENSOR_TILE_BOX;
+        if(temp == 0x07)
+            return Node.Type.DISCOVERY_IOT01A;
         if (temp >= 0x80 && temp <= 0xff)
             return Node.Type.NUCLEO;
         else // 0 or user defined

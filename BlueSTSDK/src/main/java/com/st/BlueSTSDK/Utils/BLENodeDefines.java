@@ -32,7 +32,7 @@ import com.st.BlueSTSDK.Feature;
 import com.st.BlueSTSDK.Features.FeatureAILogging;
 import com.st.BlueSTSDK.Features.FeatureAcceleration;
 import com.st.BlueSTSDK.Features.FeatureAccelerationEvent;
-import com.st.BlueSTSDK.Features.FeatureAccelerationNorm;
+import com.st.BlueSTSDK.Features.FeatureMemsNorm;
 import com.st.BlueSTSDK.Features.FeatureActivity;
 import com.st.BlueSTSDK.Features.Audio.ADPCM.FeatureAudioADPCM;
 import com.st.BlueSTSDK.Features.Audio.ADPCM.FeatureAudioADPCMSync;
@@ -47,6 +47,8 @@ import com.st.BlueSTSDK.Features.FeatureCompass;
 import com.st.BlueSTSDK.Features.FeatureDeskTypeDetection;
 import com.st.BlueSTSDK.Features.FeatureDirectionOfArrival;
 import com.st.BlueSTSDK.Features.FeatureEulerAngle;
+import com.st.BlueSTSDK.Features.FeatureEventCounter;
+import com.st.BlueSTSDK.Features.FeatureFitnessActivity;
 import com.st.BlueSTSDK.Features.FeatureFreeFall;
 import com.st.BlueSTSDK.Features.FeatureGyroscope;
 import com.st.BlueSTSDK.Features.FeatureGyroscopeNorm;
@@ -62,8 +64,7 @@ import com.st.BlueSTSDK.Features.FeatureMicLevel;
 import com.st.BlueSTSDK.Features.FeatureMotionIntensity;
 import com.st.BlueSTSDK.Features.FeatureMotorTimeParameter;
 import com.st.BlueSTSDK.Features.FeaturePedometer;
-import com.st.BlueSTSDK.Features.FeaturePoseDetection;
-import com.st.BlueSTSDK.Features.FeatureVerticalContextDetection;
+import com.st.BlueSTSDK.Features.FeatureMotionAlgorithm;
 import com.st.BlueSTSDK.Features.predictive.FeaturePredictiveFrequencyDomainStatus;
 import com.st.BlueSTSDK.Features.predictive.FeaturePredictiveAccelerationStatus;
 import com.st.BlueSTSDK.Features.predictive.FeaturePredictiveSpeedStatus;
@@ -295,7 +296,7 @@ public class BLENodeDefines {
         public static final SparseArray<Class<? extends Feature>> DEFAULT_MASK_TO_FEATURE =
                 new SparseArray<>();
 
-        public static final SparseArray<Class<? extends Feature>> SENSOT_TILE_101_MASK_TO_FEATURE =
+        public static final SparseArray<Class<? extends Feature>> SENSOT_TILE_BOX_MASK_TO_FEATURE =
                 new SparseArray<>();
 
         /**
@@ -350,45 +351,45 @@ public class BLENodeDefines {
         }
 
         private static void buildSensorTile101FeatureMask(){
-            SENSOT_TILE_101_MASK_TO_FEATURE.put(0x80000000, FeatureFFTAmplitude.class);
-            SENSOT_TILE_101_MASK_TO_FEATURE.put(0x40000000, FeatureAudioADPCMSync.class);
-            SENSOT_TILE_101_MASK_TO_FEATURE.put(0x20000000, FeatureSwitch.class);
-            SENSOT_TILE_101_MASK_TO_FEATURE.put(0x10000000, FeatureAccelerationNorm.class);
+            SENSOT_TILE_BOX_MASK_TO_FEATURE.put(0x80000000, FeatureFFTAmplitude.class);
+            SENSOT_TILE_BOX_MASK_TO_FEATURE.put(0x40000000, FeatureAudioADPCMSync.class);
+            SENSOT_TILE_BOX_MASK_TO_FEATURE.put(0x20000000, FeatureSwitch.class);
+            SENSOT_TILE_BOX_MASK_TO_FEATURE.put(0x10000000, FeatureMemsNorm.class);
 
-            SENSOT_TILE_101_MASK_TO_FEATURE.put(0x08000000, FeatureAudioADPCM.class);
-            SENSOT_TILE_101_MASK_TO_FEATURE.put(0x04000000, FeatureMicLevel.class);
-            SENSOT_TILE_101_MASK_TO_FEATURE.put(0x02000000, FeatureProximity.class);
-            SENSOT_TILE_101_MASK_TO_FEATURE.put(0x01000000, FeatureLuminosity.class);
+            SENSOT_TILE_BOX_MASK_TO_FEATURE.put(0x08000000, FeatureAudioADPCM.class);
+            SENSOT_TILE_BOX_MASK_TO_FEATURE.put(0x04000000, FeatureMicLevel.class);
+            SENSOT_TILE_BOX_MASK_TO_FEATURE.put(0x02000000, FeatureProximity.class);
+            SENSOT_TILE_BOX_MASK_TO_FEATURE.put(0x01000000, FeatureLuminosity.class);
 
-            SENSOT_TILE_101_MASK_TO_FEATURE.put(0x00800000, FeatureAcceleration.class);
-            SENSOT_TILE_101_MASK_TO_FEATURE.put(0x00400000, FeatureGyroscope.class);
-            SENSOT_TILE_101_MASK_TO_FEATURE.put(0x00200000, FeatureMagnetometer.class);
-            SENSOT_TILE_101_MASK_TO_FEATURE.put(0x00100000, FeaturePressure.class);
+            SENSOT_TILE_BOX_MASK_TO_FEATURE.put(0x00800000, FeatureAcceleration.class);
+            SENSOT_TILE_BOX_MASK_TO_FEATURE.put(0x00400000, FeatureGyroscope.class);
+            SENSOT_TILE_BOX_MASK_TO_FEATURE.put(0x00200000, FeatureMagnetometer.class);
+            SENSOT_TILE_BOX_MASK_TO_FEATURE.put(0x00100000, FeaturePressure.class);
 
-            SENSOT_TILE_101_MASK_TO_FEATURE.put(0x00080000, FeatureHumidity.class);
-            SENSOT_TILE_101_MASK_TO_FEATURE.put(0x00040000, FeatureTemperature.class);
-            SENSOT_TILE_101_MASK_TO_FEATURE.put(0x00020000, FeatureBattery.class);
-            SENSOT_TILE_101_MASK_TO_FEATURE.put(0x00010000, FeatureTemperature.class);
+            SENSOT_TILE_BOX_MASK_TO_FEATURE.put(0x00080000, FeatureHumidity.class);
+            SENSOT_TILE_BOX_MASK_TO_FEATURE.put(0x00040000, FeatureTemperature.class);
+            SENSOT_TILE_BOX_MASK_TO_FEATURE.put(0x00020000, FeatureBattery.class);
+            SENSOT_TILE_BOX_MASK_TO_FEATURE.put(0x00010000, FeatureTemperature.class);
 
-            SENSOT_TILE_101_MASK_TO_FEATURE.put(0x00008000, FeatureGyroscopeNorm.class);
-            SENSOT_TILE_101_MASK_TO_FEATURE.put(0x00004000, FeatureEulerAngle.class);
+            //SENSOT_TILE_BOX_MASK_TO_FEATURE.put(0x00008000, FeatureGyroscopeNorm.class);
+            SENSOT_TILE_BOX_MASK_TO_FEATURE.put(0x00004000, FeatureEulerAngle.class);
             //DEFAULT_MASK_TO_FEATURE.put(0x00002000, RFU); // stm32 ota reboot
-            SENSOT_TILE_101_MASK_TO_FEATURE.put(0x00001000, FeatureSDLogging.class);
+            SENSOT_TILE_BOX_MASK_TO_FEATURE.put(0x00001000, FeatureSDLogging.class);
 
-            SENSOT_TILE_101_MASK_TO_FEATURE.put(0x00000800, FeatureMagnetometerNorm.class);
-            SENSOT_TILE_101_MASK_TO_FEATURE.put(0x00000400, FeatureAccelerationEvent.class);
-            SENSOT_TILE_101_MASK_TO_FEATURE.put(0x00000200, FeatureFreeFall.class);
-            SENSOT_TILE_101_MASK_TO_FEATURE.put(0x00000100, FeatureMemsSensorFusionCompact.class);
+            //SENSOT_TILE_BOX_MASK_TO_FEATURE.put(0x00000800, FeatureMagnetometerNorm.class);
+            SENSOT_TILE_BOX_MASK_TO_FEATURE.put(0x00000400, FeatureAccelerationEvent.class);
+            SENSOT_TILE_BOX_MASK_TO_FEATURE.put(0x00000200, FeatureEventCounter.class);
+            SENSOT_TILE_BOX_MASK_TO_FEATURE.put(0x00000100, FeatureMemsSensorFusionCompact.class);
 
-            SENSOT_TILE_101_MASK_TO_FEATURE.put(0x00000080, FeatureMemsSensorFusion.class);
-            SENSOT_TILE_101_MASK_TO_FEATURE.put(0x00000020, FeatureMotionIntensity.class);
-            SENSOT_TILE_101_MASK_TO_FEATURE.put(0x00000040, FeatureCompass.class);
-            SENSOT_TILE_101_MASK_TO_FEATURE.put(0x00000010, FeatureActivity.class);
+            SENSOT_TILE_BOX_MASK_TO_FEATURE.put(0x00000080, FeatureMemsSensorFusion.class);
+            SENSOT_TILE_BOX_MASK_TO_FEATURE.put(0x00000020, FeatureMotionIntensity.class);
+            SENSOT_TILE_BOX_MASK_TO_FEATURE.put(0x00000040, FeatureCompass.class);
+            SENSOT_TILE_BOX_MASK_TO_FEATURE.put(0x00000010, FeatureActivity.class);
 
-            SENSOT_TILE_101_MASK_TO_FEATURE.put(0x00000008, FeatureCarryPosition.class);
-            SENSOT_TILE_101_MASK_TO_FEATURE.put(0x00000004, FeatureProximityGesture.class);
-            SENSOT_TILE_101_MASK_TO_FEATURE.put(0x00000002, FeatureMemsGesture.class);
-            SENSOT_TILE_101_MASK_TO_FEATURE.put(0x00000001, FeaturePedometer.class);
+            SENSOT_TILE_BOX_MASK_TO_FEATURE.put(0x00000008, FeatureCarryPosition.class);
+            SENSOT_TILE_BOX_MASK_TO_FEATURE.put(0x00000004, FeatureProximityGesture.class);
+            SENSOT_TILE_BOX_MASK_TO_FEATURE.put(0x00000002, FeatureMemsGesture.class);
+            SENSOT_TILE_BOX_MASK_TO_FEATURE.put(0x00000001, FeaturePedometer.class);
         }
 
         @SafeVarargs
@@ -406,11 +407,9 @@ public class BLENodeDefines {
             EXTENDED_FEATURE_MAP.put(buildExtendedFeatureCharacteristics(0x07), asList(FeaturePredictiveSpeedStatus.class));
             EXTENDED_FEATURE_MAP.put(buildExtendedFeatureCharacteristics(0x08), asList(FeaturePredictiveAccelerationStatus.class));
             EXTENDED_FEATURE_MAP.put(buildExtendedFeatureCharacteristics(0x09), asList(FeaturePredictiveFrequencyDomainStatus.class));
-            EXTENDED_FEATURE_MAP.put(buildExtendedFeatureCharacteristics(0x0A), asList(FeatureVerticalContextDetection.class));
-            EXTENDED_FEATURE_MAP.put(buildExtendedFeatureCharacteristics(0x0B), asList(FeaturePoseDetection.class));
-            EXTENDED_FEATURE_MAP.put(buildExtendedFeatureCharacteristics(0x0C), asList(FeatureDeskTypeDetection.class));
+            EXTENDED_FEATURE_MAP.put(buildExtendedFeatureCharacteristics(0x0A), asList(FeatureMotionAlgorithm.class));
             EXTENDED_FEATURE_MAP.put(buildExtendedFeatureCharacteristics(0x0D), asList(FeatureEulerAngle.class));
-            //EXTENDED_FEATURE_MAP.put(buildExtendedFeatureCharacteristics(0x0E),asList(FeatureFitnessActivity.class));
+            EXTENDED_FEATURE_MAP.put(buildExtendedFeatureCharacteristics(0x0E), asList(FeatureFitnessActivity.class));
         }
 
         static {

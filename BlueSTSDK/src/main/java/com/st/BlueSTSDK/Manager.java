@@ -29,7 +29,6 @@ package com.st.BlueSTSDK;
 import android.Manifest;
 import android.annotation.TargetApi;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
 
 import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanSettings;
@@ -87,7 +86,7 @@ public class Manager {
         sFeatureMapDecoder.put((byte) 0x81, BLENodeDefines.FeatureCharacteristics
                 .Nucleo_Remote_Features);
         sFeatureMapDecoder.put((byte) 0x06, BLENodeDefines.FeatureCharacteristics
-                .SENSOT_TILE_101_MASK_TO_FEATURE);
+                .SENSOT_TILE_BOX_MASK_TO_FEATURE);
     }
 
 
@@ -484,7 +483,7 @@ public class Manager {
          * @param enabled true if a new discovery start, false otherwise
          */
         @WorkerThread
-        void onDiscoveryChange(Manager m, boolean enabled);
+        void onDiscoveryChange(@NonNull Manager m, boolean enabled);
 
         /**
          * This method is call when the manager discover a new node
@@ -493,7 +492,7 @@ public class Manager {
          * @param node new node discovered
          */
         @WorkerThread
-        void onNodeDiscovered(Manager m, Node node);
+        void onNodeDiscovered(@NonNull Manager m,@NonNull Node node);
     }//ManagerListener
 
     /**

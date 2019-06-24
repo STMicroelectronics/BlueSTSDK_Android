@@ -108,7 +108,8 @@ public class Node{
         return false;
     }
 
-    public @NonNull BleAdvertiseInfo getAdvertiseInfo() {
+    public @NonNull
+    BleAdvertiseInfo getAdvertiseInfo() {
         return mAdvertise;
     }
 
@@ -126,8 +127,8 @@ public class Node{
         STEVAL_IDB008VX,
         /** ST BlueNRG-Tile eval board*/
         STEVAL_BCN002V1,
-        /** SensorTile.101 board */
-        SENSOR_TILE_101,
+        /** SensorTile.box board */
+        SENSOR_TILE_BOX,
         /** B-L475E-IOT01A board */
         DISCOVERY_IOT01A,
         /** board based on a x NUCLEO board */
@@ -270,12 +271,12 @@ public class Node{
                     ""+newState+" boundState:"+mDevice.getBondState());
             if(status==BluetoothGatt.GATT_SUCCESS){
                 if(newState==BluetoothGatt.STATE_CONNECTED){
-                    if(!isPairing()) { //if it is pairing we do it when it finish
-                        //wait a bit for see if we will do the secure pairing or not,
-                        //if the device will be in pair status the scan is aborted and will be
-                        //done when the pairing will be completed
-                        mBleThread.postDelayed(mScanServicesTask, RETRY_COMMAND_DELAY_MS);
-                    }//if !pairing
+                        if (!isPairing()) { //if it is pairing we do it when it finish
+                            //wait a bit for see if we will do the secure pairing or not,
+                            //if the device will be in pair status the scan is aborted and will be
+                            //done when the pairing will be completed
+                            mBleThread.postDelayed(mScanServicesTask, RETRY_COMMAND_DELAY_MS);
+                        }//if !pairing
                 }else if (newState == BluetoothGatt.STATE_DISCONNECTED){
                     //if the auto connect is on, avoid to close and free resources
                     if(!mConnectionOption.enableAutoConnect()) {
@@ -460,7 +461,7 @@ public class Node{
          */
         @Override
         public void onServicesDiscovered(BluetoothGatt gatt, int status){
-            Log.d(TAG,"onServicesDiscovered status:"+status+" boundState:" + mDevice.getBondState());
+            //Log.d(TAG,"onServicesDiscovered status:"+status+" boundState:" + mDevice.getBondState());
 
 
             if(status == BluetoothGatt.GATT_FAILURE) {
@@ -537,8 +538,14 @@ public class Node{
             }//for each service
 
            //move on the connected state only if all the discover services are finished
-            if(mNScanRequest.decrementAndGet()==0)
-                Node.this.updateNodeStatus(State.Connected);
+            if(mNScanRequest.decrementAndGet()==0){
+                //connection done, if the use ask to disconnect in the meantime disconnect
+                if(mUserAskToDisconnect){
+                    startDisconnectProcedure();
+                }else {
+                    Node.this.updateNodeStatus(State.Connected);
+                }
+            }
 
         }//onServicesDiscovered
 
@@ -1099,7 +1106,7 @@ public class Node{
      * @deprecated use {@link #Node(BluetoothDevice, int, BleAdvertiseInfo)}
      */
     @Deprecated
-    public Node(BluetoothDevice device,int rssi,byte advertise[]) throws InvalidBleAdvertiseFormat{
+    public Node(BluetoothDevice device, int rssi, byte[] advertise) throws InvalidBleAdvertiseFormat{
         mAdvertise = new BlueSTSDKAdvertiseFilter().filter(advertise);
         if(mAdvertise==null)
             throw new InvalidBleAdvertiseFormat("Invalid Advertise Data format");
@@ -1123,16 +1130,18 @@ public class Node{
     }
 
     @Deprecated
-    public void upDateAdvertising(byte advertise[]){
+    public void upDateAdvertising(byte[] advertise){
         try {
             mAdvertise = new BlueSTSDKAdvertiseFilter().filter(advertise);
         }catch (Exception e){Log.e(TAG,"Error updating advertising for:"+ getName());}
     }
 
     public void upDateAdvertising(@NonNull BleAdvertiseInfo updateInfo){
-        try {
+        if(updateInfo instanceof BlueSTSDKAdvertiseFilter)
             mAdvertise = updateInfo;
-        }catch (Exception e){Log.e(TAG,"Error updating advertising for:"+ getName());}
+        else if(updateInfo.getClass().equals(mAdvertise.getClass())){
+            mAdvertise = updateInfo;
+        }
     }
 
     /**
@@ -1141,7 +1150,7 @@ public class Node{
      * @throws  InvalidBleAdvertiseFormat if the advertise is not well formed, for this method is
      * mandatory that the advertise contains also the mac address
      */
-    public Node(byte advertise[]) throws InvalidBleAdvertiseFormat{
+    public Node(byte[] advertise) throws InvalidBleAdvertiseFormat{
         mAdvertise = new BlueSTSDKAdvertiseFilter().filter(advertise);
         String bleAddress = mAdvertise.getAddress();
         if(bleAddress==null){
@@ -1266,13 +1275,29 @@ public class Node{
         c.registerReceiver(mBoundStateChange, filter);
     }
 
+    private Node.NodeStateListener mDisconnectAtConnection = new Node.NodeStateListener() {
+        @Override
+        public void onStateChange(@NonNull Node node, @NonNull Node.State newState, @NonNull Node.State prevState) {
+            if(newState  == Node.State.Connected){
+                node.removeNodeStateListener(this);
+            }
+        }
+    };
+
     /**
      * close the node connection
      */
     public void disconnect(){
+        Log.d(TAG,"Disconnection: "+Node.this.getName()+" UserAsk: "+mUserAskToDisconnect + "state: "+mState);
+        mUserAskToDisconnect=true;
         if(!isConnected())
             return;
-        mUserAskToDisconnect=true;
+
+        startDisconnectProcedure();
+
+    }//disconnect
+
+    private void startDisconnectProcedure(){
         updateNodeStatus(State.Disconnecting);
 
         // run the waitCompleteAllWriteRequest in a different handler for avoid to block the
@@ -1285,8 +1310,7 @@ public class Node{
                 mBackGroundHandler.postDelayed(mSetNodeLost, NODE_LOST_TIMEOUT_MS);
             }
         });
-
-    }//disconnect
+    }
 
     /**
      * node type
@@ -1662,7 +1686,7 @@ public class Node{
     }//enqueueWriteDesc
 
     void enqueueCharacteristicsWrite(BluetoothGattCharacteristic characteristic,
-                                     byte data[]){
+                                     byte[] data){
         enqueueCharacteristicsWrite(new WriteCharCommand(characteristic,data,null));
     }
 
@@ -1746,7 +1770,7 @@ public class Node{
             return false;
         for(Feature f: features){
             if(f == currentFeature)
-                break;
+                continue;
             if(isEnableNotification(f))
                 return true;
         }//for
@@ -1761,10 +1785,12 @@ public class Node{
     public boolean disableNotification(Feature feature){
         if(!feature.isEnabled() || feature.getParentNode()!=this)
             return false;
+        if(!isEnableNotification(feature))
+            return true;
         BluetoothGattCharacteristic featureChar =getCorrespondingChar(feature);
         if(charCanBeNotify(featureChar)) {
             mNotifyFeature.remove(feature);
-            //other things are send using that characateristic, so we don't have to
+            //other things are send using that characteristic, so we don't have to
             //disable it
             if(characteristicsHasOtherEnabledFeatures(featureChar,feature))
                 return true;
@@ -1786,6 +1812,10 @@ public class Node{
         BluetoothGattCharacteristic featureChar = getCorrespondingChar(feature);
         if(charCanBeNotify(featureChar)) {
             mNotifyFeature.add(feature);
+            //other things are send using that characteristic, so we don't have to
+            //enable it
+            if(characteristicsHasOtherEnabledFeatures(featureChar,feature))
+                return true;
             return changeNotificationStatus(featureChar, true);
         }
         return false;
@@ -1824,7 +1854,7 @@ public class Node{
                             cmd.characteristic.setValue(cmd.data);
                             if (!mConnection.writeCharacteristic(cmd.characteristic)) {
                                 mBackGroundHandler.postDelayed(writeChar, RETRY_COMMAND_DELAY_MS);
-                            }//if
+                            }
                         }//run
                     });
                 }else{
@@ -1841,11 +1871,11 @@ public class Node{
      * @param data data that we have to send to the feature
      * @return true if the message is send without problem, false otherwise
      */
-    public boolean writeFeatureData(Feature feature,byte data[]){
+    public boolean writeFeatureData(Feature feature, byte[] data){
         return writeFeatureData(feature,data,null);
     }//writeFeatureData
 
-    public boolean writeFeatureData(Feature feature,byte data[], Runnable onWriteComplete){
+    public boolean writeFeatureData(Feature feature, byte[] data, Runnable onWriteComplete){
         final BluetoothGattCharacteristic characteristic = getCorrespondingChar(feature);
         //not enable or not exist or not in write mode -> return false
         if(!charCanBeWrite(characteristic) || !feature.isEnabled())
@@ -1941,9 +1971,9 @@ public class Node{
      * @param data command parameters
      * @return data to send to the characteristics
      */
-    private byte[] packageCommandData(int mask,byte type,byte data[]){
-        byte calibPackage[] = new byte[data.length+4+1]; //4=sizeof(int) + 1 for the req type
-        byte maskArray[] = NumberConversion.BigEndian.int32ToBytes(mask);
+    private byte[] packageCommandData(int mask, byte type, byte[] data){
+        byte[] calibPackage = new byte[data.length + 4 + 1]; //4=sizeof(int) + 1 for the req type
+        byte[] maskArray = NumberConversion.BigEndian.int32ToBytes(mask);
         System.arraycopy(maskArray, 0, calibPackage, 0, maskArray.length);
         calibPackage[4]=type;
         System.arraycopy(data, 0, calibPackage, 4 + 1, data.length);
@@ -1974,7 +2004,7 @@ public class Node{
      * @return true if the message is correctly send, false otherwise
      *
      */
-    boolean sendCommandMessage(Feature feature,byte type,byte data[]) {
+    boolean sendCommandMessage(Feature feature, byte type, byte[] data) {
         if (feature instanceof FeatureGenPurpose)
             return false;
 
@@ -1982,7 +2012,7 @@ public class Node{
         final BluetoothGattCharacteristic writeTo = mFeatureCommand != null ? mFeatureCommand :
                 characteristic;
 
-        if (writeTo == null || characteristic == null || !charCanBeWrite(writeTo))
+        if (characteristic == null || !charCanBeWrite(writeTo))
             return false;
 
 
@@ -1991,7 +2021,7 @@ public class Node{
             enqueueCharacteristicsWrite(
                     new WriteCharCommand(mFeatureCommand, packageCommandData(mask, type, data)));
         }else{ //fail back write directly to the feature characteristics
-            byte dataToWrite[] = new byte[1+data.length];
+            byte[] dataToWrite = new byte[1 + data.length];
             dataToWrite[0]=type;
             System.arraycopy(data,0,dataToWrite,1,data.length);
             enqueueCharacteristicsWrite(new WriteCharCommand(writeTo, dataToWrite));

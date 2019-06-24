@@ -113,7 +113,7 @@ public class BlePermissionHelper{
         throw new IllegalStateException("Fragment or activity must be != null");
     }
 
-    private void requestPermissions(String permission[],int requestCode){
+    private void requestPermissions(String[] permission, int requestCode){
         if(mFragment!=null)
             mFragment.requestPermissions(permission,requestCode);
         else if (mActivity!=null)

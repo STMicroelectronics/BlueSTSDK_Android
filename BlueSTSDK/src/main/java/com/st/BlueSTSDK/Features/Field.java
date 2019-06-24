@@ -71,7 +71,7 @@ public class Field {
      * @param max field max value
      * @param min field min value
      */
-    public Field(@NonNull String name, String unit, Type type, Number max, Number min){
+    public Field(@NonNull String name,@Nullable String unit,@NonNull Type type,@NonNull Number max,@NonNull Number min){
         mName=name;
         mUnit=unit;
         mType=type;
@@ -99,7 +99,7 @@ public class Field {
      * get field type
      * @return field type
      */
-    public Type getType() {
+    public @NonNull Type getType() {
         return mType;
     }
 
@@ -107,7 +107,7 @@ public class Field {
      * get filed max value
      * @return field max value
      */
-    public Number getMax() {
+    public @NonNull Number getMax() {
         return mMax;
     }
 
@@ -115,7 +115,7 @@ public class Field {
      * get field min value
      * @return field min value
      */
-    public Number getMin() {
+    public @NonNull Number getMin() {
         return mMin;
     }
 

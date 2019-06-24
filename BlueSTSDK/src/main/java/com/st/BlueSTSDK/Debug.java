@@ -225,7 +225,7 @@ public class Debug {
      * @param status         true if the write end correctly, false otherwise
      */
     void receiveCharacteristicsWriteUpdate(final BluetoothGattCharacteristic characteristic,
-                                           final byte data[],
+                                           final byte[] data,
                                            final boolean status) {
         if (mListener.isEmpty())
             return;

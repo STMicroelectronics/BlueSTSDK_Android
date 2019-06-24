@@ -26,8 +26,14 @@
  ******************************************************************************/
 package com.st.BlueSTSDK.Features;
 
+import android.support.annotation.NonNull;
+
+import com.st.BlueSTSDK.Debug;
 import com.st.BlueSTSDK.Feature;
 import com.st.BlueSTSDK.Node;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Extend the feature adding the possibility to be configured sending a command message to the
@@ -73,6 +79,8 @@ public abstract class FeatureAutoConfigurable extends Feature {
      */
     private boolean mIsConfigured;
 
+    private CalibrationSensorTileBox mStBoxCalib;
+
     /**
      * @param name     name of the feature
      * @param n        node that will update this feature
@@ -81,6 +89,9 @@ public abstract class FeatureAutoConfigurable extends Feature {
     public FeatureAutoConfigurable(String name, Node n, Field dataDesc[]) {
         super(name, n, dataDesc);
         mIsConfigured = false;
+        if(n.getType() == Node.Type.SENSOR_TILE_BOX){
+            mStBoxCalib = new CalibrationSensorTileBox(n.getDebug());
+        }
     }//
 
     /**
@@ -150,8 +161,14 @@ public abstract class FeatureAutoConfigurable extends Feature {
      */
     protected boolean startConfiguration(byte[] data) {
         setConfigurationStatus(false);
-        boolean messageSend = sendCommand(
-                FEATURE_COMMAND_START_CONFIGURATION, data);
+        boolean messageSend = false;
+        if(mStBoxCalib!=null){
+            mStBoxCalib.startCalibration();
+            messageSend = true;
+        }else {
+            messageSend = sendCommand(
+                    FEATURE_COMMAND_START_CONFIGURATION, data);
+        }
         if (messageSend)
             notifyAutoConfigurationStart();
         return messageSend;
@@ -209,6 +226,10 @@ public abstract class FeatureAutoConfigurable extends Feature {
      * @return true if the request is correctly send to the node
      */
     public boolean requestAutoConfigurationStatus() {
+        if(mStBoxCalib!=null){
+            mStBoxCalib.getCalibrationStatus();
+            return true;
+        }
         return sendCommand(FEATURE_COMMAND_GET_CONFIGURATION_STATUS, new byte[]{});
     }
 
@@ -261,5 +282,47 @@ public abstract class FeatureAutoConfigurable extends Feature {
         void onConfigurationFinished(FeatureAutoConfigurable f, int status);
 
     }//FeatureListener
+
+    private class CalibrationSensorTileBox implements Debug.DebugOutputListener{
+
+        private Debug mConsole;
+        private final Pattern STATUS_PARSER = Pattern.compile("magnCalibStatus (\\d+)");
+
+        public CalibrationSensorTileBox(Debug console){
+            mConsole = console;
+
+        }
+
+        void startCalibration(){
+
+            mConsole.addDebugOutputListener(this);
+            mConsole.write("startMagnCalib");
+        }
+
+        void getCalibrationStatus(){
+            mConsole.write("getMagnCalibStatus");
+        }
+
+        @Override
+        public void onStdOutReceived(@NonNull Debug debug, @NonNull String message) {
+            Matcher matcher = STATUS_PARSER.matcher(message);
+            if (!matcher.matches())
+                return;
+            mConsole.removeDebugOutputListener(this);
+            byte calibStatus = Byte.parseByte(matcher.group(1));
+            parseCommandResponse(0,FEATURE_COMMAND_GET_CONFIGURATION_STATUS,
+                    new byte[]{calibStatus});
+        }
+
+        @Override
+        public void onStdErrReceived(@NonNull Debug debug, @NonNull String message) {
+
+        }
+
+        @Override
+        public void onStdInSent(@NonNull Debug debug, @NonNull String message, boolean writeResult) {
+
+        }
+    }
 
 }//FeatureConfigurable

@@ -34,7 +34,7 @@ import com.st.BlueSTSDK.Utils.NumberConversion;
  * Feature to transmit the Euler angle
  * https://en.wikipedia.org/wiki/Euler_angles#Tait–Bryan_angles
  */
-public class FeatureEulerAngle extends Feature {
+public class FeatureEulerAngle extends FeatureAutoConfigurable {
 
     public static final String FEATURE_NAME = "Euler Angle";
     public static final String[] FEATURE_UNIT =  new String[]{"°", "°", "°"};

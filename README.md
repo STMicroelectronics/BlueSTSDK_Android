@@ -23,8 +23,8 @@ Currently used values are:
     - 0x03 is reserved for the [STEVAL-BCNKT01V1 (BlueCoin)](http://www.st.com/content/st_com/en/products/evaluation-tools/solution-evaluation-tools/sensor-solution-eval-boards/steval-bcnkt01v1.html) board
     - 0x04 is reserved for the [STEVAL-IDB008V1/2 (BlueNRG-2)](http://www.st.com/content/st_com/en/products/evaluation-tools/solution-evaluation-tools/communication-and-connectivity-solution-eval-boards/steval-idb008v2.html) board
     - 0x05 is reserved for the [STEVAL-BCN002V1B (BlueNRG-Tile)](https://www.st.com/content/st_com/en/products/evaluation-tools/solution-evaluation-tools/sensor-solution-eval-boards/steval-bcn002v1b.html) board
+    - 0x06 is reserved for the [STEVAL-MKSBOX1V1 (SensorTile.Box )](https://www.st.com/sensortilebox) board
     - 0x05 is reserved for the [STEVAL-BCN002V1B (BlueNRG-Tile)](https://www.st.com/content/st_com/en/products/evaluation-tools/solution-evaluation-tools/sensor-solution-eval-boards/steval-bcn002v1b.html) board
-    - 0x06 is reserved for the SensorTile.101 board
     - 0x07 is reserved for the [B-L475E-IOT01A](https://www.st.com/en/evaluation-tools/b-l475e-iot01a.html) board
     - 0x80 to 0x8A for a differents ST Functional pack based on Nucleo boards
 
@@ -47,7 +47,7 @@ Currently, bits are mapped in the following way:
 
    |Bit|7|6|5|4|3|2|1|0|
    |:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-   |Feature|Sensor Fusion|Motion intensity|Compass|Activity|Carry Position|ProximityGesture|MemsGesture|Pedometer|
+   |Feature|Sensor Fusion|Compass|Motion intensity|Activity|Carry Position|ProximityGesture|MemsGesture|Pedometer|
 
 To see how the data is exported by pre-defined features, consult the export method [<code> Feature.ExtractResult Feature.extractData(long,byte[],int)</code>](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Feature.html#extractData-long-byte:A-int-).  within the feature class definition.
 
