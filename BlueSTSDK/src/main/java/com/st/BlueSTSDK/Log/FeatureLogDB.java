@@ -33,7 +33,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.AsyncTask;
 import android.provider.BaseColumns;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
+import androidx.annotation.NonNull;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -84,7 +85,9 @@ public class FeatureLogDB extends  FeatureLogBase {
     }//FeatureLogDb
 
     @Override
-    public void logFeatureUpdate(Feature feature, byte[] rawData,@Nullable Feature.Sample data) {
+    public void logFeatureUpdate(@NonNull Feature feature, @NonNull byte[] rawData, @Nullable Feature.Sample data) {
+        if(data == null)
+            return;
         mDb.insert(sanitizeString(feature.getName()),null,
                 getFeatureRow(feature, rawData, data));
     }
@@ -95,8 +98,8 @@ public class FeatureLogDB extends  FeatureLogBase {
      * @param sample data extracted from the feature
      * @return object ready to be instead in the db row
      */
-    public ContentValues getFeatureRow(Feature feature,byte rawData[],Feature.Sample sample){
-        Field fields[] = feature.getFieldsDesc();
+    public ContentValues getFeatureRow(Feature feature, byte[] rawData,@NonNull Feature.Sample sample){
+        Field[] fields = feature.getFieldsDesc();
         ContentValues cv = new ContentValues();
         cv.put(HOST_TIMESTAMP_COLUMN, System.currentTimeMillis() - mStartLog.getTime());
         cv.put(NODE_NAME_COLUMN, feature.getParentNode().getFriendlyName());

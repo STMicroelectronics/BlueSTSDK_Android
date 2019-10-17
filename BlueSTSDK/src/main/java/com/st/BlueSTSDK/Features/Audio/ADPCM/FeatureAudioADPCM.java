@@ -26,7 +26,7 @@
  ******************************************************************************/
 package com.st.BlueSTSDK.Features.Audio.ADPCM;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import com.st.BlueSTSDK.Features.Audio.AudioCodecManager;
 import com.st.BlueSTSDK.Features.Audio.FeatureAudio;

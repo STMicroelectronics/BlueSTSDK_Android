@@ -26,9 +26,9 @@
  ******************************************************************************/
 package com.st.BlueSTSDK;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.WorkerThread;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.WorkerThread;
 
 import com.st.BlueSTSDK.Features.Field;
 
@@ -139,7 +139,7 @@ public abstract class Feature {
      * @param n        node that will update this feature
      * @param dataDesc description of the data that belong to this feature
      */
-    public Feature(String name, Node n,@NonNull Field dataDesc[]) {
+    public Feature(@NonNull String name,@NonNull Node n,@NonNull Field dataDesc[]) {
         mName = name;
         mParent = n;
         mIsEnabled = false;
@@ -298,7 +298,7 @@ public abstract class Feature {
      * @param rawData raw data that we have used for extract the feature field, can be null
      * @param sample sample that we have to log
      */
-    protected void logFeatureUpdate(final byte rawData[],@Nullable final Sample sample) {
+    protected void logFeatureUpdate(final byte[] rawData, @Nullable final Sample sample) {
         for (final FeatureLoggerListener listener : mFeatureLogger) {
             sThreadPool.execute(new Runnable() {
                 @Override
@@ -336,13 +336,14 @@ public abstract class Feature {
             }
         mWriteLock.unlock();
 
-        //notify to all the listener that the new data arrived
-        notifyUpdate(newSample);
+        if(mIsEnabled) {
+            //notify to all the listener that the new data arrived
+            notifyUpdate(newSample);
 
-        //pass to the log only the byte that we have read
-        logFeatureUpdate(java.util.Arrays.copyOfRange(data, dataOffset, dataOffset + res.nReadByte),
-                newSample);
-
+            //pass to the log only the byte that we have read
+            logFeatureUpdate(java.util.Arrays.copyOfRange(data, dataOffset, dataOffset + res.nReadByte),
+                    newSample);
+        }
         return res.nReadByte;
     }//update
 
@@ -430,7 +431,7 @@ public abstract class Feature {
      * @param dataOffset offset where start to read the data
      * @return number of read byte and data extracted
      */
-    abstract protected ExtractResult extractData(long timestamp, byte[] data, int dataOffset);
+    abstract protected ExtractResult extractData(long timestamp,@NonNull byte[] data, int dataOffset);
 
     /**
      * in case the corresponding characteristics has the write permission you can send some data
@@ -507,7 +508,7 @@ public abstract class Feature {
          * @param sample new data received from the feature
          */
         @WorkerThread
-        void onUpdate(@NonNull Feature f,@Nullable Sample sample);
+        void onUpdate(@NonNull Feature f,@NonNull Sample sample);
 
     }//FeatureListener
 
@@ -532,8 +533,9 @@ public abstract class Feature {
          *
          */
         @WorkerThread
-        void logFeatureUpdate( Feature feature, byte[] rawData,
-                               @Nullable Sample sample);
+        void logFeatureUpdate(@NonNull Feature feature,
+                              @NonNull byte[] rawData,
+                              @Nullable Sample sample);
     }
 
     /**

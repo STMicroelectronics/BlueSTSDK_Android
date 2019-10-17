@@ -26,7 +26,7 @@
  ******************************************************************************/
 package com.st.BlueSTSDK.Features.Audio.Opus;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import com.st.BlueSTSDK.Feature.Sample;
 import com.st.BlueSTSDK.Features.Audio.AudioCodecManager;

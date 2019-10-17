@@ -28,7 +28,7 @@ package com.st.BlueSTSDK.Utils;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 /**
  * Class that store a program version. The version is stored with 3 numbers, major version,

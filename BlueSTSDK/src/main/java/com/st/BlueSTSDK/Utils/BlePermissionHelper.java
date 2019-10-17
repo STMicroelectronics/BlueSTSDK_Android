@@ -48,14 +48,14 @@ import android.content.res.Resources;
 import android.location.LocationManager;
 import android.os.Build;
 import android.provider.Settings;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import com.google.android.material.snackbar.Snackbar;
+import androidx.core.app.ActivityCompat;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
+import androidx.core.content.ContextCompat;
+import androidx.appcompat.app.AlertDialog;
 import android.view.View;
 import android.widget.Toast;
 
@@ -75,6 +75,7 @@ public class BlePermissionHelper{
 
     public interface BlePermissionAcquiredCallback{
         void onBlePermissionAcquired();
+        void onBlePermissionDenied();
     }
 
     private final @NonNull Context mCtx;
@@ -82,25 +83,19 @@ public class BlePermissionHelper{
     FragmentActivity mActivity;
     private final @Nullable
     Fragment mFragment;
-    private final @NonNull View mRootView;
-    private BlePermissionAcquiredCallback mCallback;
 
     /**
-     *
      * @param src fragment that will trigger the open of the file selector
-     * @param rootView view where show the shankbar with the request/errors
      */
-    public BlePermissionHelper(@NonNull Fragment src,@NonNull View rootView) {
+    public BlePermissionHelper(@NonNull Fragment src) {
         this.mFragment = src;
         this.mCtx = src.requireContext();
-        this.mRootView = rootView;
         this.mActivity=null;
     }
 
-    public BlePermissionHelper(@NonNull FragmentActivity src,@NonNull View rootView) {
+    public BlePermissionHelper(@NonNull FragmentActivity src) {
         this.mFragment = null;
         mActivity = src;
-        this.mRootView = rootView;
         mCtx = mActivity;
     }
 
@@ -132,15 +127,6 @@ public class BlePermissionHelper{
             throw new IllegalStateException("Fragment or activity must be != null");
         }
     }
-
-
-    public void acquireBlePermission(BlePermissionAcquiredCallback callback){
-        mCallback = callback;
-        if(checkAdapterAndPermission()){
-            mCallback.onBlePermissionAcquired();
-        }
-    }
-
 
     /**
      * check that the bluetooth is enabled
@@ -207,12 +193,12 @@ public class BlePermissionHelper{
      */
     private boolean checkBlePermission(){
         if (ContextCompat.checkSelfPermission(mCtx,
-                Manifest.permission.ACCESS_COARSE_LOCATION)
+                Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
 
             // Should we show an explanation?
             if (ActivityCompat.shouldShowRequestPermissionRationale(requireActivity(),
-                    Manifest.permission.ACCESS_COARSE_LOCATION)) {
+                    Manifest.permission.ACCESS_FINE_LOCATION)) {
                 final AlertDialog.Builder dialog = new AlertDialog.Builder(mCtx);
                 dialog.setMessage(mCtx.getString(R.string.LocationCoarseRationale));
                 dialog.setPositiveButton(android.R.string.ok,
@@ -220,7 +206,7 @@ public class BlePermissionHelper{
                             @Override
                             public void onClick(DialogInterface paramDialogInterface, int paramInt) {
                                 requestPermissions(
-                                        new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
+                                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                                         REQUEST_LOCATION_ACCESS);
                             }
                         });
@@ -228,7 +214,7 @@ public class BlePermissionHelper{
             } else {
                 // No explanation needed, we can request the permission.
                 requestPermissions(
-                        new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
+                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                         REQUEST_LOCATION_ACCESS);
             }//if-else
             return false;
@@ -268,8 +254,8 @@ public class BlePermissionHelper{
 
 
     public void onRequestPermissionsResult(int requestCode,
-                                           @NonNull String permissions[],
-                                           @NonNull int[] grantResults) {
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grantResults, BlePermissionAcquiredCallback callback) {
         if (grantResults.length == 0 )
             return;
 
@@ -277,9 +263,9 @@ public class BlePermissionHelper{
             // If request is cancelled, the result arrays are empty.
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 //we have the permission try to start the scan again
-                mCallback.onBlePermissionAcquired();
+                callback.onBlePermissionAcquired();
             } else {
-                    Snackbar.make(mRootView,  R.string.LocationNotGranted, Snackbar.LENGTH_SHORT).show();
+                callback.onBlePermissionDenied();
             }//if-else
         }// if REQUEST_LOCATION_ACCESS
     }//onRequestPermissionsResult

@@ -26,7 +26,7 @@
  ******************************************************************************/
 package com.st.BlueSTSDK.Features;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import com.st.BlueSTSDK.Debug;
 import com.st.BlueSTSDK.Feature;
@@ -161,13 +161,11 @@ public abstract class FeatureAutoConfigurable extends Feature {
      */
     protected boolean startConfiguration(byte[] data) {
         setConfigurationStatus(false);
-        boolean messageSend = false;
-        if(mStBoxCalib!=null){
+        boolean messageSend = sendCommand(
+                FEATURE_COMMAND_START_CONFIGURATION, data);
+        if (!messageSend && mStBoxCalib != null){
             mStBoxCalib.startCalibration();
             messageSend = true;
-        }else {
-            messageSend = sendCommand(
-                    FEATURE_COMMAND_START_CONFIGURATION, data);
         }
         if (messageSend)
             notifyAutoConfigurationStart();

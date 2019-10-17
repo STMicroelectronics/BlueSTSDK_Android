@@ -26,7 +26,8 @@
  ******************************************************************************/
 package com.st.BlueSTSDK.Log;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import android.util.Log;
 
 import com.st.BlueSTSDK.Feature;
@@ -101,7 +102,7 @@ public class FeatureLogCSVFile extends FeatureLogBase {
     }
 
     @Override
-    public void logFeatureUpdate(Feature feature, byte[] rawData,@Nullable Feature.Sample data) {
+    public void logFeatureUpdate(@NonNull Feature feature, @NonNull byte[] rawData, @Nullable Feature.Sample data) {
         try {
             Formatter out = openDumpFile(feature);
             Date notificationTime = data !=null ? new Date(data.notificationTime) : new Date();
@@ -117,8 +118,7 @@ public class FeatureLogCSVFile extends FeatureLogBase {
                 if(data!=null)
                     out.format(Long.toString(data.timestamp)); //NodeTimestamp
                 out.format(",");
-                if (rawData != null)
-                    storeBlobData(out, rawData);
+                storeBlobData(out, rawData);
                 out.format(",");
                 if(data!=null)
                     storeFeatureData(out, data.data);

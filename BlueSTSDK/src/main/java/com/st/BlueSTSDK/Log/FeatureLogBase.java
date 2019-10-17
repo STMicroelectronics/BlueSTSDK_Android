@@ -54,9 +54,9 @@ public abstract class FeatureLogBase implements Feature.FeatureLoggerListener{
     final static SimpleDateFormat DATE_FIELD_FORMAT_PREFIX = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss.SSS",
             Locale.getDefault());
 
-    final static SimpleDateFormat FILE_DATE_FORMAT_PREFIX = new SimpleDateFormat("yyyyMMdd_HHmmss",
+    private final static SimpleDateFormat FILE_DATE_FORMAT_PREFIX = new SimpleDateFormat("yyyyMMdd_HHmmss",
             Locale.getDefault());
-    final static SimpleDateFormat DATE_FORMAT_TO_HEADER = new SimpleDateFormat("yyyy-MM-dd " +
+    private final static SimpleDateFormat DATE_FORMAT_TO_HEADER = new SimpleDateFormat("yyyy-MM-dd " +
             "HH:mm:ss",Locale.getDefault());
 
     protected static final String HOST_DATE_COLUMN ="Date";
@@ -86,7 +86,7 @@ public abstract class FeatureLogBase implements Feature.FeatureLoggerListener{
      * @param f feature that this close will dump
      */
     protected void printHeader(Formatter out, Feature f) {
-        Field fields[] = f.getFieldsDesc();
+        Field[] fields = f.getFieldsDesc();
         out.format("Log start on," + DATE_FORMAT_TO_HEADER.format(mStartLog) + "\n");
         out.format("Feature," + f.getName() + "\n");
         out.format("Nodes,");
@@ -115,7 +115,10 @@ public abstract class FeatureLogBase implements Feature.FeatureLoggerListener{
      * @param out stream where write the feature data
      * @param data byte data to dump
      */
-    protected void storeBlobData(Formatter out,byte data[]) {
+    protected void storeBlobData(Formatter out, byte[] data) {
+        if (data == null || data.length == 0){
+            return;
+        }
         for(byte b: data) {
             out.format("%02X", b);
         }//for
@@ -126,7 +129,10 @@ public abstract class FeatureLogBase implements Feature.FeatureLoggerListener{
      * @param out stream where write the feature data
      * @param data feature data
      */
-    protected void storeFeatureData(Formatter out, Number data[])  {
+    protected void storeFeatureData(Formatter out, Number[] data)  {
+        if (data == null || data.length == 0){
+            return;
+        }
         for(Number n: data){
             out.format("%s,",n.toString());
         }//for

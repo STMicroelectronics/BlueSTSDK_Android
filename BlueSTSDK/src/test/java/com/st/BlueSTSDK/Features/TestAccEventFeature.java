@@ -1,25 +1,17 @@
 package com.st.BlueSTSDK.Features;
 
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import com.st.BlueSTSDK.Feature;
-import com.st.BlueSTSDK.Features.FeatureAccelerationEvent.AccelerationEvent;
-import com.st.BlueSTSDK.Node;
-import com.st.BlueSTSDK.TestUtil.TestUtil;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyByte;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 public class TestAccEventFeature {
 

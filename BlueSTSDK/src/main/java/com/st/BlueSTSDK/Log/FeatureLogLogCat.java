@@ -27,6 +27,7 @@
 
 package com.st.BlueSTSDK.Log;
 
+import androidx.annotation.NonNull;
 import android.util.Log;
 
 import com.st.BlueSTSDK.Feature;
@@ -96,7 +97,7 @@ public class FeatureLogLogCat implements Feature.FeatureLoggerListener {
     }
 
     @Override
-    public void logFeatureUpdate(Feature feature,byte[] rawData,Feature.Sample sample){
+    public void logFeatureUpdate(@NonNull Feature feature, @NonNull byte[] rawData, Feature.Sample sample){
         StringBuilder sb = new StringBuilder();
         sb.append(Long.toString(System.currentTimeMillis() - mStartLog.getTime())).append(' ')
           .append(feature.getParentNode().getFriendlyName().replace(" @", "_")).append(' ')

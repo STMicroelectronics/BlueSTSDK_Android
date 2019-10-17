@@ -25,7 +25,7 @@
  ******************************************************************************/
 package com.st.BlueSTSDK.Features;
 
-import android.support.annotation.IntDef;
+import androidx.annotation.IntDef;
 
 import com.st.BlueSTSDK.Feature;
 import com.st.BlueSTSDK.Node;

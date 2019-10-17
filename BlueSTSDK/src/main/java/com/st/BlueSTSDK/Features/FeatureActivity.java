@@ -26,8 +26,8 @@
  ******************************************************************************/
 package com.st.BlueSTSDK.Features;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.st.BlueSTSDK.Feature;
 import com.st.BlueSTSDK.Node;
@@ -51,8 +51,8 @@ import java.util.Locale;
 public class FeatureActivity extends Feature {
 
     public static final String FEATURE_NAME = "Activity Recognition";
-    public static final String FEATURE_UNIT[] = {null,"ms",null};
-    public static final String FEATURE_DATA_NAME[] = {"Activity","Date","Algorithm"};
+    public static final String[] FEATURE_UNIT = {null, "ms", null};
+    public static final String[] FEATURE_DATA_NAME = {"Activity", "Date", "Algorithm"};
     public static final float DATA_MAX = 7;
     public static final float DATA_MIN = 0;
 
@@ -166,13 +166,13 @@ public class FeatureActivity extends Feature {
                         DATA_MAX,DATA_MIN),
                 new Field(FEATURE_DATA_NAME[1], FEATURE_UNIT[1], Field.Type.Int64,
                         Long.MAX_VALUE,0),
-                new Field(FEATURE_DATA_NAME[1], FEATURE_UNIT[1], Field.Type.UInt8,
+                new Field(FEATURE_DATA_NAME[2], FEATURE_UNIT[2], Field.Type.UInt8,
                         0xFF,0),
         });
     }//FeatureActivity
 
 
-    private ExtractResult extractActivity(long timestamp,byte data[], int dataOffset){
+    private ExtractResult extractActivity(long timestamp, byte[] data, int dataOffset){
         Sample temp = new Sample(timestamp, new Number[]{
                 data[dataOffset],
                 System.currentTimeMillis()
@@ -180,7 +180,7 @@ public class FeatureActivity extends Feature {
         return new ExtractResult(temp, 1);
     }
 
-    private ExtractResult extractActivityAndAlgorithm(long timestamp,byte data[], int dataOffset){
+    private ExtractResult extractActivityAndAlgorithm(long timestamp, byte[] data, int dataOffset){
         Sample temp = new Sample(timestamp, new Number[]{
                 data[dataOffset],
                 System.currentTimeMillis(),

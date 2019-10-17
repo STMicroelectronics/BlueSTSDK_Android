@@ -41,10 +41,10 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.RequiresApi;
-import android.support.annotation.WorkerThread;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
+import androidx.annotation.WorkerThread;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -170,14 +170,14 @@ public class Node{
          * @param newRSSIValue new rssi
          */
         @WorkerThread
-        void onRSSIChanged(Node node,int newRSSIValue);
+        void onRSSIChanged(@NonNull Node node,int newRSSIValue);
 
         /**
          * method call when the mtu request was accepted
          * @param node node that update the mtu
          * @param newMtu the new mtu used by the connection
          */
-        void onMtuChange(Node node, int newMtu);
+        void onMtuChange(@NonNull Node node, int newMtu);
     }//BleConnectionParamUpdateListener
 
     /**
@@ -384,21 +384,25 @@ public class Node{
 
             List<Feature> temp = new ArrayList<>();
 
+            long advertiseMask = mAdvertise.getFeatureMap() ;
+
             //we do the search in reverse order for have the feature in he correct order in case
             //of characteristics that export multiple feature
-
             long mask= 1L<<31; //1<<31
             //we test all the 32bit of the feature mask
             for(int i=0; i<32; i++ ) {
                 if ((featureMask & mask) != 0) { //if the bit is up
                     Class<? extends Feature> featureClass = decoder.get((int)mask);
-                    if (featureClass != null && isExportingFeature(featureClass)) { //and the decoder has a name for that bit
+                    if (featureClass != null) {
                         Feature f = buildFeatureFromClass(featureClass);
                         if(f!=null) {
-                            mAvailableFeature.add(f);
-                            mMaskToFeature.put((int) mask, f);
-                            f.setEnable(true);
                             temp.add(f);
+                            mMaskToFeature.put((int) mask, f);
+                            //if the feature is exported into the feature mask made it available
+                            if((advertiseMask & mask) != 0){
+                                mAvailableFeature.add(f);
+                                f.setEnable(true);
+                            }
                         }
                     }//if
                 }//if
@@ -661,8 +665,7 @@ public class Node{
             /*Log.d(TAG, "onDescriptorWrite: "+
                     descriptor.getCharacteristic().getUuid()+
                     "size: "+mWriteDescQueue.size()+
-                    "success: "+(status == BluetoothGatt.GATT_SUCCESS));
-            */
+                    "success: "+(status == BluetoothGatt.GATT_SUCCESS));*/
             //descriptor write -> remove from the queue
             if(status == BluetoothGatt.GATT_SUCCESS)
                 dequeueWriteDesc(new WriteDescCommand(descriptor,descriptor.getValue()));
@@ -678,6 +681,7 @@ public class Node{
         @Override
         public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
             super.onCharacteristicWrite(gatt, characteristic, status);
+
             WriteCharCommand out = dequeueCharacteristicsWrite();
             if(out==null) {
                 Log.e(TAG, "No write operation requested, write notification received: char:"
@@ -688,7 +692,7 @@ public class Node{
                 Log.e(TAG,"Write notification and last write operation are on different char: "
                         +out.characteristic.getUuid() +" vs "+characteristic.getUuid());
             }else {
-                //Log.d(TAG, "onCharacteristicWrite: "+mCharacteristicWriteQueue.size()+" success: "+(status == BluetoothGatt.GATT_SUCCESS));
+            //Log.d(TAG, "onCharacteristicWrite: "+mCharacteristicWriteQueue.size()+" success: "+(status == BluetoothGatt.GATT_SUCCESS));
             }
             boolean writeSuccess = status == BluetoothGatt.GATT_SUCCESS;
             if (mDebugConsole != null &&
@@ -718,12 +722,14 @@ public class Node{
      */
     private void cleanConnectionData(){
         mConnection=null;
-        synchronized (mWriteDescQueue) {
-            mWriteDescQueue.clear();
-        }
         synchronized (mCharacteristicWriteQueue) {
             mCharacteristicWriteQueue.clear();
         }
+        synchronized (mWriteDescQueue) {
+            mWriteDescQueue.clear();
+            mWriteDescQueue.notifyAll();
+        }
+
         mCharFeatureMap.clear();
         mAvailableFeature.clear();
 
@@ -888,7 +894,11 @@ public class Node{
             if(newState==State.Dead  || newState==State.Disconnecting){
                 if(mBoundStateChange !=null) {
                     //clean the broadcast receiver
-                    mContext.getApplicationContext().unregisterReceiver(mBoundStateChange);
+                    try {
+                        mContext.getApplicationContext().unregisterReceiver(mBoundStateChange);
+                    }catch (IllegalArgumentException e){
+                        //fire when the receiver doesn't exist so we can ignore it
+                    }
                     mBoundStateChange = null;
                 }
             }
@@ -1736,16 +1746,16 @@ public class Node{
 
             WriteDescCommand command = null;
             final  int properties = characteristic.getProperties();
-            if((properties & BluetoothGattCharacteristic.PROPERTY_NOTIFY) != 0)
+            if((properties & BluetoothGattCharacteristic.PROPERTY_NOTIFY) != 0) {
                 command = new WriteDescCommand(descriptor,
-                    enable ? BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE :
-                        BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE);
+                        enable ? BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE :
+                                BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE);
 
-            if((properties & BluetoothGattCharacteristic.PROPERTY_INDICATE) != 0)
+            }else if((properties & BluetoothGattCharacteristic.PROPERTY_INDICATE) != 0) {
                 command = new WriteDescCommand(descriptor,
                         enable ? BluetoothGattDescriptor.ENABLE_INDICATION_VALUE :
                                 BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE);
-
+            }
             if(command==null)
                 return false;
 
@@ -1850,10 +1860,12 @@ public class Node{
                     waitCompleteAllDescriptorWriteRequest(new Runnable() {
                         @Override
                         public void run() {
-                            //set the value to write and write it
-                            cmd.characteristic.setValue(cmd.data);
-                            if (!mConnection.writeCharacteristic(cmd.characteristic)) {
-                                mBackGroundHandler.postDelayed(writeChar, RETRY_COMMAND_DELAY_MS);
+                            if(mConnection!=null &&  isConnected()&& ! isPairing()) {
+                                //set the value to write and write it
+                                cmd.characteristic.setValue(cmd.data);
+                                if (!mConnection.writeCharacteristic(cmd.characteristic)) {
+                                    mBackGroundHandler.postDelayed(writeChar, RETRY_COMMAND_DELAY_MS);
+                                }
                             }
                         }//run
                     });
@@ -2052,17 +2064,29 @@ public class Node{
      */
     public @Nullable ConfigControl getConfigRegister(){return mConfigControl; } //getConfigRegister
 
-    public int getAdvertiseBitMask(){
+    public long getAdvertiseBitMask(){
         return mAdvertise.getFeatureMap();
     }
 
     public int getLastMtu(){ return mLastMtu;}
 
-    public boolean requestNewMtu(int newMtu){
+    public boolean requestNewMtu(final int newMtu){
         if(!isConnected())
             return false;
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            return  mConnection.requestMtu(newMtu);
+            mBackGroundHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    waitCompleteAllDescriptorWriteRequest(new Runnable() {
+                        @Override
+                        public void run() {
+                            if(isConnected())
+                                mConnection.requestMtu(newMtu);
+                        }
+                    });
+                }
+            });
+            return  true;
         }else{
             return false;
         }

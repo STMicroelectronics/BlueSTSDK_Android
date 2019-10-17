@@ -26,8 +26,8 @@
  ******************************************************************************/
 package com.st.BlueSTSDK.Features;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 /**
  * Class that describe a feature data field

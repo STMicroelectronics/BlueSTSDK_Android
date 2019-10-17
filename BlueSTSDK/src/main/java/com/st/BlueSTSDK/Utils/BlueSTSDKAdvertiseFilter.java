@@ -27,7 +27,7 @@
 package com.st.BlueSTSDK.Utils;
 
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import android.util.SparseArray;
 
 import com.st.BlueSTSDK.Node;
@@ -86,7 +86,7 @@ public class BlueSTSDKAdvertiseFilter implements AdvertiseFilter {
             Node.Type boardType = getNodeType(deviceId);
             boolean boardSleeping = getNodeSleepingState(data[1]);
             boolean hasGeneralPurpose = getHasGenericPurposeFeature(data[1]);
-            int featureMap = NumberConversion.BigEndian.bytesToInt32(data, + 2);
+            long featureMap = NumberConversion.BigEndian.bytesToUInt32(data, + 2);
 
             String address = null;
             if ((data.length == 12 )) {

@@ -26,7 +26,7 @@
  ******************************************************************************/
 package com.st.BlueSTSDK.Config.STWeSU;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import com.st.BlueSTSDK.Config.Command;
 import com.st.BlueSTSDK.Config.Register;

@@ -34,10 +34,10 @@ import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanSettings;
 import android.os.Build;
 import android.os.Handler;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.RequiresPermission;
-import android.support.annotation.WorkerThread;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresPermission;
+import androidx.annotation.WorkerThread;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -51,7 +51,6 @@ import com.st.BlueSTSDK.Utils.advertise.LeScanCallback;
 import com.st.BlueSTSDK.Utils.advertise.ScanCallbackBridge;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -86,7 +85,7 @@ public class Manager {
         sFeatureMapDecoder.put((byte) 0x81, BLENodeDefines.FeatureCharacteristics
                 .Nucleo_Remote_Features);
         sFeatureMapDecoder.put((byte) 0x06, BLENodeDefines.FeatureCharacteristics
-                .SENSOT_TILE_BOX_MASK_TO_FEATURE);
+                .SENSOR_TILE_BOX_MASK_TO_FEATURE);
     }
 
 
@@ -202,7 +201,7 @@ public class Manager {
      * @return true if the process is started, false if it is already running
      */
     @RequiresPermission(allOf = {
-            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.BLUETOOTH,
             Manifest.permission.BLUETOOTH_ADMIN})
     public boolean startDiscovery() {
@@ -211,7 +210,7 @@ public class Manager {
     }//startDiscovery;
 
     @RequiresPermission(allOf = {
-            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.BLUETOOTH,
             Manifest.permission.BLUETOOTH_ADMIN})
     public boolean startDiscovery(int timeoutMs){
@@ -242,7 +241,7 @@ public class Manager {
      * @return true if the process is started, false if a discovery is already running
      */
     @RequiresPermission(allOf = {
-            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.BLUETOOTH,
             Manifest.permission.BLUETOOTH_ADMIN})
     public boolean startDiscovery(int timeoutMs,List<AdvertiseFilter> filters) {

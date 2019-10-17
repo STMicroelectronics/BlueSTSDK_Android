@@ -28,12 +28,14 @@ package com.st.BlueSTSDK.Utils;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.st.BlueSTSDK.Manager;
+import com.st.BlueSTSDK.R;
 import com.st.BlueSTSDK.Utils.advertise.AdvertiseFilter;
 
 import java.util.List;
@@ -58,6 +60,21 @@ public class NodeScanActivity extends AppCompatActivity {
 
     private BlePermissionHelper mPermissionHelper;
 
+    private BlePermissionHelper.BlePermissionAcquiredCallback mCallback = new BlePermissionHelper.BlePermissionAcquiredCallback() {
+        @Override
+        public void onBlePermissionAcquired() {
+            mManager.startDiscovery(mLastTimeOut,buildAdvertiseFilter());
+            mLastTimeOut=0;
+        }
+
+        @Override
+        public void onBlePermissionDenied() {
+            final View viewRoot = ((ViewGroup) NodeScanActivity.this
+                    .findViewById(android.R.id.content)).getChildAt(0);
+            Snackbar.make(viewRoot,  R.string.LocationNotGranted, Snackbar.LENGTH_SHORT).show();
+        }
+    };
+
     /**
      * !=0 if we have a start scanning request pending
      */
@@ -67,6 +84,8 @@ public class NodeScanActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mManager = Manager.getSharedInstance();
+
+        mPermissionHelper = new BlePermissionHelper(this);
     }//onCreate
 
 
@@ -96,17 +115,9 @@ public class NodeScanActivity extends AppCompatActivity {
      */
     public void startNodeDiscovery(final int timeoutMs) {
         mLastTimeOut=timeoutMs;
-        final View viewRoot = ((ViewGroup) this
-                .findViewById(android.R.id.content)).getChildAt(0);
-        mPermissionHelper = new BlePermissionHelper(this,viewRoot);
-        mPermissionHelper.acquireBlePermission(new BlePermissionHelper.BlePermissionAcquiredCallback() {
-            @Override
-            public void onBlePermissionAcquired() {
-                mManager.startDiscovery(timeoutMs,buildAdvertiseFilter());
-                mLastTimeOut=0;
-            }
-        });
-
+        if(mPermissionHelper.checkAdapterAndPermission()){
+            mCallback.onBlePermissionAcquired();
+        }
     }
 
     /**
@@ -133,9 +144,9 @@ public class NodeScanActivity extends AppCompatActivity {
 
     @Override
     public void onRequestPermissionsResult(int requestCode,
-                                           @NonNull String permissions[],
+                                           @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
-        mPermissionHelper.onRequestPermissionsResult(requestCode,permissions,grantResults);
+        mPermissionHelper.onRequestPermissionsResult(requestCode,permissions,grantResults,mCallback);
     }//onRequestPermissionsResult
 }
 

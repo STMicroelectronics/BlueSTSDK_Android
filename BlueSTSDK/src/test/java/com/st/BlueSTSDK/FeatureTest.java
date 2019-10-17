@@ -27,11 +27,12 @@
 
 package com.st.BlueSTSDK;
 
+import androidx.annotation.NonNull;
+
 import com.st.BlueSTSDK.Features.Field;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.mockito.Mock;
 
 import java.util.Date;
 import java.util.List;
@@ -105,14 +106,14 @@ public class FeatureTest {
     public void insertFeatureListener() throws Exception {
         Feature.FeatureListener listener1 = new Feature.FeatureListener() {
             @Override
-            public void onUpdate(Feature f,Feature.Sample s) {
+            public void onUpdate(@NonNull Feature f, @NonNull Feature.Sample s) {
 
             }
         };
 
         Feature.FeatureListener listener2 = new Feature.FeatureListener() {
             @Override
-            public void onUpdate(Feature f,Feature.Sample s) {
+            public void onUpdate(@NonNull Feature f, @NonNull Feature.Sample s) {
 
             }
         };
@@ -138,14 +139,14 @@ public class FeatureTest {
     public  void removeFeatureListener(){
         Feature.FeatureListener listener1 = new Feature.FeatureListener() {
             @Override
-            public void onUpdate(Feature f,Feature.Sample s) {
+            public void onUpdate(@NonNull Feature f, @NonNull Feature.Sample s) {
 
             }
         };
 
         Feature.FeatureListener listener2 = new Feature.FeatureListener() {
             @Override
-            public void onUpdate(Feature f,Feature.Sample s) {
+            public void onUpdate(@NonNull Feature f, @NonNull Feature.Sample s) {
 
             }
         };

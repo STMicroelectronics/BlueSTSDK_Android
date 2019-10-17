@@ -6,7 +6,7 @@ buildscript {
         google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.4.1'
+        classpath 'com.android.tools.build:gradle:3.4.2'
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
@@ -29,12 +29,14 @@ task clean(type: Delete) {
 ext {
     // Sdk and tools
     targetSdkVersion = 28
-    compileSdkVersion = 28
-    buildToolsVersion = '28.0.3'
+    compileSdkVersion = 29
+    buildToolsVersion = '29.0.1'
 
-// App dependencies
-    supportLibraryVersion = '28.0.0'
-    constraintLayoutVersion = '1.0.2'
+    // App dependencies
+    androidx_appCompatVersion='1.0.2'
+    androidx_annotationVersion='1.1.0'
+    androidx_materialVersion='1.0.0'
+
     junitVersion = '4.12'
     mockitoVersion = '1.9.5'
 }

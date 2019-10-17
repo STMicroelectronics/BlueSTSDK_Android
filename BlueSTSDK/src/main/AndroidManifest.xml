@@ -8,7 +8,7 @@
     <!-- search for new devices -->
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
     <!-- need for search for new devices for api >23 !-->
-    <uses-permission-sdk-23 android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission-sdk-23 android:name="android.permission.ACCESS_FINE_LOCATION"/>
 
     <!-- store log files -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -17,7 +17,7 @@
 
     <application>
         <provider
-            android:name="android.support.v4.content.FileProvider"
+            android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.logFileProvider"
             android:exported="false"
             android:grantUriPermissions="true">
