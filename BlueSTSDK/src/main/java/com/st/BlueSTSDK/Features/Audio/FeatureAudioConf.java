@@ -45,7 +45,16 @@ public abstract class FeatureAudioConf extends Feature {
         super(name, n, dataDesc);
     }
 
-    public abstract AudioCodecManager instantiateManager();
+    public abstract AudioCodecManager instantiateManager(boolean hasDecoder, boolean hasEncoder);
+
+    public abstract void setEncParams( int encFrameSize,
+                                       int encSamplingFreq,
+                                       short encChannels,
+                                       int encFrameSizePcm,
+                                       int encApplication,
+                                       int encBitrate,
+                                       boolean encVbr,
+                                       int encComplexity);
 
     //avoid to notify on the thread pool since here the order notification order is important,
     //keep the notification inside the main thread..

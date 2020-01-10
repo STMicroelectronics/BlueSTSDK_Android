@@ -258,6 +258,10 @@ public abstract class Feature {
         mParent.enableNotification(this);
     }
 
+    public void read(){
+        mParent.readFeature(this);
+    }
+
     public void disableNotification(){
         mParent.disableNotification(this);
     }

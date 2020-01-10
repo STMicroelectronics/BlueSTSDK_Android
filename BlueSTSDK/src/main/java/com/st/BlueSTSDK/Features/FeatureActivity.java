@@ -53,7 +53,7 @@ public class FeatureActivity extends Feature {
     public static final String FEATURE_NAME = "Activity Recognition";
     public static final String[] FEATURE_UNIT = {null, "ms", null};
     public static final String[] FEATURE_DATA_NAME = {"Activity", "Date", "Algorithm"};
-    public static final float DATA_MAX = 7;
+    public static final float DATA_MAX = 8;
     public static final float DATA_MIN = 0;
 
     /**
@@ -99,6 +99,10 @@ public class FeatureActivity extends Feature {
          */
         STAIRS,
         /**
+         * the adult is in the car
+         */
+        ADULT_IN_CAR,
+        /**
          * invalid state
          */
         ERROR
@@ -129,6 +133,8 @@ public class FeatureActivity extends Feature {
                     return ActivityType.DRIVING;
                 case 0x07:
                     return ActivityType.STAIRS;
+                case 0x08:
+                    return ActivityType.ADULT_IN_CAR;
                 default:
                     return ActivityType.ERROR;
             }//switch

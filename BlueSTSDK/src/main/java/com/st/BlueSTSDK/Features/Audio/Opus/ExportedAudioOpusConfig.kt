@@ -24,9 +24,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  ******************************************************************************/
-package com.st.BlueSTSDK.Utils;
+package com.st.BlueSTSDK.Features.Audio.Opus
 
-import com.st.BlueSTSDK.Feature;
+import com.st.BlueSTSDK.ExportedFeature
+import com.st.BlueSTSDK.NodeServer
 
-public class UUIDToFeatureMap extends UUIDToClassListMap<Feature> {
-}
+class ExportedAudioOpusConf(parent:NodeServer) : ExportedFeature(parent){}

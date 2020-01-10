@@ -49,7 +49,6 @@ public class FeatureAudioADPCM extends FeatureAudio {
      */
     public static final int AUDIO_PACKAGE_SIZE=40;
 
-    private ADPCMEngine adpcmEngine = new ADPCMEngine();
     private ADPCMManager mBVBvAudioSyncManager =null;
 
     protected static final Field AUDIO_FIELD = new Field(FEATURE_DATA_NAME,null, Field.Type.ByteArray,-128,127);
@@ -122,10 +121,10 @@ public class FeatureAudioADPCM extends FeatureAudio {
     @Override
     protected ExtractResult extractData(long timestamp, byte[] data, int dataOffset) {
         if(data.length == 20){
-            Number[] dataPkt = new Number[AUDIO_PACKAGE_SIZE];
-            for (int i=0; i<AUDIO_PACKAGE_SIZE/2; i++) {
-                dataPkt[2*i] = adpcmEngine.decode((byte)(data[i] & 0x0F), mBVBvAudioSyncManager);
-                dataPkt[(2*i)+1] = adpcmEngine.decode((byte)((data[i] >> 4) & 0x0F), mBVBvAudioSyncManager);
+            short[] decodedData = mBVBvAudioSyncManager.decode(data);
+            Number[] dataPkt = new Number[decodedData.length];
+            for (int i=0; i<decodedData.length; i++) {
+               dataPkt[i] = decodedData[i];
             }
             Sample audioData = new Sample(dataPkt,getFieldsDesc());
             return new ExtractResult(audioData,20);
@@ -135,107 +134,4 @@ public class FeatureAudioADPCM extends FeatureAudio {
         }
     }//update
 
-    /**
-     * ADPCM Engine class. It contains all the operations and parameters necessary to decompress the
-     * audio received.
-     */
-    private static class ADPCMEngine {
-
-        /** Quantizer step size lookup table */
-        private static final short[] StepSizeTable={7,8,9,10,11,12,13,14,16,17,
-                19,21,23,25,28,31,34,37,41,45,
-                50,55,60,66,73,80,88,97,107,118,
-                130,143,157,173,190,209,230,253,279,307,
-                337,371,408,449,494,544,598,658,724,796,
-                876,963,1060,1166,1282,1411,1552,1707,1878,2066,
-                2272,2499,2749,3024,3327,3660,4026,4428,4871,5358,
-                5894,6484,7132,7845,8630,9493,10442,11487,12635,13899,
-                15289,16818,18500,20350,22385,24623,27086,29794,32767};
-
-        /** Table of index changes */
-        private static final byte[] IndexTable = {-1,-1,-1,-1,2,4,6,8,-1,-1,-1,-1,2,4,6,8};
-
-        private short index;
-        private int predsample;
-
-        /**
-         * Default Constructor
-         */
-        public ADPCMEngine() {
-            this.index = 0;
-            this.predsample = 0;
-        }
-
-        /**
-         * ADPCM_Decode.
-         * @param code: a byte containing a 4-bit ADPCM sample.
-         * @return : a struct which contains a 16-bit ADPCM sample
-         */
-        public short decode(byte code,@Nullable ADPCMManager syncManager) {
-            short step;
-            int diffq;
-
-            if(syncManager!=null && syncManager.isIntra()) {
-                predsample = syncManager.getAdpcm_predsample_in();
-                index = syncManager.getAdpcm_index_in();
-                syncManager.reinit();
-            }
-            step = StepSizeTable[index];
-
-            /* 2. inverse code into diff */
-            diffq = step>> 3;
-            if ((code&4)!=0)
-            {
-                diffq += step;
-            }
-
-            if ((code&2)!=0)
-            {
-                diffq += step>>1;
-            }
-
-            if ((code&1)!=0)
-            {
-                diffq += step>>2;
-            }
-
-            /* 3. add diff to predicted sample*/
-            if ((code&8)!=0)
-            {
-                predsample -= diffq;
-            }
-            else
-            {
-                predsample += diffq;
-            }
-
-            /* check for overflow*/
-            if (predsample > 32767)
-            {
-                predsample = 32767;
-            }
-            else if (predsample < -32768)
-            {
-                predsample = -32768;
-            }
-
-            /* 4. find new quantizer step size */
-            index += IndexTable [code];
-            /* check for overflow*/
-            if (index < 0)
-            {
-                index = 0;
-            }
-            if (index > 88)
-            {
-                index = 88;
-            }
-
-            /* 5. save predict sample and index for next iteration */
-            /* done! static variables */
-
-            /* 6. return new speech sample*/
-            return (short)predsample;
-        }
-    }
 }

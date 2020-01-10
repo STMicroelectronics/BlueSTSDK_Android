@@ -28,6 +28,7 @@
 package com.st.BlueSTSDK.Features.Audio;
 
 import com.st.BlueSTSDK.Feature.Sample;
+import com.st.BlueSTSDK.Node;
 
 /**
  * Class containing the abstraction of an Audio Codec Manager
@@ -60,11 +61,27 @@ public interface AudioCodecManager {
     /**
      * returns true if the audio stream is enabled, false elsewhere
      */
-    boolean isAudioEnabled();
+    Boolean isAudioEnabled();
 
     /**
      * update Audio Codec parameters extracted from a Sample passed as parameter
      * @param sample the Sample which contains the sync params
      */
     void updateParams(Sample sample);
+
+    /**
+     * Encode function
+     * @param pcmData input data to be encoded, pcm ad signed 16bit
+     * @return encoded data
+     */
+    byte[] encode(short[] pcmData);
+
+
+    /**
+     * Encode function
+     * @param encodeData input data to be encoded
+     * @return decoded data into pcm signed 16bit
+     */
+    short[] decode(byte[] encodeData);
+
 }

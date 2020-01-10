@@ -46,6 +46,7 @@ public class FeatureAudioOpus extends FeatureAudio {
     public static final String FEATURE_DATA_NAME = "Opus";
 
     private OpusManager mOpusManager = null;
+    private BlueVoiceOpusTransportProtocol mOpusTransportDecoder;
 
     protected static final Field AUDIO_FIELD =
             new Field(FEATURE_DATA_NAME,null, Field.Type.ByteArray,Byte.MAX_VALUE, Byte.MIN_VALUE);
@@ -73,6 +74,7 @@ public class FeatureAudioOpus extends FeatureAudio {
      */
     public void setAudioCodecManager(AudioCodecManager manager){
         mOpusManager = (OpusManager) manager;
+        mOpusTransportDecoder = new BlueVoiceOpusTransportProtocol(mOpusManager.getTransportFrameByteSize());
     }
 
     @Nullable
@@ -118,12 +120,13 @@ public class FeatureAudioOpus extends FeatureAudio {
     @Override
     protected Feature.ExtractResult extractData(long timestamp, byte[] data, int dataOffset) {
 
-        short[] shortData = mOpusManager.getDecodedPckt(data);
-        if (shortData != null) {
-            Number[] dataPkt = new Number[shortData.length];
+        byte[] opusFrame = mOpusTransportDecoder.unpackData(data);
+        if (opusFrame != null) {
+            short[] decodedData = mOpusManager.decode(opusFrame);
+            Number[] dataPkt = new Number[decodedData.length];
 
-            for (int i = 0; i < shortData.length; i++) {
-                dataPkt[i] = shortData[i];
+            for (int i = 0; i < decodedData.length; i++) {
+                dataPkt[i] = decodedData[i];
             }
             Feature.Sample audioData = new Feature.Sample(dataPkt,getFieldsDesc());
             return new Feature.ExtractResult(audioData,dataPkt.length);

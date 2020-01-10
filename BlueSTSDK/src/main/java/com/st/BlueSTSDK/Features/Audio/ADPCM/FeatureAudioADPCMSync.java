@@ -129,7 +129,13 @@ public class FeatureAudioADPCMSync extends FeatureAudioConf {
     }
 
     @Override
-    public AudioCodecManager instantiateManager() {
+    public AudioCodecManager instantiateManager(boolean hasDecoder, boolean hasEncoder) {
         return new ADPCMManager();
     }
+
+    @Override
+    public void setEncParams(int encFrameSize, int encSamplingFreq, short encChannels, int encFrameSizePcm, int encApplication, int encBitrate, boolean encVbr, int encComplexity) {
+        //Empty at the moment!!!
+    }
+
 }

@@ -300,6 +300,15 @@ public class Manager {
             stopBleScan_pre21();
     }
 
+    public boolean hasConnectedNodes(){
+        for (Node node : mDiscoverNode){
+            if(node.isConnected()){
+                return true;
+            }
+        }
+        return false;
+    }
+
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
     private void stopBleScan_pre21() {
         mBtAdapter.stopLeScan(mScanCallBack_pre21);
@@ -310,6 +319,13 @@ public class Manager {
         if(mBtAdapter!=null && mBtAdapter.getBluetoothLeScanner()!=null) {
             mBtAdapter.getBluetoothLeScanner().stopScan(mScanCallBack_post21);
         }
+    }
+
+    public boolean isMPhy2Supported(){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            return mBtAdapter.isLe2MPhySupported();
+        }
+        return false;
     }
 
     /**

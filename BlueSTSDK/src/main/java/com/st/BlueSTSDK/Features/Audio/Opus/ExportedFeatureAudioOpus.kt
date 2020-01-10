@@ -24,9 +24,23 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  ******************************************************************************/
-package com.st.BlueSTSDK.Utils;
+package com.st.BlueSTSDK.Features.Audio.Opus
 
-import com.st.BlueSTSDK.Feature;
+import com.st.BlueSTSDK.ExportedFeature
+import com.st.BlueSTSDK.NodeServer
 
-public class UUIDToFeatureMap extends UUIDToClassListMap<Feature> {
+class ExportedFeatureAudioOpus(parent:NodeServer) : ExportedFeature(parent){
+
+    /**
+     * send a portion of opus encoed audio
+     * the codedData will be automaticaly splitted in different package if the size is bigger than
+     * the supported mtu
+     */
+    fun sendEncodedAudio(codedData:ByteArray) {
+        val maxPayloadSize = mParent.maxPayloadSize
+        val packData = BlueVoiceOpusTransportProtocol.packData(codedData, maxPayloadSize)
+        packData.forEach {
+            notifyData(it)
+        }
+    }
 }

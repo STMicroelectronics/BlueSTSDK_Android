@@ -30,8 +30,11 @@ import androidx.annotation.Nullable;
 
 import com.st.BlueSTSDK.Feature.Sample;
 import com.st.BlueSTSDK.Features.Audio.AudioCodecManager;
+import com.st.BlueSTSDK.Node;
 
+import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * Class containing data needed in a Opus stream decoding
@@ -48,33 +51,44 @@ public class OpusManager implements AudioCodecManager {
         System.loadLibrary("opusUser");
     }
 
-    private boolean isPlaying = false;
+    private boolean isPlaying = true;
 
     /* Opus NDK functions */
     /** Opus Decoder Initialization function declaration*/
     private native int OpusDecInit(int sampFreq, int channels);
     /** Opus Decoder Decoding function declaration*/
     private native byte[] OpusDecode(byte[] input, int in_length, int frameSizePcm);
+    /** Opus Encoder Initialization function declaration*/
+    private native int OpusEncInit(int sampFreq, int channels, int app, int bitrate, boolean cvbr, int complexity);
+    /** Opus Encoder Encode function declaration*/
+    private native byte[] OpusEncode(short[] input, int encodedFrameSize, int frameSizePcm, int channels);
 
     /** Opus Decoder parameters */
-    private float opusFrameSize;
-    private int opusSamplingFreq;
-    private short opusChannels;
-    private int opusFrameSizePCM;
-
-    private byte[] opusCoded;
-    private int opusCodedLen = 0;
+    private float opusDecFrameSize;
+    private int opusDecSamplingFreq;
+    private short opusDecChannels;
+    private int opusDecFrameSizePCM;
     private short[] opusOutputPCM;
-    private boolean opusDecStart = false;
 
     /** Constructor. It loads default value statically from the Opus Configuration Feature */
-    public OpusManager() {
-        this.opusFrameSize = FeatureAudioOpusConf.getDefaultFrameSize();
-        this.opusSamplingFreq = FeatureAudioOpusConf.getDefaultSamplingFreq();
-        this.opusChannels = FeatureAudioOpusConf.getDefaultChannels();
-        this.opusFrameSizePCM = FeatureAudioOpusConf.getDefaultFrameSizePCM();
-        this.opusCoded = new byte[opusFrameSizePCM*2];
-        this.opusOutputPCM = new short[opusFrameSizePCM];
+    public OpusManager(boolean hasDecoder, boolean hasEncoder) {
+        if(hasDecoder){
+            this.opusDecFrameSize = FeatureAudioOpusConf.getDecDefaultFrameSize();
+            this.opusDecSamplingFreq = FeatureAudioOpusConf.getDecDefaultSamplingFreq();
+            this.opusDecChannels = FeatureAudioOpusConf.getDecDefaultChannels();
+            this.opusDecFrameSizePCM = FeatureAudioOpusConf.getDecDefaultFrameSizePCM();
+            this.opusOutputPCM = new short[opusDecFrameSizePCM];
+
+            OpusDecInit(opusDecSamplingFreq, opusDecChannels);
+        }
+        if(hasEncoder){
+            OpusEncInit(FeatureAudioOpusConf.getEncParams().getEncSamplingFreq(),
+                    FeatureAudioOpusConf.getEncParams().getEncChannels(),
+                    FeatureAudioOpusConf.getEncParams().getEncApplication(),
+                    FeatureAudioOpusConf.getEncParams().getEncBitrate(),
+                    FeatureAudioOpusConf.getEncParams().isEncVbr(),
+                    FeatureAudioOpusConf.getEncParams().getEncComplexity());
+        }
     }
 
     @Override
@@ -88,28 +102,33 @@ public class OpusManager implements AudioCodecManager {
 
     @Override
     public int getSamplingFreq() {
-        return opusSamplingFreq;
+        return opusDecSamplingFreq;
     }
 
     @Override
     public short getChannels() {
-        return opusChannels;
+        return opusDecChannels;
     }
 
     @Override
-    public boolean isAudioEnabled() {
+    public Boolean isAudioEnabled() {
         return isPlaying;
+    }
+
+    int getTransportFrameByteSize(){
+        return opusDecFrameSizePCM*2;
     }
 
     @Override
     public void updateParams(Sample sample){
         if (sample.data[0].byteValue()==FeatureAudioOpusConf.BV_OPUS_CONF_CMD) {
-            this.opusFrameSize = FeatureAudioOpusConf.getFrameSize(sample);
-            this.opusSamplingFreq = FeatureAudioOpusConf.getSamplingFreq(sample);
-            this.opusChannels = FeatureAudioOpusConf.getChannels(sample);
-            this.opusFrameSizePCM = (int)(((opusSamplingFreq/1000)*opusFrameSize));
-            this.opusCoded = new byte[opusFrameSizePCM*2];
-            this.opusOutputPCM = new short[opusFrameSizePCM];
+            this.opusDecFrameSize = FeatureAudioOpusConf.getFrameSize(sample);
+            this.opusDecSamplingFreq = FeatureAudioOpusConf.getSamplingFreq(sample);
+            this.opusDecChannels = FeatureAudioOpusConf.getChannels(sample);
+            this.opusDecFrameSizePCM = (int)(((opusDecSamplingFreq /1000)* opusDecFrameSize));
+            this.opusOutputPCM = new short[opusDecFrameSizePCM];
+
+            OpusDecInit(opusDecSamplingFreq, opusDecChannels);
         }
         if (sample.data[0].byteValue()==FeatureAudioOpusConf.BV_OPUS_CONTROL) {
             if (sample.data[1].byteValue() == FeatureAudioOpusConf.BV_OPUS_ENABLE_NOTIF_REQ) {
@@ -120,42 +139,21 @@ public class OpusManager implements AudioCodecManager {
         }
     }
 
-    /** Transport protocol Audio Packet reconstruction and Decoding method */
-    @Nullable
-    public short[] getDecodedPckt(byte[] audioSample) {
-        if(!opusDecStart) {
-            if (audioSample[0] == 0)
-            {
-                OpusDecInit(opusSamplingFreq,opusChannels);
-                opusDecStart = true;
-                System.arraycopy(audioSample, 1, opusCoded, 0, audioSample.length-1);
-                opusCodedLen += audioSample.length - 1;
-            }
-            return null;
-        }else {
-            if (audioSample[0] == 0) {
-                Arrays.fill(opusCoded, (byte) 0);
-                System.arraycopy(audioSample, 1, opusCoded, 0, audioSample.length - 1);
-                opusCodedLen = opusCodedLen + audioSample.length - 1;
-            } else if (audioSample[0] == 64) {
-                System.arraycopy(audioSample, 1, opusCoded, opusCodedLen, audioSample.length - 1);
-                opusCodedLen = opusCodedLen + audioSample.length - 1;
-            } else if (audioSample[0] == -128) {
-                System.arraycopy(audioSample, 1, opusCoded, opusCodedLen, audioSample.length - 1);
-                opusCodedLen = opusCodedLen + audioSample.length - 1;
-
-                //decode
-                byte[] OPUSdecoded = OpusDecode(opusCoded, opusCodedLen, opusFrameSizePCM);
-
-                for (int i = 0; i < (OPUSdecoded.length / 2); i++){
-                    opusOutputPCM[i] = (short)(((OPUSdecoded[2 * i]&0xFF)) | (OPUSdecoded[2 * i + 1]&0xFF)<<8 );
-                }
-
-                opusCodedLen = 0;
-
-                return opusOutputPCM;
-            }
-            return null;
+    @Override
+    public short[] decode(byte[] encodedData){
+        byte[] OPUSdecoded = OpusDecode(encodedData, encodedData.length, opusDecFrameSizePCM);
+        for (int i = 0; i < (OPUSdecoded.length / 2); i++){
+            opusOutputPCM[i] = (short)(((OPUSdecoded[2 * i]&0xFF)) | (OPUSdecoded[2 * i + 1]&0xFF)<<8 );
         }
+        return opusOutputPCM;
     }
+
+    @Override
+    public byte[] encode(short[] input){
+        return OpusEncode(input,
+                FeatureAudioOpusConf.getEncParams().getEncFrameSize(),
+                FeatureAudioOpusConf.getEncParams().getEncFrameSizePcm(),
+                FeatureAudioOpusConf.getEncParams().getEncChannels());
+    }
+
 }

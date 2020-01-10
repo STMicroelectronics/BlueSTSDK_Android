@@ -1,4 +1,6 @@
 apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-android'
 
 android {
 
@@ -34,6 +36,8 @@ android {
 }
 
 dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+
     implementation group: 'com.google.android.material', name: 'material', version: "$rootProject.androidx_materialVersion"
     implementation group: 'androidx.appcompat', name: 'appcompat', version: "$rootProject.androidx_appCompatVersion"
     implementation group: 'androidx.annotation', name:'annotation',version: "$rootProject.androidx_annotationVersion"

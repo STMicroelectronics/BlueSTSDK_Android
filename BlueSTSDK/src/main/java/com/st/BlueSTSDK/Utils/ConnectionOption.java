@@ -32,6 +32,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import androidx.annotation.Nullable;
 
+import com.st.BlueSTSDK.ExportedFeature;
 import com.st.BlueSTSDK.Feature;
 
 import java.util.Collections;
@@ -118,6 +119,7 @@ public class ConnectionOption  implements Parcelable{
         }else{
             dest.writeByte((byte) 0);
         }
+
     }
 
     public static class ConnectionOptionBuilder {
@@ -128,7 +130,8 @@ public class ConnectionOption  implements Parcelable{
         Map<UUID, List<Class<? extends Feature>>> userDefineFeature = null;
 
         public ConnectionOption build() {
-            return new ConnectionOption(resetCache, enableAutoConnect, userDefineFeature);
+            return new ConnectionOption(resetCache, enableAutoConnect,
+                    userDefineFeature);
         }
 
         public ConnectionOptionBuilder resetCache(boolean resetCache) {
@@ -143,7 +146,7 @@ public class ConnectionOption  implements Parcelable{
 
         public ConnectionOptionBuilder addFeature(UUID uuid, List<Class<? extends Feature>> features) {
             if (userDefineFeature == null)
-                userDefineFeature = new UUIDToFeatureMap();
+                userDefineFeature = new UUIDToClassListMap<>();
             if (userDefineFeature.containsKey(uuid)) {
                 throw new IllegalArgumentException("UUID ("+uuid+") already present");
             } else {
@@ -156,11 +159,12 @@ public class ConnectionOption  implements Parcelable{
             return addFeature(uuid, Collections.<Class<? extends Feature>>singletonList(features));
         }
 
-        public ConnectionOptionBuilder setFeatureMap(UUIDToFeatureMap featureMap) {
+        public ConnectionOptionBuilder setFeatureMap(UUIDToClassListMap<Feature> featureMap) {
             if (userDefineFeature == null)
-                userDefineFeature = new UUIDToFeatureMap();
+                userDefineFeature = new UUIDToClassListMap<>();
             userDefineFeature.putAll(featureMap);
             return this;
         }
+
     }
 }

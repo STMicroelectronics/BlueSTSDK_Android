@@ -48,14 +48,17 @@ import androidx.annotation.WorkerThread;
 import android.util.Log;
 import android.util.SparseArray;
 
+import com.st.BlueSTSDK.Features.Audio.Opus.FeatureAudioOpus;
+import com.st.BlueSTSDK.Features.Audio.Opus.FeatureAudioOpusConf;
 import com.st.BlueSTSDK.Features.FeatureGenPurpose;
 import com.st.BlueSTSDK.Utils.BLENodeDefines;
 import com.st.BlueSTSDK.Utils.BlueSTSDKAdvertiseFilter;
 import com.st.BlueSTSDK.Utils.ConnectionOption;
-import com.st.BlueSTSDK.Utils.advertise.BleAdvertiseInfo;
-import com.st.BlueSTSDK.Utils.advertise.InvalidBleAdvertiseFormat;
+import com.st.BlueSTSDK.Utils.FeatureCoordinate;
 import com.st.BlueSTSDK.Utils.NumberConversion;
 import com.st.BlueSTSDK.Utils.UnwrapTimestamp;
+import com.st.BlueSTSDK.Utils.advertise.BleAdvertiseInfo;
+import com.st.BlueSTSDK.Utils.advertise.InvalidBleAdvertiseFormat;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -94,6 +97,8 @@ public class Node{
         sBackgroundThread.start();
     }
 
+    private @Nullable NodeServer mGattServer=null;
+
     public boolean isExportingFeature(Class<? extends Feature> featureClass) {
         SparseArray<Class<? extends Feature>> decoder = Manager.getNodeFeatures(
                 getTypeId());
@@ -111,6 +116,10 @@ public class Node{
     public @NonNull
     BleAdvertiseInfo getAdvertiseInfo() {
         return mAdvertise;
+    }
+
+    public BluetoothDevice getDevice() {
+        return this.mDevice;
     }
 
     /** Node type: type the board that is advertising connection */
@@ -251,10 +260,20 @@ public class Node{
             super.onMtuChanged(gatt, mtu, status);
             if(status==BluetoothGatt.GATT_SUCCESS){
                 updateMtu(mtu);
+                Log.e(TAG,"on MTU Changed BluetoothGatt Callback SUCCESS!!!");
             }else{
                 //if fail we use the last value
                 updateMtu(mLastMtu);
+                Log.e(TAG,"on MTU Changed BluetoothGatt Callback FAIL!");
             }
+        }
+
+        @Override
+        public void onPhyUpdate(BluetoothGatt gatt, int txPhy, int rxPhy, int status) {
+            super.onPhyUpdate(gatt, txPhy, rxPhy, status);
+            /*Log.e(TAG,"device: " + device.getName() + ", [" +device.getAddress() + "]");*/
+            Log.e(TAG, " on PHY Updated BluetoothGatt Callback. txPhy is: " + txPhy);
+            Log.e(TAG, " on PHY Updated BluetoothGatt Callback. rxPhy is: " + rxPhy);
         }
 
         /**
@@ -283,6 +302,9 @@ public class Node{
                         if (mConnection != null) {
                             if(mConnectionOption.resetCache())
                                 refreshDeviceCache(mConnection);
+                            if (mGattServer != null) {
+                                mGattServer.disconnect();
+                            }
                             mConnection.close();
                         }//if
                         cleanConnectionData();
@@ -305,6 +327,9 @@ public class Node{
                 }
                 //close & clean the dead connection
                 if(mConnection!=null) {
+                    if (mGattServer != null) {
+                        mGattServer.disconnect();
+                    }
                     mConnection.close();
                 }//if
                 cleanConnectionData();
@@ -852,14 +877,34 @@ public class Node{
     }//refreshDeviceCache
 
     /**
+     * BLE Gatt Server initialization
+     */
+    public void enableNodeServer(Map<FeatureCoordinate, Class<? extends ExportedFeature>> exportedFeature){
+        if(mState == State.Connected || mState == State.Connecting){
+            throw new IllegalStateException("The Node Server can be initialized only before the connection");
+        }
+        mGattServer = new NodeServer(exportedFeature,this);
+    }
+
+
+    public @Nullable NodeServer getNodeServer(){
+        return mGattServer;
+    }
+
+    /**
      * task that open a connection with the remote device
      */
     private Runnable mConnectionTask = new Runnable() {
         @Override
         public void run() {
+
             mConnection = mDevice.connectGatt(mContext,
                     mConnectionOption.enableAutoConnect(),
                     new GattNodeConnection());
+            if(mGattServer!=null) {
+                mGattServer.initializeGattServer(mContext);
+                mGattServer.connect();
+            }
             if(mConnection==null){
                 if(mBleThread != null)
                     mBleThread.postDelayed(this, RETRY_COMMAND_DELAY_MS);
@@ -881,14 +926,18 @@ public class Node{
         public void onStateChange(@NonNull Node node, @NonNull State newState, @NonNull State prevState) {
             if(newState == State.Connected && mFeatureCommand !=null) {
                 changeNotificationStatus(mFeatureCommand,true);
-
             }//if
             //error during connection (connecting ->dead or connected -> dead )
             if((prevState == State.Connecting || prevState== State.Connected ) && newState==State
                     .Dead){
                 Log.e(TAG,"Error connecting to the node:"+node.getName());
                 //we disconnect -> free the gatt resource and connect again
-                if(mConnection!=null){ mConnection.close();}
+                if(mConnection!=null){
+                    if(mGattServer!=null) {
+                        mGattServer.disconnect();
+                    }
+                    mConnection.close();
+                }
                 cleanConnectionData();
             }
             if(newState==State.Dead  || newState==State.Disconnecting){
@@ -1552,8 +1601,11 @@ public class Node{
                 waitCompleteAllDescriptorWriteRequest(new Runnable() {
                     @Override
                     public void run() {
-                        if (!mConnection.readCharacteristic(characteristic))
-                            mBackGroundHandler.postDelayed(readChar, RETRY_COMMAND_DELAY_MS);
+                        //check again that the connetion is valid, after wht wait..
+                        if (mConnection != null && isConnected() && !isPairing()) {
+                            if (!mConnection.readCharacteristic(characteristic))
+                                mBackGroundHandler.postDelayed(readChar, RETRY_COMMAND_DELAY_MS);
+                        }
                     }//run
                 });
             }else{

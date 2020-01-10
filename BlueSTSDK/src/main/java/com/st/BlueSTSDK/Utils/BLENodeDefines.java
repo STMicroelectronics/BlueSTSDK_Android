@@ -28,10 +28,15 @@ package com.st.BlueSTSDK.Utils;
 
 import android.util.SparseArray;
 
+import com.st.BlueSTSDK.ExportedFeature;
 import com.st.BlueSTSDK.Feature;
+import com.st.BlueSTSDK.Features.Audio.Opus.ExportedAudioOpusConf;
+import com.st.BlueSTSDK.Features.Audio.Opus.ExportedFeatureAudioOpus;
 import com.st.BlueSTSDK.Features.FeatureAILogging;
 import com.st.BlueSTSDK.Features.FeatureAcceleration;
 import com.st.BlueSTSDK.Features.FeatureAccelerationEvent;
+import com.st.BlueSTSDK.Features.FeatureFiniteStateMachine;
+import com.st.BlueSTSDK.Features.FeatureMachineLearningCore;
 import com.st.BlueSTSDK.Features.FeatureMemsNorm;
 import com.st.BlueSTSDK.Features.FeatureActivity;
 import com.st.BlueSTSDK.Features.Audio.ADPCM.FeatureAudioADPCM;
@@ -302,7 +307,7 @@ public class BLENodeDefines {
         public static final SparseArray<Class<? extends Feature>> Nucleo_Remote_Features =
                 new SparseArray<>();
 
-        private static final Map<UUID,List<Class<? extends Feature>>> EXTENDED_FEATURE_MAP = new HashMap<>();
+        static final Map<UUID,List<Class<? extends Feature>>> EXTENDED_FEATURE_MAP = new HashMap<>();
 
 
         private static void buildDefaultBaseFeatureMask(){
@@ -390,23 +395,46 @@ public class BLENodeDefines {
         }
 
         @SafeVarargs
-        private static List<Class<? extends Feature>> asList(Class<? extends Feature> ... args){
+        private static List<Class<? extends Feature>> asFeatureList(Class<? extends Feature> ... args){
             return Arrays.asList(args);
         }
 
         private static void buildExtendedFeatureMask(){
-            EXTENDED_FEATURE_MAP.put(buildExtendedFeatureCharacteristics(0x01), asList(FeatureAudioOpus.class));
-            EXTENDED_FEATURE_MAP.put(buildExtendedFeatureCharacteristics(0x02), asList(FeatureAudioOpusConf.class));
-            EXTENDED_FEATURE_MAP.put(buildExtendedFeatureCharacteristics(0x03), asList(FeatureAudioClassification.class));
-            EXTENDED_FEATURE_MAP.put(buildExtendedFeatureCharacteristics(0x04), asList(FeatureAILogging.class));
-            EXTENDED_FEATURE_MAP.put(buildExtendedFeatureCharacteristics(0x05), asList(FeatureFFTAmplitude.class));
-            EXTENDED_FEATURE_MAP.put(buildExtendedFeatureCharacteristics(0x06), asList(FeatureMotorTimeParameter.class));
-            EXTENDED_FEATURE_MAP.put(buildExtendedFeatureCharacteristics(0x07), asList(FeaturePredictiveSpeedStatus.class));
-            EXTENDED_FEATURE_MAP.put(buildExtendedFeatureCharacteristics(0x08), asList(FeaturePredictiveAccelerationStatus.class));
-            EXTENDED_FEATURE_MAP.put(buildExtendedFeatureCharacteristics(0x09), asList(FeaturePredictiveFrequencyDomainStatus.class));
-            EXTENDED_FEATURE_MAP.put(buildExtendedFeatureCharacteristics(0x0A), asList(FeatureMotionAlgorithm.class));
-            EXTENDED_FEATURE_MAP.put(buildExtendedFeatureCharacteristics(0x0D), asList(FeatureEulerAngle.class));
-            EXTENDED_FEATURE_MAP.put(buildExtendedFeatureCharacteristics(0x0E), asList(FeatureFitnessActivity.class));
+            EXTENDED_FEATURE_MAP.put(buildExtendedFeatureCharacteristics(0x01), asFeatureList(FeatureAudioOpus.class));
+            EXTENDED_FEATURE_MAP.put(buildExtendedFeatureCharacteristics(0x02), asFeatureList(FeatureAudioOpusConf.class));
+            EXTENDED_FEATURE_MAP.put(buildExtendedFeatureCharacteristics(0x03), asFeatureList(FeatureAudioClassification.class));
+            EXTENDED_FEATURE_MAP.put(buildExtendedFeatureCharacteristics(0x04), asFeatureList(FeatureAILogging.class));
+            EXTENDED_FEATURE_MAP.put(buildExtendedFeatureCharacteristics(0x05), asFeatureList(FeatureFFTAmplitude.class));
+            EXTENDED_FEATURE_MAP.put(buildExtendedFeatureCharacteristics(0x06), asFeatureList(FeatureMotorTimeParameter.class));
+            EXTENDED_FEATURE_MAP.put(buildExtendedFeatureCharacteristics(0x07), asFeatureList(FeaturePredictiveSpeedStatus.class));
+            EXTENDED_FEATURE_MAP.put(buildExtendedFeatureCharacteristics(0x08), asFeatureList(FeaturePredictiveAccelerationStatus.class));
+            EXTENDED_FEATURE_MAP.put(buildExtendedFeatureCharacteristics(0x09), asFeatureList(FeaturePredictiveFrequencyDomainStatus.class));
+            EXTENDED_FEATURE_MAP.put(buildExtendedFeatureCharacteristics(0x0A), asFeatureList(FeatureMotionAlgorithm.class));
+            EXTENDED_FEATURE_MAP.put(buildExtendedFeatureCharacteristics(0x0D), asFeatureList(FeatureEulerAngle.class));
+            EXTENDED_FEATURE_MAP.put(buildExtendedFeatureCharacteristics(0x0E), asFeatureList(FeatureFitnessActivity.class));
+            EXTENDED_FEATURE_MAP.put(buildExtendedFeatureCharacteristics(0x0F), asFeatureList(FeatureMachineLearningCore.class));
+            EXTENDED_FEATURE_MAP.put(buildExtendedFeatureCharacteristics(0x10), asFeatureList(FeatureFiniteStateMachine.class));
+        }
+
+
+        @SafeVarargs
+        private static List<Class<? extends ExportedFeature>> asExportedFeatureList(Class<? extends ExportedFeature> ... args){
+            return Arrays.asList(args);
+        }
+
+        private static FeatureCoordinate buildStandardExportedExtendedFeature(long header){
+            return new FeatureCoordinate(
+                    UUID.fromString("00000000-0001-11e1-9ab4-0002a5d5c51b"),
+                    buildExtendedFeatureCharacteristics(header)
+            );
+        }
+
+        public static Map<FeatureCoordinate,Class< ? extends ExportedFeature>> getDefaultExportedFeature(){
+            Map<FeatureCoordinate,Class< ? extends ExportedFeature>> map = new HashMap<>();
+            map.put(buildStandardExportedExtendedFeature(0x01), ExportedFeatureAudioOpus.class);
+            map.put(buildStandardExportedExtendedFeature(0x02), ExportedAudioOpusConf.class);
+            return map;
+
         }
 
         static {

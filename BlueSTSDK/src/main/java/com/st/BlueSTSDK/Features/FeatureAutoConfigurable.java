@@ -26,7 +26,10 @@
  ******************************************************************************/
 package com.st.BlueSTSDK.Features;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.st.BlueSTSDK.Debug;
 import com.st.BlueSTSDK.Feature;
@@ -77,7 +80,7 @@ public abstract class FeatureAutoConfigurable extends Feature {
      * have correct values
      * default value: true
      */
-    private boolean mIsConfigured;
+    private @Nullable Boolean mIsConfigured;
 
     private CalibrationSensorTileBox mStBoxCalib;
 
@@ -88,7 +91,7 @@ public abstract class FeatureAutoConfigurable extends Feature {
      */
     public FeatureAutoConfigurable(String name, Node n, Field dataDesc[]) {
         super(name, n, dataDesc);
-        mIsConfigured = false;
+        mIsConfigured = null;
         if(n.getType() == Node.Type.SENSOR_TILE_BOX){
             mStBoxCalib = new CalibrationSensorTileBox(n.getDebug());
         }
@@ -245,7 +248,7 @@ public abstract class FeatureAutoConfigurable extends Feature {
      *
      * @return true if the feature is configured, false otherwise
      */
-    public boolean isConfigured() {
+    public @Nullable Boolean isConfigured() {
         return mIsConfigured;
     }
 

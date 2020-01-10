@@ -30,6 +30,7 @@ import androidx.annotation.NonNull;
 import android.util.Log;
 
 import com.st.BlueSTSDK.Features.Audio.AudioCodecManager;
+import com.st.BlueSTSDK.Features.Audio.EncParams;
 import com.st.BlueSTSDK.Features.Audio.FeatureAudioConf;
 import com.st.BlueSTSDK.Features.Field;
 import com.st.BlueSTSDK.Node;
@@ -91,10 +92,13 @@ public class FeatureAudioOpusConf extends FeatureAudioConf {
     private static final byte BV_OPUS_CHANNELS_2 =                     0x41;
 
     /** Opus decoder params [default values] */
-    private static final float OPUS_MS = 20;
+    private static final float OPUS_DEC_MS = 20;
     private static final int OPUS_DEC_SAMPLING_FREQ = 16000;
     private static final short OPUS_DEC_CHANNELS = 1;
-    private static final int OPUS_DEC_FRAME_SIZE_PCM = (int)((OPUS_DEC_SAMPLING_FREQ/1000)*OPUS_MS);
+    private static final int OPUS_DEC_FRAME_SIZE_PCM = (int)((OPUS_DEC_SAMPLING_FREQ/1000)* OPUS_DEC_MS);
+
+    /** Opus encoder params */
+    private static OpusEncParams opusEncParams;
 
     /**
      * build an Audio Opus Configuration Feature
@@ -110,20 +114,24 @@ public class FeatureAudioOpusConf extends FeatureAudioConf {
         });
     }
 
-    public static float getDefaultFrameSize() {
-        return OPUS_MS;
+    public static float getDecDefaultFrameSize() {
+        return OPUS_DEC_MS;
     }
 
-    public static int getDefaultSamplingFreq() {
+    public static int getDecDefaultSamplingFreq() {
         return OPUS_DEC_SAMPLING_FREQ;
     }
 
-    public static short getDefaultChannels() {
+    public static short getDecDefaultChannels() {
         return OPUS_DEC_CHANNELS;
     }
 
-    public static int getDefaultFrameSizePCM() {
+    public static int getDecDefaultFrameSizePCM() {
         return OPUS_DEC_FRAME_SIZE_PCM;
+    }
+
+    public static OpusEncParams getEncParams(){
+        return opusEncParams;
     }
 
 
@@ -208,7 +216,7 @@ public class FeatureAudioOpusConf extends FeatureAudioConf {
                     return 60;
             }
         }
-        return OPUS_MS;
+        return OPUS_DEC_MS;
     }
 
     private Number getOpusSamplingFreq(byte[] data) {
@@ -245,7 +253,7 @@ public class FeatureAudioOpusConf extends FeatureAudioConf {
             return sample.data[OPUS_FRAME_SIZE_SUBINDEX].floatValue();
         }
         //else
-        return OPUS_MS;
+        return OPUS_DEC_MS;
     }
 
     public static int getSamplingFreq(Sample sample) {
@@ -264,7 +272,26 @@ public class FeatureAudioOpusConf extends FeatureAudioConf {
     }
 
     @Override
-    public AudioCodecManager instantiateManager() {
-        return new OpusManager();
+    public AudioCodecManager instantiateManager(boolean hasDecoder, boolean hasEncoder) {
+        return new OpusManager(hasDecoder,hasEncoder);
+    }
+
+    public void setEncParams(int encFrameSize,
+                             int encSamplingFreq,
+                             short encChannels,
+                             int encFrameSizePcm,
+                             int encApplication,
+                             int encBitrate,
+                             boolean encVbr,
+                             int encComplexity) {
+
+        opusEncParams = new OpusEncParams(encFrameSize,
+                encSamplingFreq,
+                encChannels,
+                encFrameSizePcm,
+                encApplication,
+                encBitrate,
+                encVbr,
+                encComplexity);
     }
 }

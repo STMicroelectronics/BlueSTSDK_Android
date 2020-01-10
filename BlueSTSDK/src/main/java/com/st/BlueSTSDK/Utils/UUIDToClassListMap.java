@@ -1,5 +1,5 @@
 /*******************************************************************************
- * COPYRIGHT(c) 2019 STMicroelectronics
+ * COPYRIGHT(c) 2015 STMicroelectronics
  *
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
@@ -28,5 +28,35 @@ package com.st.BlueSTSDK.Utils;
 
 import com.st.BlueSTSDK.Feature;
 
-public class UUIDToFeatureMap extends UUIDToClassListMap<Feature> {
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.UUID;
+
+/**
+ * Utility class that extend the Map&lt;UUID,List&lt;Class&lt; ? extends Feature&gt;&gt;&gt; and
+ * permit to add a single Feature instead of a list of Feature
+ *
+ * @author STMicroelectronics - Central Labs.
+ * @version 1.0
+ */
+public class UUIDToClassListMap<T> extends HashMap<UUID,List<Class< ? extends T>>> {
+
+    /**
+     * add a single feature to the map
+     * @param key UUID to manage with a feature class
+     * @param value feature class that has its data inside the key UUID
+     * @return null if the key wasn't present or the list of features that are read from that UUID
+     */
+    public List<Class<? extends T>> put(UUID key, Class<? extends T> value) {
+        List<Class<? extends T>> features = get(key);
+        if (features != null) {
+            features.add(value);
+        } else {
+            features = new ArrayList<>(1);
+            features.add(value);
+            super.put(key, features);
+        }//if-else
+        return features;
+    }//put
 }

@@ -24,9 +24,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  ******************************************************************************/
-package com.st.BlueSTSDK.Utils;
+package com.st.BlueSTSDK.Utils
 
-import com.st.BlueSTSDK.Feature;
+import java.util.*
 
-public class UUIDToFeatureMap extends UUIDToClassListMap<Feature> {
-}
+data class FeatureCoordinate(
+        val service: UUID,
+        val characteristic: UUID
+)
