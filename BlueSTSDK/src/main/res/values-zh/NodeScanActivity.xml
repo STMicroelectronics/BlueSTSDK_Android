@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="EnablePositionService">请打开定位服务以搜索设备</string>
-    <string name="bluetoothNotEnabled">不打开蓝牙服务本app无法使用</string>
     <string name="LocationCoarseRationale">打开定位许可后才能搜索新设备</string>
     <string name="LocationNotGranted">无法搜索新设备</string>
     <string name="LocationNotEnabled">由于地理位置未始能本app无法使用</string>

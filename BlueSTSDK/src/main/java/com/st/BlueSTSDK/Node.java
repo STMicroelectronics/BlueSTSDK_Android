@@ -48,8 +48,6 @@ import androidx.annotation.WorkerThread;
 import android.util.Log;
 import android.util.SparseArray;
 
-import com.st.BlueSTSDK.Features.Audio.Opus.FeatureAudioOpus;
-import com.st.BlueSTSDK.Features.Audio.Opus.FeatureAudioOpusConf;
 import com.st.BlueSTSDK.Features.FeatureGenPurpose;
 import com.st.BlueSTSDK.Utils.BLENodeDefines;
 import com.st.BlueSTSDK.Utils.BlueSTSDKAdvertiseFilter;
@@ -603,7 +601,7 @@ public class Node{
         boolean updateFeature(BluetoothGattCharacteristic characteristic){
             List<Feature> features = getCorrespondingFeatures(characteristic);
             if(features!=null){
-                byte data[] = characteristic.getValue();
+                byte[] data = characteristic.getValue();
                 long timeStampLong;
                 if(data.length>=2) {
                     int timeStamp = NumberConversion.LittleEndian.bytesToUInt16(data);
@@ -627,7 +625,7 @@ public class Node{
          * @param characteristic characteristics that contain the response data
          */
         private void dispatchCommandResponseData(BluetoothGattCharacteristic characteristic){
-            byte data[] = characteristic.getValue();
+            byte[] data = characteristic.getValue();
             if(data.length<7) //if we miss some data
                 return;
             int timeStamps = NumberConversion.LittleEndian.bytesToUInt16(data);
@@ -678,7 +676,7 @@ public class Node{
                     updateFeature(characteristic);
             }else{
                 if(!isPairing()) {
-                    Log.e(TAG,"Error reading the characteristics: "+characteristic);
+                    Log.e(TAG,"Error reading the characteristics: "+characteristic+"Status "+status);
                     Node.this.updateNodeStatus(State.Dead);
                 }//if
             }//if-else
@@ -784,7 +782,7 @@ public class Node{
     private Runnable mDisconnectTask = new Runnable() {
         @Override
         public void run() {
-            if(mState==State.Disconnecting) {
+            if(mState==State.Disconnecting && mConnection!=null) {
                 mConnection.disconnect();
                 //the data will be free in the onConnectionStateChange
             }// if
@@ -897,7 +895,6 @@ public class Node{
     private Runnable mConnectionTask = new Runnable() {
         @Override
         public void run() {
-
             mConnection = mDevice.connectGatt(mContext,
                     mConnectionOption.enableAutoConnect(),
                     new GattNodeConnection());
@@ -959,7 +956,7 @@ public class Node{
      */
     private class WriteCharCommand {
         public final BluetoothGattCharacteristic characteristic;
-        public final byte data[];
+        public final byte[] data;
         public final @Nullable Runnable onWriteComplete;
 
         private WriteCharCommand(BluetoothGattCharacteristic characteristic, byte[] data){
@@ -991,9 +988,9 @@ public class Node{
      */
     private class WriteDescCommand{
         public BluetoothGattDescriptor desc;
-        public byte data[];
+        public byte[] data;
 
-        WriteDescCommand(BluetoothGattDescriptor desc ,byte data[]){
+        WriteDescCommand(BluetoothGattDescriptor desc , byte[] data){
             this.desc=desc;
             this.data=data;
         }
@@ -1349,9 +1346,9 @@ public class Node{
     public void disconnect(){
         Log.d(TAG,"Disconnection: "+Node.this.getName()+" UserAsk: "+mUserAskToDisconnect + "state: "+mState);
         mUserAskToDisconnect=true;
-        if(!isConnected())
+        //we are already disconnecting
+        if(mState == State.Disconnecting)
             return;
-
         startDisconnectProcedure();
 
     }//disconnect

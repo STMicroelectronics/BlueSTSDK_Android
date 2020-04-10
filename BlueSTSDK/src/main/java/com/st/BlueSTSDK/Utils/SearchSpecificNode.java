@@ -31,6 +31,8 @@ import android.os.AsyncTask;
 import com.st.BlueSTSDK.Manager;
 import com.st.BlueSTSDK.Node;
 
+import androidx.annotation.NonNull;
+
 import java.util.List;
 
 /**
@@ -92,7 +94,7 @@ public class SearchSpecificNode extends AsyncTask<String,Void, Node> {
         final Object barrier = new Object();
         final Manager.ManagerListener filterNode = new Manager.ManagerListener() {
             @Override
-            public void onDiscoveryChange(Manager m, boolean enabled) {
+            public void onDiscoveryChange(@NonNull Manager m, boolean enabled) {
                 if(!enabled) //when stop, unlock the barrier
                     synchronized (barrier){
                         barrier.notify();
@@ -105,7 +107,7 @@ public class SearchSpecificNode extends AsyncTask<String,Void, Node> {
              * @param node new node discovered
              */
             @Override
-            public void onNodeDiscovered(Manager m, Node node) {
+            public void onNodeDiscovered(@NonNull Manager m, Node node) {
                 String foundTag = node.getTag();
                 for(String temp : tags){
                     if(foundTag.equalsIgnoreCase(temp)) {

@@ -2,7 +2,6 @@
 <resources>
     <string name="EnablePositionService">Please enable the Location service for search new
         devices</string>
-    <string name="bluetoothNotEnabled">Impossible use the app without the bluetooth</string>
     <string name="LocationCoarseRationale">For search new devices the location permission
         is mandatory</string>
     <string name="LocationNotGranted">Impossible search for new devices</string>

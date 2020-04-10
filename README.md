@@ -23,7 +23,7 @@ Currently used values are:
     - 0x03 is reserved for the [STEVAL-BCNKT01V1 (BlueCoin)](http://www.st.com/content/st_com/en/products/evaluation-tools/solution-evaluation-tools/sensor-solution-eval-boards/steval-bcnkt01v1.html) board
     - 0x04 is reserved for the [STEVAL-IDB008V1/2 (BlueNRG-2)](http://www.st.com/content/st_com/en/products/evaluation-tools/solution-evaluation-tools/communication-and-connectivity-solution-eval-boards/steval-idb008v2.html) board
     - 0x05 is reserved for the [STEVAL-BCN002V1B (BlueNRG-Tile)](https://www.st.com/content/st_com/en/products/evaluation-tools/solution-evaluation-tools/sensor-solution-eval-boards/steval-bcn002v1b.html) board
-    - 0x06 is reserved for the [STEVAL-MKSBOX1V1 (SensorTile.Box )](https://www.st.com/sensortilebox) board
+    - 0x06 is reserved for the [STEVAL-MKSBOX1V1 (SensorTile.Box)](https://www.st.com/sensortilebox) board
     - 0x07 is reserved for the [B-L475E-IOT01A](https://www.st.com/en/evaluation-tools/b-l475e-iot01a.html) board
     - 0x80 to 0x8A for a differents ST Functional pack based on Nucleo boards
 
@@ -42,13 +42,31 @@ Currently, bits are mapped in the following way:
    
    |Bit|15|14|13|12|11|10|9|8|
    |:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-   |Feature|CO Sensor|STM32WB Thread Reboot bit | STM32WB OTA Reboot bit|SD Logging|Beam forming|AccEvent|FreeFall|Sensor Fusion Compact|
+   |Feature|CO Sensor|STM32WB Reboot bit | STM32WB OTA Reboot bit|SD Logging|Beam forming|AccEvent|FreeFall|Sensor Fusion Compact|
 
    |Bit|7|6|5|4|3|2|1|0|
    |:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-   |Feature|Sensor Fusion|Compass|Motion intensity|Activity|Carry Position|ProximityGesture|MemsGesture|Pedometer|
+   |Feature|Sensor Fusion|Motion intensity|Compass|Activity|Carry Position|ProximityGesture|MemsGesture|Pedometer|
 
-To see how the data is exported by pre-defined features, consult the export method [<code> Feature.ExtractResult Feature.extractData(long,byte[],int)</code>](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Feature.html#extractData-long-byte:A-int-).  within the feature class definition.
+a custom bitmask is defined for the SensorTile.box board:
+
+   |Bit|31|30|29|28|27|26|25|24|
+   |:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+   |Feature|FFT Amplitude|ADPCM Sync|Switch|MEMS Norm|ADPC Audio|MicLevel|Audio Classification|RFU|
+
+   |Bit|23|22|21|20|19|18|17|16|
+   |:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+   |Feature|Acc|Gyro|Mag|Pressure|Humidity|Temperature|Battery|Second Temperature|
+   
+   |Bit|15|14|13|12|11|10|9|8|
+   |:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+   |Feature|RFU|Euler Angle|RFU|SD Logging|RFU|AccEvent|EventCounter|Sensor Fusion Compact|
+
+   |Bit|7|6|5|4|3|2|1|0|
+   |:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+   |Feature|Sensor Fusion|Motion intensity|Compass|Activity|Carry Position|RFU|MemsGesture|Pedometer|
+
+To see how the data is exported by pre-defined features, consult the export method [<code> Feature.ExtractResult Feature.extractData(long,byte[],int)</code>](https://stmicroelectronics.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Feature.html#extractData-long-byte:A-int-).  within the feature class definition.
 
 
 - The device MAC address is optional and useful only for obtaining the device MAC address on an iOS device.
@@ -117,13 +135,13 @@ If available, the configuration service must have the UUID <code>00000000-000F-1
     |:------:|:---------:|:-------------------:|:----------:|:-----------:|
     |  Name  | Timestamp | Sender Feature Mask | Command Id | Answer Data |
     
-  From the SDK point of view the messages are sent using the method [Feature.sendCommand](https://stmicroelectronics.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Feature.html#sendCommand-byte-byte:A-) and the answer is notified with a callback passed through the method [Feature.parseCommandResponse](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Feature.html#parseCommandResponse-int-byte-byte:A-).
+  From the SDK point of view the messages are sent using the method [Feature.sendCommand](https://stmicroelectronics.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Feature.html#sendCommand-byte-byte:A-) and the answer is notified with a callback passed through the method [Feature.parseCommandResponse](https://stmicroelectronics.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Feature.html#parseCommandResponse-int-byte-byte:A-).
 
   If this characteristic does not exist, but the characteristics that export the feature is in 
   write mode, the *command id* and the *command data* are sending directly to the feature 
   characteristics. In this case is not possible answer to the command.
 
-- <code>00000001-000F-11e1-ac36-0002a5d5c51b</code> (Read/Write/Notify): if available it is used to access the board configuration register that can be modified using the [ConfigControl](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/ConfigControl.html) class.
+- <code>00000001-000F-11e1-ac36-0002a5d5c51b</code> (Read/Write/Notify): if available it is used to access the board configuration register that can be modified using the [ConfigControl](https://stmicroelectronics.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/ConfigControl.html) class.
 
 
 ### Example
@@ -146,7 +164,7 @@ And it is used in different application as:
 1. Add the repository as a submodule:
   
   ```Shell
-  $ git submodule add https://github.com/STMicroelectronics-CentralLabs/BlueSTSDK_Android.git BlueSTSDK
+  $ git submodule add https://github.com/STMicroelectronics/BlueSTSDK_Android.git BlueSTSDK
   ```
 2. Add the SDK as a project submodule in the *settings.gradle* file, adding the line:
 <pre>include ':BlueSTSDK:BlueSTSDK'</pre>
@@ -157,7 +175,7 @@ And it is used in different application as:
 This is a singleton class that starts/stops the discovery process and stores the retrieved nodes.
 Before starting the scanning process, it is also possible to define a new deviceId and to register/add new features to already-defined devices
 
-The Manager will notify a node discovery through the [<code>Manager.ManagerListener</code>](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Manager.ManagerListener.html) class.
+The Manager will notify a node discovery through the [<code>Manager.ManagerListener</code>](https://stmicroelectronics.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Manager.ManagerListener.html) class.
 Note that each callback is performed asynchronously by a background thread.
 
 ### [Node](https://stmicroelectronics.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Node.html)
@@ -166,8 +184,8 @@ This class represents a remote device.
 From this class you can recover what features are exported by a node and read/write data from/to the device.
 The node will export all the features that are set to 1 in the advertise message. Once the device is connected, scanning and enabling of available characteristics are performed. At this point it is possible to request/send data related to the discovered features.
 
-A node notifies its RSSI (signal strength) through the [<code>Node.BleConnectionParamUpdateListener</code>](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Node.BleConnectionParamUpdateListener.html) class.
-A node notifies any change of its state through the [<code>Node.NodeStateListener</code>](https://stmicroelectronics-centralLabs.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Node.NodeStateListener.html) class.
+A node notifies its RSSI (signal strength) through the [<code>Node.BleConnectionParamUpdateListener</code>](https://stmicroelectronics.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Node.BleConnectionParamUpdateListener.html) class.
+A node notifies any change of its state through the [<code>Node.NodeStateListener</code>](https://stmicroelectronics.github.io/BlueSTSDK_Android/javadoc/com/st/BlueSTSDK/Node.NodeStateListener.html) class.
 
 A node can be in one of following states:
 - **Idle**: the node is waiting for a connection and sending an advertise message

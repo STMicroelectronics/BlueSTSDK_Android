@@ -300,9 +300,14 @@ public class Manager {
             stopBleScan_pre21();
     }
 
+    /**
+     * tell if some nodes can needs to be disconnected
+     * @return true if one node is in connected or connecting state
+     */
     public boolean hasConnectedNodes(){
         for (Node node : mDiscoverNode){
-            if(node.isConnected()){
+            Node.State state = node.getState();
+            if(state == Node.State.Connected || state == Node.State.Connecting ){
                 return true;
             }
         }

@@ -318,6 +318,37 @@ public class FeatureAccelerationEvent extends Feature {
 
     private boolean mIsPedometerEnabled=false;
 
+    private ExtractResult extractPedometerData(long timestamp, @NonNull byte[] data, int dataOffset) {
+        if(data.length - dataOffset< 2){
+            throw new IllegalArgumentException("There are no 2 byte available to read");
+        }
+        int nSteps = NumberConversion.LittleEndian.bytesToUInt16(data, dataOffset);
+        return new ExtractResult(
+                new Sample(timestamp,new Number[]{PEDOMETER,nSteps},getFieldsDesc()),
+                2);
+    }
+
+    private ExtractResult extractEventData(long timestamp, @NonNull byte[] data, int dataOffset) {
+        if(data.length - dataOffset< 1){
+            throw new IllegalArgumentException("There are no 1 byte available to read");
+        }
+        int event = NumberConversion.byteToUInt8(data, dataOffset + 0);
+        return new ExtractResult(
+                new Sample(timestamp,new Number[]{event},getFieldsDesc()),
+                1);
+    }
+
+    private ExtractResult extractEventAndPedometerData(long timestamp, @NonNull byte[] data, int dataOffset) {
+        if(data.length - dataOffset< 3){
+            throw new IllegalArgumentException("There are no 3 byte available to read");
+        }
+        int event = NumberConversion.byteToUInt8(data, dataOffset + 0) | PEDOMETER ;
+        int nSteps = NumberConversion.LittleEndian.bytesToUInt16(data, dataOffset+1);
+        return new ExtractResult(
+                new Sample(timestamp,new Number[]{event,nSteps},getFieldsDesc()),
+                3);
+    }
+
     /**
      * read a byte with the event data send from the node
      * @param timestamp data timestamp
@@ -333,29 +364,15 @@ public class FeatureAccelerationEvent extends Feature {
     @Override
     protected ExtractResult extractData(long timestamp, @NonNull byte[] data, int dataOffset) {
 
-        short accEvent;
-        int nSteps=-1;
-        int readBytes;
+        int dataLength = data.length - dataOffset;
+        if(dataLength>=3){
+            return extractEventAndPedometerData(timestamp,data,dataOffset);
+        }else if (dataLength >=2 && mIsPedometerEnabled){
+            return extractPedometerData(timestamp,data,dataOffset);
+        }else{
+            return extractEventData(timestamp,data,dataOffset);
+        }
 
-        if (data.length - dataOffset >= 3){
-            accEvent = (short)
-                    (NumberConversion.byteToUInt8(data, dataOffset + 0) | PEDOMETER);
-            nSteps = NumberConversion.LittleEndian.bytesToUInt16(data, dataOffset + 1);
-            readBytes=3;
-        }else if (data.length - dataOffset == 2){
-            if(mIsPedometerEnabled) {
-                accEvent = PEDOMETER;
-                nSteps = NumberConversion.LittleEndian.bytesToUInt16(data, dataOffset);
-            }else{
-                accEvent =  NumberConversion.byteToUInt8(data, dataOffset + 0);
-            }//if-else
-            readBytes=2;
-        }else
-            throw new IllegalArgumentException("There are no 2 byte available to read");
-
-        return new ExtractResult(
-                new Sample(timestamp,new Number[]{accEvent,nSteps},getFieldsDesc()),
-                readBytes);
     }//extractData
 
     /**
