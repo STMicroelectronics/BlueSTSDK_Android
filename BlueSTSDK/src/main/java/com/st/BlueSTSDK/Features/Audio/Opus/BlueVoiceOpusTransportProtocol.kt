@@ -88,12 +88,11 @@ internal class BlueVoiceOpusTransportProtocol(private val frameSize:Int) {
             var head = BV_OPUS_TP_START_PACKET
             val baos = ByteArrayOutputStream()
             var cnt = 0
-            var size = 0
             val codedDataLength = codedData.size
             val nPackage = (codedDataLength + (maxLength-1)/2)/(maxLength-1)
             val packData = ArrayList<ByteArray>(nPackage)
             while (cnt < codedDataLength) {
-                size = Math.min(maxLength - 1, codedDataLength - cnt)
+                val size = Math.min(maxLength - 1, codedDataLength - cnt)
                 if (codedDataLength - cnt <= maxLength - 1) {
                     if (cnt == 0) {
                         head = BV_OPUS_TP_START_END_PACKET

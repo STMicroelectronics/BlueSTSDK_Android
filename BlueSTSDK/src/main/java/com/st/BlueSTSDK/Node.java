@@ -744,7 +744,6 @@ public class Node{
      * clear the data that are created during the connection
      */
     private void cleanConnectionData(){
-        mConnection=null;
         synchronized (mCharacteristicWriteQueue) {
             mCharacteristicWriteQueue.clear();
         }
@@ -768,6 +767,7 @@ public class Node{
         }
 
         //we stop the connection -> we have not notification enabled
+        mConnection=null;
         mNotifyFeature.clear();
         mFeatureCommand=null;
         mConfigControl=null;
@@ -1936,7 +1936,7 @@ public class Node{
         return writeFeatureData(feature,data,null);
     }//writeFeatureData
 
-    public boolean writeFeatureData(Feature feature, byte[] data, Runnable onWriteComplete){
+    public boolean writeFeatureData(Feature feature, byte[] data,@Nullable Runnable onWriteComplete){
         final BluetoothGattCharacteristic characteristic = getCorrespondingChar(feature);
         //not enable or not exist or not in write mode -> return false
         if(!charCanBeWrite(characteristic) || !feature.isEnabled())

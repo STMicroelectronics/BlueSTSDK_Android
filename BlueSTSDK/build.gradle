@@ -42,6 +42,7 @@ dependencies {
     implementation group: 'androidx.appcompat', name: 'appcompat', version: "$rootProject.androidx_appCompatVersion"
     implementation group: 'androidx.annotation', name:'annotation',version: "$rootProject.androidx_annotationVersion"
 
+    implementation group: 'com.google.code.gson', name: 'gson', version: "$rootProject.gsonVersion"
 
     testImplementation "junit:junit:$rootProject.junitVersion"
     testImplementation "org.mockito:mockito-core:$rootProject.mockitoVersion"

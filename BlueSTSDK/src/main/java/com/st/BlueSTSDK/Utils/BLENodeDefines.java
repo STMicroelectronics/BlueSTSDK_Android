@@ -67,6 +67,7 @@ import com.st.BlueSTSDK.Features.FeatureMotionIntensity;
 import com.st.BlueSTSDK.Features.FeatureMotorTimeParameter;
 import com.st.BlueSTSDK.Features.FeaturePedometer;
 import com.st.BlueSTSDK.Features.FeatureMotionAlgorithm;
+import com.st.BlueSTSDK.Features.highSpeedDataLog.FeatureHSDataLogConfig;
 import com.st.BlueSTSDK.Features.predictive.FeaturePredictiveFrequencyDomainStatus;
 import com.st.BlueSTSDK.Features.predictive.FeaturePredictiveAccelerationStatus;
 import com.st.BlueSTSDK.Features.predictive.FeaturePredictiveSpeedStatus;
@@ -414,6 +415,7 @@ public class BLENodeDefines {
             EXTENDED_FEATURE_MAP.put(buildExtendedFeatureCharacteristics(0x0E), asFeatureList(FeatureFitnessActivity.class));
             EXTENDED_FEATURE_MAP.put(buildExtendedFeatureCharacteristics(0x0F), asFeatureList(FeatureMachineLearningCore.class));
             EXTENDED_FEATURE_MAP.put(buildExtendedFeatureCharacteristics(0x10), asFeatureList(FeatureFiniteStateMachine.class));
+            EXTENDED_FEATURE_MAP.put(buildExtendedFeatureCharacteristics(0x11), asFeatureList(FeatureHSDataLogConfig.class));
         }
 
 

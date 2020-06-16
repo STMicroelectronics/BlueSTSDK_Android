@@ -61,7 +61,6 @@ import android.widget.Toast;
 
 import com.st.BlueSTSDK.R;
 
-//todo: use ContextComp.getSystemService when support library can be upgraded to 28
 public class BlePermissionHelper{
     /**
      * request id for the activity that will ask to the user to enable the bt
@@ -133,7 +132,8 @@ public class BlePermissionHelper{
      * @return true if the bluetooth is enable false if we ask to the user to enable it
      */
     private boolean enableBluetoothAdapter(){
-        final BluetoothManager bluetoothManager = (BluetoothManager) mCtx.getSystemService(Context.BLUETOOTH_SERVICE);
+        final BluetoothManager bluetoothManager =
+                ContextCompat.getSystemService(mCtx,BluetoothManager.class);
         if(bluetoothManager==null)
             throw new IllegalStateException("Bluetooth adapter is needed by this app!");
         //the adapter is !=null since we request in the manifest to have the bt capability
@@ -154,7 +154,7 @@ public class BlePermissionHelper{
      * @return true if the location service is enabled, false if we ask to the user to do it
      */
     private boolean enableLocationService(){
-        LocationManager lm =  (LocationManager) mCtx.getSystemService(Context.LOCATION_SERVICE);
+        final LocationManager lm =  ContextCompat.getSystemService(mCtx,LocationManager.class);
         if(lm == null)
             throw new IllegalStateException("Location manager adapter is needed by this app!");
         boolean providerEnabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER) |
