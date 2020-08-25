@@ -57,6 +57,7 @@ public class BlueSTSDKAdvertiseFilter implements AdvertiseFilter {
         SparseArray<byte[]> splitAdv = split(advData);
         byte data[]  = splitAdv.get(TX_POWER_TYPE);
         byte txPower;
+        byte Offset=0;
         if(data!=null){
             txPower = data[0];
         }else{
@@ -73,27 +74,33 @@ public class BlueSTSDKAdvertiseFilter implements AdvertiseFilter {
         data = splitAdv.get(VENDOR_DATA_TYPE);
         if(data!=null){
 
-            if ((data.length != 6 ) && (data.length != 12 )) {
+            if ((data.length != 6 ) && (data.length != 12 ) && (data.length != 14 )) {
                 return null;
-            }// if length
+            }
 
-            short protocolVersion = NumberConversion.byteToUInt8(data,0);
+            if((data.length==14) && (data[0] !=0x30) &&  (data[1] !=0x00)){
+                return null;
+            } else if(data.length==14) {
+                Offset=2;
+            }
+
+            short protocolVersion = NumberConversion.byteToUInt8(data,Offset);
             if ((protocolVersion < VERSION_PROTOCOL_SUPPORTED_MIN) ||(protocolVersion > VERSION_PROTOCOL_SUPPORTED_MAX)) {
                 return null;
             }
 
-            byte deviceId = (byte)(((data[1] & 0x80) == 0x80) ? (data[1] & 0xFF) : (data[1] & 0x1F));
+            byte deviceId = (byte)(((data[1+Offset] & 0x80) == 0x80) ? (data[1+Offset] & 0xFF) : (data[1+Offset] & 0x1F));
             Node.Type boardType = getNodeType(deviceId);
-            boolean boardSleeping = getNodeSleepingState(data[1]);
-            boolean hasGeneralPurpose = getHasGenericPurposeFeature(data[1]);
-            long featureMap = NumberConversion.BigEndian.bytesToUInt32(data, + 2);
+            boolean boardSleeping = getNodeSleepingState(data[1+Offset]);
+            boolean hasGeneralPurpose = getHasGenericPurposeFeature(data[1+Offset]);
+            long featureMap = NumberConversion.BigEndian.bytesToUInt32(data, 2+Offset);
 
             String address = null;
-            if ((data.length == 12 )) {
-                address = String.format("%02X:%02X:%02X:%02X:%02X:%02X", data[+ 6],
-                        data[7], data[ 8],
-                        data[9], data[ 10],
-                        data[11]);
+            if ((data.length !=6 )) {
+                address = String.format("%02X:%02X:%02X:%02X:%02X:%02X", data[6+Offset],
+                        data[7+Offset], data[ 8+Offset],
+                        data[9+Offset], data[ 10+Offset],
+                        data[11+Offset]);
             }
             return new BlueSTSDKAdvertiseInfo(name,txPower, address, featureMap, deviceId, protocolVersion, boardType, boardSleeping, hasGeneralPurpose);
         }else{

@@ -62,7 +62,7 @@ import java.lang.annotation.RetentionPolicy;
  */
 public class FeatureAccelerationEvent extends Feature {
 
-    public static final String FEATURE_NAME = "Accelerometer Events";
+    public static final String FEATURE_NAME = "Acc. Events";
     public static final String FEATURE_UNIT = null;
     public static final String FEATURE_DATA_NAME[] ={"Event","nSteps"} ;
     public static final Number DATA_MAX[] = {Short.MAX_VALUE, Short.MAX_VALUE};
