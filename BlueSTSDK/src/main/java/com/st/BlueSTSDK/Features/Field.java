@@ -62,6 +62,25 @@ public class Field {
     private final Number mMax;
     /** field min value */
     private final Number mMin;
+    /** flag for plotting it*/
+    private final boolean mPlotIt;
+
+    /**
+     * build a field, the field value will be set to null
+     * @param name filed name
+     * @param unit filed unit
+     * @param type field type
+     * @param max field max value
+     * @param min field min value
+     */
+    public Field(@NonNull String name,@Nullable String unit,@NonNull Type type,@NonNull Number max,@NonNull Number min,@NonNull boolean plotIt){
+        mName=name;
+        mUnit=unit;
+        mType=type;
+        mMax=max;
+        mMin=min;
+        mPlotIt=plotIt;
+    }
 
     /**
      * build a field, the field value will be set to null
@@ -72,11 +91,7 @@ public class Field {
      * @param min field min value
      */
     public Field(@NonNull String name,@Nullable String unit,@NonNull Type type,@NonNull Number max,@NonNull Number min){
-        mName=name;
-        mUnit=unit;
-        mType=type;
-        mMax=max;
-        mMin=min;
+        this(name,unit,type,max,min,true);
     }
 
     /**
@@ -117,6 +132,14 @@ public class Field {
      */
     public @NonNull Number getMin() {
         return mMin;
+    }
+
+    /**
+     * get field min value
+     * @return flag for including in plot
+     */
+    public @NonNull boolean getPlotIt() {
+        return mPlotIt;
     }
 
 }//Field

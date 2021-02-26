@@ -134,7 +134,6 @@ public class FeatureAudioOpusConf extends FeatureAudioConf {
         return opusEncParams;
     }
 
-
     /**
      * extract the audio sync data from the node raw data, in this case it read
      * a short {@code adpcm_index_in} and an int {@code adpcm_predsample_in} values which represent
@@ -269,6 +268,11 @@ public class FeatureAudioOpusConf extends FeatureAudioConf {
             return sample.data[OPUS_CHANNELS_SUBINDEX].shortValue();
         //else
         return OPUS_DEC_CHANNELS;
+    }
+
+    public static byte[] getEnableNotificationCmd(boolean enable){
+        byte[] command = {BV_OPUS_CONTROL, enable ? BV_OPUS_ENABLE_NOTIF_REQ : BV_OPUS_DISABLE_NOTIF_REQ};
+        return command;
     }
 
     @Override

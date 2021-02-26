@@ -147,7 +147,6 @@ public class FeatureBattery extends Feature {
             case 0x04:
                 return BatteryStatus.Unknown;
             case 0xFF:
-                return BatteryStatus.Error;
             default:
                 return BatteryStatus.Error;
         }//switch

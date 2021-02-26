@@ -50,15 +50,15 @@ import android.os.Build;
 import android.provider.Settings;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import com.google.android.material.snackbar.Snackbar;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AlertDialog;
-import android.view.View;
-import android.widget.Toast;
 
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Toast;
 import com.st.BlueSTSDK.R;
 
 public class BlePermissionHelper{
@@ -70,12 +70,6 @@ public class BlePermissionHelper{
      * request id for grant the location permission
      */
     public static final int REQUEST_LOCATION_ACCESS = 2;
-
-
-    public interface BlePermissionAcquiredCallback{
-        void onBlePermissionAcquired();
-        void onBlePermissionDenied();
-    }
 
     private final @NonNull Context mCtx;
     private final @Nullable
@@ -178,7 +172,7 @@ public class BlePermissionHelper{
                         public void onClick(DialogInterface paramDialogInterface, int paramInt) {
                             paramDialogInterface.cancel();
                             Toast.makeText(mCtx,
-                                    R.string.LocationNotEnabled,
+                                    R.string.LocationNotGranted,
                                     Toast.LENGTH_SHORT).show();
                         }//onClick
                     });
@@ -196,10 +190,10 @@ public class BlePermissionHelper{
                 Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
 
-            // Should we show an explanation?
-            if (ActivityCompat.shouldShowRequestPermissionRationale(requireActivity(),
+            if (ActivityCompat.shouldShowRequestPermissionRationale(mActivity,
                     Manifest.permission.ACCESS_FINE_LOCATION)) {
                 final AlertDialog.Builder dialog = new AlertDialog.Builder(mCtx);
+                dialog.setTitle("Permission required");
                 dialog.setMessage(mCtx.getString(R.string.LocationCoarseRationale));
                 dialog.setPositiveButton(android.R.string.ok,
                         new DialogInterface.OnClickListener() {
@@ -218,8 +212,8 @@ public class BlePermissionHelper{
                         REQUEST_LOCATION_ACCESS);
             }//if-else
             return false;
-        }else
-            return  true;
+        }
+        return  true;
     }//checkBlePermission
 
 
@@ -232,8 +226,9 @@ public class BlePermissionHelper{
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 if(enableLocationService())
                     return checkBlePermission();
-            }else
+            } else {
                 return true;
+            }
         }//if
         return false;
     }//checkAdapterAndPermission
@@ -252,20 +247,23 @@ public class BlePermissionHelper{
         return null;
     }
 
-
     public void onRequestPermissionsResult(int requestCode,
                                            @NonNull String[] permissions,
-                                           @NonNull int[] grantResults, BlePermissionAcquiredCallback callback) {
+                                           @NonNull int[] grantResults) {
         if (grantResults.length == 0 )
             return;
 
         if(requestCode == REQUEST_LOCATION_ACCESS){
             // If request is cancelled, the result arrays are empty.
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                //we have the permission try to start the scan again
-                callback.onBlePermissionAcquired();
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                //we have the permission to start the scan again
+                Toast.makeText(mCtx, R.string.LocationGranted, Toast.LENGTH_SHORT).show();
+            } else if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) && !ActivityCompat.shouldShowRequestPermissionRationale(requireActivity(),permissions[0])) {
+                // User selected the Never Ask Again Option
+                Toast.makeText(mCtx, R.string.LocationNotGranted, Toast.LENGTH_SHORT).show();
+                mActivity.finish();
             } else {
-                callback.onBlePermissionDenied();
+                Toast.makeText(mCtx, R.string.LocationNotGranted, Toast.LENGTH_SHORT).show();
             }//if-else
         }// if REQUEST_LOCATION_ACCESS
     }//onRequestPermissionsResult

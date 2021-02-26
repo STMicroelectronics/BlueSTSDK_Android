@@ -70,7 +70,7 @@ public class Debug {
      */
     private final CopyOnWriteArrayList<DebugOutputListener> mListener = new CopyOnWriteArrayList<>();
 
-    private static final Charset CHARSET = Charset.forName("ISO-8859-1"); //ACII
+    private static final Charset CHARSET = Charset.forName("ISO-8859-1"); //ASCII
 
     /**
      * Max size of string to sent in the input char

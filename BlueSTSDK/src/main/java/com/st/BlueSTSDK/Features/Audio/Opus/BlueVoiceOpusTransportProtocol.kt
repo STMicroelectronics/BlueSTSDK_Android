@@ -28,6 +28,7 @@ package com.st.BlueSTSDK.Features.Audio.Opus
 
 import java.io.ByteArrayOutputStream
 import java.util.*
+import kotlin.math.min
 
 /**
  * class that unpack the messages encapsulated into the BlueVoice transport protocol.
@@ -36,7 +37,6 @@ import java.util.*
 internal class BlueVoiceOpusTransportProtocol(private val frameSize:Int) {
 
     private var mPartialData:ByteArray = byteArrayOf()
-    private var mLastValidData:Int = 0
 
     /**
      * extract the data from the dataPacakge, return null if the frame is not completed or an array
@@ -67,14 +67,12 @@ internal class BlueVoiceOpusTransportProtocol(private val frameSize:Int) {
     }
 
     private fun resetPartialData() {
-        mPartialData = ByteArray(frameSize)
-        mLastValidData = 0
+        mPartialData = byteArrayOf()
     }
 
 
     private fun appendPackage(audioSample: ByteArray) {
-        System.arraycopy(audioSample, 1, mPartialData, mLastValidData, audioSample.size - 1)
-        mLastValidData = mLastValidData + audioSample.size - 1
+        mPartialData = mPartialData.plus(audioSample.copyOfRange(1, audioSample.size))
     }
 
 
@@ -88,16 +86,17 @@ internal class BlueVoiceOpusTransportProtocol(private val frameSize:Int) {
             var head = BV_OPUS_TP_START_PACKET
             val baos = ByteArrayOutputStream()
             var cnt = 0
+            var size = 0
             val codedDataLength = codedData.size
             val nPackage = (codedDataLength + (maxLength-1)/2)/(maxLength-1)
             val packData = ArrayList<ByteArray>(nPackage)
             while (cnt < codedDataLength) {
-                val size = Math.min(maxLength - 1, codedDataLength - cnt)
+                size = min(maxLength - 1, codedDataLength - cnt)
                 if (codedDataLength - cnt <= maxLength - 1) {
-                    if (cnt == 0) {
-                        head = BV_OPUS_TP_START_END_PACKET
+                    head = if (cnt == 0) {
+                        BV_OPUS_TP_START_END_PACKET
                     } else {
-                        head = BV_OPUS_TP_END_PACKET
+                        BV_OPUS_TP_END_PACKET
                     }
                 }
                 when (head) {

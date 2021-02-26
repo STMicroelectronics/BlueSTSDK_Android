@@ -49,7 +49,7 @@ import static com.st.BlueSTSDK.Utils.advertise.AdvertiseParser.split;
 public class BlueSTSDKAdvertiseFilter implements AdvertiseFilter {
 
     private final static int VERSION_PROTOCOL_SUPPORTED_MIN = 0x01;
-    private final static int VERSION_PROTOCOL_SUPPORTED_MAX = 0x01;
+    private final static int VERSION_PROTOCOL_SUPPORTED_MAX = 0x02;
 
     @Nullable
     @Override
@@ -131,6 +131,8 @@ public class BlueSTSDKAdvertiseFilter implements AdvertiseFilter {
             return Node.Type.SENSOR_TILE_BOX;
         if(temp == 0x07)
             return Node.Type.DISCOVERY_IOT01A;
+        if(temp == 0x08)
+            return Node.Type.STEVAL_STWINKIT1;
         if (temp >= 0x80 && temp <= 0xff)
             return Node.Type.NUCLEO;
         else // 0 or user defined

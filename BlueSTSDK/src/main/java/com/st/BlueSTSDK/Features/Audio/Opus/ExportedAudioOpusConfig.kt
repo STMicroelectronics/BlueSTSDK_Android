@@ -29,4 +29,13 @@ package com.st.BlueSTSDK.Features.Audio.Opus
 import com.st.BlueSTSDK.ExportedFeature
 import com.st.BlueSTSDK.NodeServer
 
-class ExportedAudioOpusConf(parent:NodeServer) : ExportedFeature(parent){}
+class ExportedAudioOpusConf(parent:NodeServer) : ExportedFeature(parent){
+    /**
+     * send a command as a notification
+     * the data array will be automaticaly splitted in different package if the size is bigger than
+     * the supported mtu
+     */
+    fun sendCommand(command: ByteArray) {
+        notifyData(command)
+    }
+}

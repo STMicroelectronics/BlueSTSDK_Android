@@ -26,16 +26,11 @@
  ******************************************************************************/
 package com.st.BlueSTSDK.Utils;
 
-import android.content.Intent;
+import android.content.Context;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import android.view.View;
-import android.view.ViewGroup;
-
-import com.google.android.material.snackbar.Snackbar;
 import com.st.BlueSTSDK.Manager;
-import com.st.BlueSTSDK.R;
 import com.st.BlueSTSDK.Utils.advertise.AdvertiseFilter;
 
 import java.util.List;
@@ -59,21 +54,6 @@ public class NodeScanActivity extends AppCompatActivity {
     protected Manager mManager;
 
     private BlePermissionHelper mPermissionHelper;
-
-    private BlePermissionHelper.BlePermissionAcquiredCallback mCallback = new BlePermissionHelper.BlePermissionAcquiredCallback() {
-        @Override
-        public void onBlePermissionAcquired() {
-            mManager.startDiscovery(mLastTimeOut,buildAdvertiseFilter());
-            mLastTimeOut=0;
-        }
-
-        @Override
-        public void onBlePermissionDenied() {
-            final View viewRoot = ((ViewGroup) NodeScanActivity.this
-                    .findViewById(android.R.id.content)).getChildAt(0);
-            Snackbar.make(viewRoot,  R.string.LocationNotGranted, Snackbar.LENGTH_SHORT).show();
-        }
-    };
 
     /**
      * !=0 if we have a start scanning request pending
@@ -115,8 +95,9 @@ public class NodeScanActivity extends AppCompatActivity {
      */
     public void startNodeDiscovery(final int timeoutMs) {
         mLastTimeOut=timeoutMs;
-        if(mPermissionHelper.checkAdapterAndPermission()){
-            mCallback.onBlePermissionAcquired();
+        if(mPermissionHelper.checkAdapterAndPermission()) {
+            mManager.startDiscovery(mLastTimeOut, buildAdvertiseFilter());
+            mLastTimeOut = 0;
         }
     }
 
@@ -127,26 +108,11 @@ public class NodeScanActivity extends AppCompatActivity {
         mManager.stopDiscovery();
     }
 
-    /**
-     * return after ask to the user to enable the bluetooth
-     *
-     * @param requestCode request code id
-     * @param resultCode  request result, if is {@code Activity.RESULT_CANCELED} the activity is
-     *                    closed since we need the bluetooth
-     * @param data        request data
-     */
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(mPermissionHelper.onActivityResult(requestCode,resultCode,data)==null) {
-            super.onActivityResult(requestCode, resultCode, data);
-        }
-    }//onActivityResult
-
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
-        mPermissionHelper.onRequestPermissionsResult(requestCode,permissions,grantResults,mCallback);
+        mPermissionHelper.onRequestPermissionsResult(requestCode,permissions,grantResults);
     }//onRequestPermissionsResult
 }
 

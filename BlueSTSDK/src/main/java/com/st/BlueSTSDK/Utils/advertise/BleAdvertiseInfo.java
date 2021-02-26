@@ -41,6 +41,8 @@ public interface BleAdvertiseInfo {
 
     long getFeatureMap();
 
+    long getOptionBytes();
+
     byte getDeviceId();
 
     short getProtocolVersion();

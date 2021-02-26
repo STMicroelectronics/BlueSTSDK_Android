@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="EnablePositionService">Please enable the Location service for search new
-        devices</string>
-    <string name="LocationCoarseRationale">For search new devices the location permission
-        is mandatory</string>
-    <string name="LocationNotGranted">Impossible search for new devices</string>
-    <string name="LocationNotEnabled">Impossible use the app without the Location enabled</string>
+    <string name="EnablePositionService">Please enable the Location service for search new devices</string>
+    <string name="LocationCoarseRationale">For searching new devices the location permission is mandatory</string>
+    <string name="LocationNotGranted">Impossible to search for new devices without the Location permission enabled</string>
+    <string name="LocationGranted">Now it\'s possible to search for new devices</string>
 </resources>

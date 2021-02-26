@@ -29,14 +29,14 @@ package com.st.BlueSTSDK.Features.Audio.Opus
 import com.st.BlueSTSDK.ExportedFeature
 import com.st.BlueSTSDK.NodeServer
 
-class ExportedFeatureAudioOpus(parent:NodeServer) : ExportedFeature(parent){
+abstract class ExportedFeatureAudioOpus(parent:NodeServer) : ExportedFeature(parent) {
 
     /**
      * send a portion of opus encoed audio
      * the codedData will be automaticaly splitted in different package if the size is bigger than
      * the supported mtu
      */
-    fun sendEncodedAudio(codedData:ByteArray) {
+    fun sendEncodedAudio(codedData: ByteArray) {
         val maxPayloadSize = mParent.maxPayloadSize
         val packData = BlueVoiceOpusTransportProtocol.packData(codedData, maxPayloadSize)
         packData.forEach {
@@ -44,3 +44,7 @@ class ExportedFeatureAudioOpus(parent:NodeServer) : ExportedFeature(parent){
         }
     }
 }
+
+    class ExportedFeatureAudioOpusVoice(parent:NodeServer) : ExportedFeatureAudioOpus(parent)
+
+    class ExportedFeatureAudioOpusMusic(parent:NodeServer) : ExportedFeatureAudioOpus(parent)

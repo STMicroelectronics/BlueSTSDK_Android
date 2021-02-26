@@ -499,6 +499,36 @@ public abstract class Feature {
     }
 
     /**
+     * print the last data received by this feature including only the one that we want to plot
+     * @return string with the feature data
+     */
+    public String toStringToPlot(){
+        //create the string with the feature data
+        Sample sample = mLastSample; //keep a reference for be secure to be thread safe
+        if(sample==null)
+            return mName+": No Data";
+        //else
+        if(sample.data.length==0){
+            return mName+": No Data";
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append("TS: ").append(sample.timestamp).append(' ');
+        Number data[] = sample.data;
+        for (int i = 0; i < data.length-1; i++) {
+            if(sample.dataDesc[i].getPlotIt()) {
+                sb.append(mDataDesc[i].getName())
+                        .append(": ").append(data[i]).append(' ');
+            }
+        }//for
+        if(sample.dataDesc[data.length - 1].getPlotIt()) {
+            sb.append(mDataDesc[data.length - 1].getName())
+                    .append(": ").append(data[data.length - 1]);
+        }
+
+        return sb.toString();
+    }
+
+    /**
      * Interface used for notify that the feature updates its data
      *
      * @author STMicroelectronics - Central Labs.

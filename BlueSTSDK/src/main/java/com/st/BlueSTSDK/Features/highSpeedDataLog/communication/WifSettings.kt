@@ -1,7 +1,10 @@
 package com.st.BlueSTSDK.Features.highSpeedDataLog.communication
 
+import com.google.gson.annotations.SerializedName
+
 data class WifSettings(
-        val enable:Boolean,
-        val ssid:CharSequence?,
-        val password:CharSequence?
+        @SerializedName("enable") val enable: Boolean?,
+        @SerializedName("ssid") val ssid: String?,
+        @SerializedName("password") val password: String?,
+        @SerializedName("securityType") val securityType: String?
 )

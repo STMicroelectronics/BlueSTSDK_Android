@@ -2,7 +2,7 @@
 
 BlueST is a multi-platform library (Android and iOS supported) that permits easy access to the data exported by a Bluetooth Low Energy (BLE) device that implements the BlueST protocol.
 
-## BlueST  Protocol
+## BlueST Protocol
 
 ### Advertise
 The library will show only the device that has a vendor-specific field formatted in the following way:
@@ -297,7 +297,7 @@ or
     try {
         Manager.addFeatureToNode(deviceId,temp);
     } catch (InvalidFeatureBitMaskException e) {
-      e.printStackTrace();
+    	e.printStackTrace();
     }
     ```
 ## Log

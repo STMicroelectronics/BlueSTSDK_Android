@@ -31,10 +31,12 @@ import android.util.SparseArray;
 import com.st.BlueSTSDK.ExportedFeature;
 import com.st.BlueSTSDK.Feature;
 import com.st.BlueSTSDK.Features.Audio.Opus.ExportedAudioOpusConf;
-import com.st.BlueSTSDK.Features.Audio.Opus.ExportedFeatureAudioOpus;
+import com.st.BlueSTSDK.Features.Audio.Opus.ExportedFeatureAudioOpusMusic;
+import com.st.BlueSTSDK.Features.Audio.Opus.ExportedFeatureAudioOpusVoice;
 import com.st.BlueSTSDK.Features.FeatureAILogging;
 import com.st.BlueSTSDK.Features.FeatureAcceleration;
 import com.st.BlueSTSDK.Features.FeatureAccelerationEvent;
+import com.st.BlueSTSDK.Features.FeatureColorAmbientLight;
 import com.st.BlueSTSDK.Features.FeatureFiniteStateMachine;
 import com.st.BlueSTSDK.Features.FeatureMachineLearningCore;
 import com.st.BlueSTSDK.Features.FeatureMemsNorm;
@@ -67,6 +69,9 @@ import com.st.BlueSTSDK.Features.FeatureMotionIntensity;
 import com.st.BlueSTSDK.Features.FeatureMotorTimeParameter;
 import com.st.BlueSTSDK.Features.FeaturePedometer;
 import com.st.BlueSTSDK.Features.FeatureMotionAlgorithm;
+import com.st.BlueSTSDK.Features.FeatureQVAR;
+import com.st.BlueSTSDK.Features.FeatureToFMultiObject;
+import com.st.BlueSTSDK.Features.ExtConfiguration.FeatureExtConfiguration;
 import com.st.BlueSTSDK.Features.highSpeedDataLog.FeatureHSDataLogConfig;
 import com.st.BlueSTSDK.Features.predictive.FeaturePredictiveFrequencyDomainStatus;
 import com.st.BlueSTSDK.Features.predictive.FeaturePredictiveAccelerationStatus;
@@ -416,6 +421,11 @@ public class BLENodeDefines {
             EXTENDED_FEATURE_MAP.put(buildExtendedFeatureCharacteristics(0x0F), asFeatureList(FeatureMachineLearningCore.class));
             EXTENDED_FEATURE_MAP.put(buildExtendedFeatureCharacteristics(0x10), asFeatureList(FeatureFiniteStateMachine.class));
             EXTENDED_FEATURE_MAP.put(buildExtendedFeatureCharacteristics(0x11), asFeatureList(FeatureHSDataLogConfig.class));
+            // the 0x12 is already exposed by HSDataLog even if it's not used....
+            EXTENDED_FEATURE_MAP.put(buildExtendedFeatureCharacteristics(0x13), asFeatureList(FeatureToFMultiObject.class));
+            EXTENDED_FEATURE_MAP.put(buildExtendedFeatureCharacteristics(0x14), asFeatureList(FeatureExtConfiguration.class));
+            EXTENDED_FEATURE_MAP.put(buildExtendedFeatureCharacteristics(0x15), asFeatureList(FeatureColorAmbientLight.class));
+            EXTENDED_FEATURE_MAP.put(buildExtendedFeatureCharacteristics(0x16), asFeatureList(FeatureQVAR.class));
         }
 
 
@@ -433,8 +443,9 @@ public class BLENodeDefines {
 
         public static Map<FeatureCoordinate,Class< ? extends ExportedFeature>> getDefaultExportedFeature(){
             Map<FeatureCoordinate,Class< ? extends ExportedFeature>> map = new HashMap<>();
-            map.put(buildStandardExportedExtendedFeature(0x01), ExportedFeatureAudioOpus.class);
+            map.put(buildStandardExportedExtendedFeature(0x01), ExportedFeatureAudioOpusVoice.class);
             map.put(buildStandardExportedExtendedFeature(0x02), ExportedAudioOpusConf.class);
+            map.put(buildStandardExportedExtendedFeature(0x11), ExportedFeatureAudioOpusMusic.class);
             return map;
 
         }

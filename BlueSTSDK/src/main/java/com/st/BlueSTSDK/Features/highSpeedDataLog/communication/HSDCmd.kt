@@ -134,7 +134,7 @@ data class MLCConfigParam(
                 }
 
                 private fun isCommentLine(line:String):Boolean{
-                        return line.startsWith("--")
+                        return !line.startsWith("--")
                 }
 
         }

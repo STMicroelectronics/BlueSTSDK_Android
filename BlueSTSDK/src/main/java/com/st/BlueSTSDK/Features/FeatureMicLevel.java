@@ -88,7 +88,7 @@ public class FeatureMicLevel extends Feature {
                     return s.data[micLevel].byteValue();
         //else
         return Byte.MIN_VALUE;
-    }//getAccY
+    }//getMicLevel
 
     /**
      * the number of microphone is not fixed so this function will read all the available data

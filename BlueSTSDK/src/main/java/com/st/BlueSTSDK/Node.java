@@ -138,6 +138,8 @@ public class Node{
         SENSOR_TILE_BOX,
         /** B-L475E-IOT01A board */
         DISCOVERY_IOT01A,
+        /** STEVAL-STWINKIT1 board */
+        STEVAL_STWINKIT1,
         /** board based on a x NUCLEO board */
         NUCLEO
     }//Type
@@ -408,6 +410,7 @@ public class Node{
             List<Feature> temp = new ArrayList<>();
 
             long advertiseMask = mAdvertise.getFeatureMap() ;
+            short protocolVersion = mAdvertise.getProtocolVersion();
 
             //we do the search in reverse order for have the feature in he correct order in case
             //of characteristics that export multiple feature
@@ -421,8 +424,14 @@ public class Node{
                         if(f!=null) {
                             temp.add(f);
                             mMaskToFeature.put((int) mask, f);
-                            //if the feature is exported into the feature mask made it available
-                            if((advertiseMask & mask) != 0){
+                            if(protocolVersion==1) {
+                                //if the feature is exported into the feature mask made it available
+                                if ((advertiseMask & mask) != 0) {
+                                    mAvailableFeature.add(f);
+                                    f.setEnable(true);
+                                }
+                            } else {
+                                //For protocol v2 we don't use the advertise bit-mask for any feature
                                 mAvailableFeature.add(f);
                                 f.setEnable(true);
                             }
@@ -1070,7 +1079,7 @@ public class Node{
 
     private String mFriendlyName = null;
 
-    private int mLastMtu = 20; //default ble length
+    private int mLastMtu = 23; //default ble length (23-3=20 ==max packet length)
 
     /** ms to wait before declare a node as lost */
     private static long NODE_LOST_TIMEOUT_MS=4000;
@@ -2113,11 +2122,25 @@ public class Node{
      */
     public @Nullable ConfigControl getConfigRegister(){return mConfigControl; } //getConfigRegister
 
+    /**
+     *  For BlueSTSDK V1 uses 4 bytes inside the BLE advertise like Feature Mask
+     * @return Feature Bit Mask (long type -> 4 bytes)
+     */
     public long getAdvertiseBitMask(){
         return mAdvertise.getFeatureMap();
     }
 
+    /**
+     *  For BlueSTSDK V2 uses 4 bytes inside the BLE advertise Like option bytes
+     * @return option bytes (long type -> 4 bytes)
+     */
+    public long getAdvertiseOptionBytes(){
+        return mAdvertise.getOptionBytes();
+    }
+
     public int getLastMtu(){ return mLastMtu;}
+
+    public int getMaxPayloadSize(){ return mLastMtu-3;}
 
     public boolean requestNewMtu(final int newMtu){
         if(!isConnected())

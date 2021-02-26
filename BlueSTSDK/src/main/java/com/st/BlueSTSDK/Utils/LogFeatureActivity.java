@@ -214,9 +214,14 @@ public abstract class LogFeatureActivity extends AppCompatActivity {
     public void startLogging(){
         if (mCurrentLogger!=null)
             stopLogging();
-        else
+        else {
             mCurrentLogger = getLogger();
-
+            View rootView = getCurrentFocus();
+            if(rootView!=null) {
+                Snackbar.make(rootView, R.string.saving_csv_log_message,
+                        Snackbar.LENGTH_SHORT).show();
+            }
+        }
         for (Node n : getNodesToLog()) {
             startLogging(n);
         }

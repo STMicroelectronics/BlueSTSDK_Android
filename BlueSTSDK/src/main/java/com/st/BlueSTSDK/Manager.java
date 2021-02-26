@@ -339,7 +339,7 @@ public class Manager {
      */
     public void addVirtualNode() {
         try {
-           addNode(new NodeEmulator());
+            addNode(new NodeEmulator());
         }catch(InvalidBleAdvertiseFormat e){
             //never throw from a NodeEmulator
         }//try-catch
@@ -393,11 +393,11 @@ public class Manager {
     public boolean isDiscovering() {
         return mIsScanning;
     }//isDiscovering
-    
+
     /**
      * remove all the nodes that aren't bounded with this device
      */
-    private void removeNodes(){
+    public void removeNodesExceptBounded(){
         synchronized (mDiscoverNode){
             Collection<Node> removeMe = new ArrayList<>(mDiscoverNode.size());
             for(Node n: mDiscoverNode){
@@ -408,6 +408,17 @@ public class Manager {
             mDiscoverNode.removeAll(removeMe);
         }//synchronized
     }//removeNodes
+
+    /**
+     * remove all the nodes (also nodes bounded with this device)
+     */
+    public void removeNodes(){
+        synchronized (mDiscoverNode){
+            Collection<Node> removeMe = new ArrayList<>(mDiscoverNode.size());
+            removeMe.addAll(mDiscoverNode);
+            mDiscoverNode.removeAll(removeMe);
+        }
+    }
 
     /**
      * stop the discovery process and remove all the already discovered nodes. the node that are

@@ -45,9 +45,10 @@ public class BlueSTSDKAdvertiseInfo implements BleAdvertiseInfo {
     private final String mAddress;
 
     /**
-     * bit map that tell us the available features
+     * - for BlueSTSDK V1 -> bit map that tell us the available features
+     * - for BlueSTSDK V2 -> Option bytes
      */
-    private final long mFeatureMap;
+    private final long mOptByte_FeatureMap;
     /**
      * device id
      */
@@ -90,7 +91,20 @@ public class BlueSTSDKAdvertiseInfo implements BleAdvertiseInfo {
 
     @Override
     public long getFeatureMap() {
-        return mFeatureMap;
+        if(mProtocolVersion==1) {
+            return mOptByte_FeatureMap;
+        } else {
+            return 0;
+        }
+    }
+
+    @Override
+    public long getOptionBytes() {
+        if(mProtocolVersion==1) {
+            return 0;
+        } else {
+            return mOptByte_FeatureMap;
+        }
     }
 
     @Override
@@ -118,11 +132,11 @@ public class BlueSTSDKAdvertiseInfo implements BleAdvertiseInfo {
         return mHasGeneralPurpose;
     }
 
-    public BlueSTSDKAdvertiseInfo(String mName, byte mTxPower, String mAddress, long mFeatureMap, byte mDeviceId, short mProtocolVersion, Type mBoardType, boolean mBoardSleeping, boolean mHasGeneralPurpose) {
+    public BlueSTSDKAdvertiseInfo(String mName, byte mTxPower, String mAddress, long mOptByte_FeatureMap, byte mDeviceId, short mProtocolVersion, Type mBoardType, boolean mBoardSleeping, boolean mHasGeneralPurpose) {
         this.mName = mName;
         this.mTxPower = mTxPower;
         this.mAddress = mAddress;
-        this.mFeatureMap = mFeatureMap;
+        this.mOptByte_FeatureMap = mOptByte_FeatureMap;
         this.mDeviceId = mDeviceId;
         this.mProtocolVersion = mProtocolVersion;
         this.mBoardType = mBoardType;
