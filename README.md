@@ -39,6 +39,7 @@ Currently used values are:
     - 0x06 is reserved for the [STEVAL-MKSBOX1V1 (SensorTile.Box)](https://www.st.com/sensortilebox) board
     - 0x07 is reserved for the [B-L475E-IOT01A](https://www.st.com/en/evaluation-tools/b-l475e-iot01a.html) board
     - 0x08 is reserved for the [STEVAL-STWINKT1](https://www.st.com/en/evaluation-tools/steval-stwinkt1.html) board
+    - 0x09 is reserved for the [STEVAL-STWINKT1B](https://www.st.com/en/evaluation-tools/steval-stwinkt1b.html) board
     - 0x80 that identifies ST Functional pack based on Nucleo boards
 
     You should use a value between 0x90 and 0xFF for your custom board. Values between 0x00 and 0x8F are reserved for ST boards.
