@@ -35,4 +35,3 @@ So:
 
    st_opus/build/assemble
    st_opus/publishing/publishToMavenLocal
-
