@@ -1,0 +1,42 @@
+/*
+ * Copyright (c) 2022(-0001) STMicroelectronics.
+ * All rights reserved.
+ * This software is licensed under terms that can be found in the LICENSE file in
+ * the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
+ */
+
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        google()
+        mavenCentral()
+        maven { url 'https://alphacephei.com/maven/' }
+    }
+}
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+
+    repositories {
+        google()
+        maven { url 'https://jitpack.io' }
+        mavenCentral()
+        mavenLocal()
+        maven { url 'https://alphacephei.com/maven/' }
+
+        maven {
+            name = "github"
+            url = uri("https://maven.pkg.github.com/STMicroelectronics/BlueSTSDK_Android")
+            credentials {
+                username = System.getenv("GPR_USER") ?: settings.GPR_USER
+                password = System.getenv("GPR_API_KEY") ?: settings.GPR_API_KEY
+            }
+        }
+    }
+}
+
+rootProject.name = "STBleSDK"
+include ':app'
+include ':st_blue_sdk'
+include ':st_opus'

@@ -1,0 +1,17 @@
+[
+  {
+    "directory": "/Users/paolo/workspace/android/STBleSDK/opus/.cxx/Debug/60i1sxs5/arm64-v8a",
+    "command": "/Users/paolo/Library/Android/sdk/ndk/21.4.7075529/toolchains/llvm/prebuilt/darwin-x86_64/bin/clang++ --target=aarch64-none-linux-android21 --gcc-toolchain=/Users/paolo/Library/Android/sdk/ndk/21.4.7075529/toolchains/llvm/prebuilt/darwin-x86_64 --sysroot=/Users/paolo/Library/Android/sdk/ndk/21.4.7075529/toolchains/llvm/prebuilt/darwin-x86_64/sysroot -Dst_opus_EXPORTS -I/Users/paolo/workspace/android/STBleSDK/opus/src/main/cpp/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -O0 -fno-limit-debug-info  -fPIC -o CMakeFiles/st_opus.dir/codec/CodecOpus.cpp.o -c /Users/paolo/workspace/android/STBleSDK/opus/src/main/cpp/codec/CodecOpus.cpp",
+    "file": "/Users/paolo/workspace/android/STBleSDK/opus/src/main/cpp/codec/CodecOpus.cpp"
+  },
+  {
+    "directory": "/Users/paolo/workspace/android/STBleSDK/opus/.cxx/Debug/60i1sxs5/arm64-v8a",
+    "command": "/Users/paolo/Library/Android/sdk/ndk/21.4.7075529/toolchains/llvm/prebuilt/darwin-x86_64/bin/clang++ --target=aarch64-none-linux-android21 --gcc-toolchain=/Users/paolo/Library/Android/sdk/ndk/21.4.7075529/toolchains/llvm/prebuilt/darwin-x86_64 --sysroot=/Users/paolo/Library/Android/sdk/ndk/21.4.7075529/toolchains/llvm/prebuilt/darwin-x86_64/sysroot -Dst_opus_EXPORTS -I/Users/paolo/workspace/android/STBleSDK/opus/src/main/cpp/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -O0 -fno-limit-debug-info  -fPIC -o CMakeFiles/st_opus.dir/utils/SamplesConverter.cpp.o -c /Users/paolo/workspace/android/STBleSDK/opus/src/main/cpp/utils/SamplesConverter.cpp",
+    "file": "/Users/paolo/workspace/android/STBleSDK/opus/src/main/cpp/utils/SamplesConverter.cpp"
+  },
+  {
+    "directory": "/Users/paolo/workspace/android/STBleSDK/opus/.cxx/Debug/60i1sxs5/arm64-v8a",
+    "command": "/Users/paolo/Library/Android/sdk/ndk/21.4.7075529/toolchains/llvm/prebuilt/darwin-x86_64/bin/clang++ --target=aarch64-none-linux-android21 --gcc-toolchain=/Users/paolo/Library/Android/sdk/ndk/21.4.7075529/toolchains/llvm/prebuilt/darwin-x86_64 --sysroot=/Users/paolo/Library/Android/sdk/ndk/21.4.7075529/toolchains/llvm/prebuilt/darwin-x86_64/sysroot -Dst_opus_EXPORTS -I/Users/paolo/workspace/android/STBleSDK/opus/src/main/cpp/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -O0 -fno-limit-debug-info  -fPIC -o CMakeFiles/st_opus.dir/st_opus.cpp.o -c /Users/paolo/workspace/android/STBleSDK/opus/src/main/cpp/st_opus.cpp",
+    "file": "/Users/paolo/workspace/android/STBleSDK/opus/src/main/cpp/st_opus.cpp"
+  }
+]

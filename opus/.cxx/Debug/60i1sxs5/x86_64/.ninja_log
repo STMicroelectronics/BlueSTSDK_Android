@@ -1,0 +1,5 @@
+# ninja log v5
+1	323	1649336670	CMakeFiles/st_opus.dir/codec/CodecOpus.cpp.o	36ed81286271a125
+1	333	1649336670	CMakeFiles/st_opus.dir/utils/SamplesConverter.cpp.o	e097e97620f6a8f0
+1	381	1649336670	CMakeFiles/st_opus.dir/st_opus.cpp.o	be71506c1049127a
+382	466	1649336670	/Users/paolo/workspace/android/STBleSDK/opus/build/intermediates/cxx/Debug/60i1sxs5/obj/x86_64/libst_opus.so	815f9f9b1dce3cef

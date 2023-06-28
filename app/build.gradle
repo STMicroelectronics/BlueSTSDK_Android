@@ -1,0 +1,122 @@
+/*
+ * Copyright (c) 2022(-0001) STMicroelectronics.
+ * All rights reserved.
+ * This software is licensed under terms that can be found in the LICENSE file in
+ * the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
+ */
+
+plugins {
+    id 'com.android.application'
+    id 'kotlin-android'
+    id 'kotlin-kapt'
+    id 'dagger.hilt.android.plugin'
+    id 'kotlinx-serialization'
+}
+
+android {
+    compileSdk rootProject.compileSdk
+
+    defaultConfig {
+        applicationId "com.st.demo"
+        minSdk rootProject.minSdk
+        targetSdk rootProject.targetSdk
+        versionCode 1
+        versionName "4.17"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        vectorDrawables {
+            useSupportLibrary true
+        }
+    }
+
+    buildTypes {
+        getByName("release") {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    buildFeatures {
+        compose true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion compose_compiler_version
+    }
+
+    packagingOptions {
+        resources {
+            excludes += '/META-INF/{AL2.0,LGPL2.1}'
+        }
+    }
+
+    namespace 'com.st.demo'
+}
+
+dependencies {
+    implementation project(':st_blue_sdk')
+
+    // Compose
+    def composeBom = platform("androidx.compose:compose-bom:$compose_bom_date")
+    implementation composeBom
+    androidTestImplementation composeBom
+    // Material Design 3
+    implementation "androidx.compose.material3:material3"
+    // or Material Design 2
+    implementation "androidx.compose.material:material"
+    implementation "androidx.compose.ui:ui"
+    // Android Studio Preview support
+    implementation "androidx.compose.ui:ui-tooling-preview"
+    debugImplementation "androidx.compose.ui:ui-tooling"
+    // UI Tests
+    androidTestImplementation "androidx.compose.ui:ui-test-junit4"
+    debugImplementation "androidx.compose.ui:ui-test-manifest"
+    // Optional - Add full set of material icons
+    implementation "androidx.compose.material:material-icons-extended"
+    // Optional - Add window size utils
+    implementation "androidx.compose.material3:material3-window-size-class"
+    // LiveData
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version")
+    // Optional - Integration with activities
+    implementation "androidx.activity:activity-compose:$activity_compose_version"
+    // Optional - Integration with ViewModels
+    implementation "androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-runtime-compose:$lifecycle_version"
+    // Optional - Integration with LiveData
+    implementation("androidx.compose.runtime:runtime-livedata")
+    // Optional - Integration with Hilt
+    implementation "androidx.hilt:hilt-navigation-compose:$hilt_compose_version"
+    // Optional - Integration with Navigation
+    implementation "androidx.navigation:navigation-compose:$navigation_compose_version"
+    // Optional - Integration with ViewBinding
+    implementation "androidx.compose.ui:ui-viewbinding"
+
+    // Core
+    implementation "androidx.core:core-ktx:$core_ktx_version"
+    implementation "com.google.android.material:material:$google_material_version"
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_version"
+    implementation "androidx.appcompat:appcompat:$appcompat_version"
+
+    // Hilt
+    implementation "androidx.hilt:hilt-navigation-fragment:$hilt_navigation_fragment_version"
+    implementation "com.google.dagger:hilt-android:$hilt_version"
+    kapt "com.google.dagger:hilt-compiler:$hilt_version"
+
+    // Kotlinx serialization
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0"
+    implementation "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:1.0.0"
+
+    // Accompanist
+    implementation "com.google.accompanist:accompanist-permissions:$accompanist_version"
+
+    // Tests
+    testImplementation "junit:junit:$junit_version"
+    androidTestImplementation "androidx.test.ext:junit:$junit_ui_version"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$espresso_core_version"
+}

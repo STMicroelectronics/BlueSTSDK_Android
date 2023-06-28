@@ -1,0 +1,18 @@
+<!--
+  ~ Copyright (c) 2022(-0001) STMicroelectronics.
+  ~ All rights reserved.
+  ~ This software is licensed under terms that can be found in the LICENSE file in
+  ~ the root directory of this software component.
+  ~ If no LICENSE file comes with this software, it is provided AS-IS.
+  -->
+<resources>
+    <string name="app_name">STBleSDK</string>
+
+    <string name="st_deviceList_title">Ble Device List:</string>
+
+    <string name="st_audioScreenTitle">Audio Screen</string>
+    <string name="st_testAudio">Test\nAudio</string>
+
+    <string name="st_feature_updatesLabel">Updates:</string>
+    <string name="st_feature_featureNameLabel">Name: %1$s</string>
+</resources>
