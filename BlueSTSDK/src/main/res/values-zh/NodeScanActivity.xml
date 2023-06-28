@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="EnablePositionService">请打开定位服务以搜索设备</string>
-    <string name="LocationCoarseRationale">打开定位许可后才能搜索新设备</string>
-    <string name="LocationNotGranted">无法搜索新设备</string>
-    <string name="LocationGranted">现在可以搜索新设备</string>
-</resources>
