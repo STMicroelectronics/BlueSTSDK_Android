@@ -1,0 +1,3 @@
+/Users/paolo/workspace/android/STBleSDK/opus/.cxx/Debug/60i1sxs5/arm64-v8a/CMakeFiles/rebuild_cache.dir
+/Users/paolo/workspace/android/STBleSDK/opus/.cxx/Debug/60i1sxs5/arm64-v8a/CMakeFiles/edit_cache.dir
+/Users/paolo/workspace/android/STBleSDK/opus/.cxx/Debug/60i1sxs5/arm64-v8a/CMakeFiles/st_opus.dir

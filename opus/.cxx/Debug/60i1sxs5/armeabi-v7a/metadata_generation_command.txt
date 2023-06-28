@@ -1,0 +1,23 @@
+                    Executable : /Users/paolo/Library/Android/sdk/cmake/3.18.1/bin/cmake
+arguments : 
+-H/Users/paolo/workspace/android/STBleSDK/opus/src/main/cpp
+-DCMAKE_SYSTEM_NAME=Android
+-DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+-DCMAKE_SYSTEM_VERSION=21
+-DANDROID_PLATFORM=android-21
+-DANDROID_ABI=armeabi-v7a
+-DCMAKE_ANDROID_ARCH_ABI=armeabi-v7a
+-DANDROID_NDK=/Users/paolo/Library/Android/sdk/ndk/21.4.7075529
+-DCMAKE_ANDROID_NDK=/Users/paolo/Library/Android/sdk/ndk/21.4.7075529
+-DCMAKE_TOOLCHAIN_FILE=/Users/paolo/Library/Android/sdk/ndk/21.4.7075529/build/cmake/android.toolchain.cmake
+-DCMAKE_MAKE_PROGRAM=/Users/paolo/Library/Android/sdk/cmake/3.18.1/bin/ninja
+-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=/Users/paolo/workspace/android/STBleSDK/opus/build/intermediates/cxx/Debug/60i1sxs5/obj/armeabi-v7a
+-DCMAKE_RUNTIME_OUTPUT_DIRECTORY=/Users/paolo/workspace/android/STBleSDK/opus/build/intermediates/cxx/Debug/60i1sxs5/obj/armeabi-v7a
+-DCMAKE_BUILD_TYPE=Debug
+-B/Users/paolo/workspace/android/STBleSDK/opus/.cxx/Debug/60i1sxs5/armeabi-v7a
+-GNinja
+jvmArgs : 
+
+
+                    Build command args: []
+                    Version: 2

@@ -1,0 +1,41 @@
+{
+  "buildFiles": [
+    "/Users/paolo/workspace/android/STBleSDK/opus/src/main/cpp/CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "/Users/paolo/Library/Android/sdk/cmake/3.18.1/bin/ninja",
+      "-C",
+      "/Users/paolo/workspace/android/STBleSDK/opus/.cxx/Debug/60i1sxs5/arm64-v8a",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "/Users/paolo/Library/Android/sdk/cmake/3.18.1/bin/ninja",
+    "-C",
+    "/Users/paolo/workspace/android/STBleSDK/opus/.cxx/Debug/60i1sxs5/arm64-v8a",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {
+    "st_opus::@6890427a1f51a3e7e1df": {
+      "toolchain": "toolchain",
+      "abi": "arm64-v8a",
+      "artifactName": "st_opus",
+      "output": "/Users/paolo/workspace/android/STBleSDK/opus/build/intermediates/cxx/Debug/60i1sxs5/obj/arm64-v8a/libst_opus.so",
+      "runtimeFiles": [
+        "/Users/paolo/workspace/android/STBleSDK/opus/src/main/cpp/lib/arm64-v8a/libopus.so",
+        "/Users/paolo/workspace/android/STBleSDK/opus/src/main/cpp/lib/arm64-v8a/libopusenc.so"
+      ]
+    }
+  },
+  "toolchains": {
+    "toolchain": {
+      "cCompilerExecutable": "/Users/paolo/Library/Android/sdk/ndk/21.4.7075529/toolchains/llvm/prebuilt/darwin-x86_64/bin/clang",
+      "cppCompilerExecutable": "/Users/paolo/Library/Android/sdk/ndk/21.4.7075529/toolchains/llvm/prebuilt/darwin-x86_64/bin/clang++"
+    }
+  },
+  "cFileExtensions": [],
+  "cppFileExtensions": [
+    "cpp"
+  ]
+}

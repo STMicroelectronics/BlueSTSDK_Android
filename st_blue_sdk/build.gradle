@@ -1,0 +1,97 @@
+/*
+ * Copyright (c) 2022(-0001) STMicroelectronics.
+ * All rights reserved.
+ * This software is licensed under terms that can be found in the LICENSE file in
+ * the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
+ */
+
+plugins {
+    id 'com.android.library'
+    id 'kotlin-android'
+    id 'kotlin-kapt'
+    id 'dagger.hilt.android.plugin'
+    id 'kotlinx-serialization'
+    id 'com.google.devtools.ksp'
+}
+
+apply from: file('publish.gradle')
+
+android {
+    compileSdk rootProject.compileSdk
+
+    defaultConfig {
+        minSdk rootProject.minSdk
+        targetSdk rootProject.targetSdk
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
+    }
+
+    buildTypes {
+        getByName("debug") {
+            buildConfigField "String", "DB_BASE_URL", "\"https://s3.amazonaws.com/st_test/STBLESensor/\""
+            buildConfigField "String", "BLUESTSDK_DB_BASE_URL", "\"https://raw.githubusercontent.com/STMicroelectronics/appconfig/blesensor_%s/bluestsdkv2/\""
+            buildConfigField "String", "DTMI_GITHUB_DB_BASE_URL", "\"https://raw.githubusercontent.com/STMicroelectronics/appconfig/release/%s.expanded.json\""
+            buildConfigField "String", "DTMI_GITHUB_DB_BASE_URL_BETA", "\"https://raw.githubusercontent.com/SW-Platforms/appconfig/release/%s.expanded.json\""
+            buildConfigField "String", "DTMI_AZURE_DB_BASE_URL", "\"https://devicemodels.azure.com/%s.expanded.json\""
+        }
+
+        getByName("release") {
+            buildConfigField "String", "DB_BASE_URL", "\"https://s3.amazonaws.com/st_test/STBLESensor/\""
+            buildConfigField "String", "BLUESTSDK_DB_BASE_URL", "\"https://raw.githubusercontent.com/STMicroelectronics/appconfig/blesensor_%s/bluestsdkv2/\""
+            buildConfigField "String", "DTMI_GITHUB_DB_BASE_URL", "\"https://raw.githubusercontent.com/STMicroelectronics/appconfig/release/%s.expanded.json\""
+            buildConfigField "String", "DTMI_GITHUB_DB_BASE_URL_BETA", "\"https://raw.githubusercontent.com/SW-Platforms/appconfig/release/%s.expanded.json\""
+            buildConfigField "String", "DTMI_AZURE_DB_BASE_URL", "\"https://devicemodels.azure.com/%s.expanded.json\""
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    ksp {
+        arg("room.schemaLocation", "$projectDir/schemas")
+    }
+
+    namespace 'com.st.blue_sdk'
+}
+
+kapt {
+    correctErrorTypes true
+}
+
+dependencies {
+    implementation project(path: ':st_opus')
+
+    // Core
+    implementation "androidx.core:core-ktx:$core_ktx_version"
+    implementation "com.google.android.material:material:$google_material_version"
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_version"
+    implementation "androidx.appcompat:appcompat:$appcompat_version"
+
+    // Hilt
+    implementation "com.google.dagger:hilt-android:$hilt_version"
+    kapt "com.google.dagger:hilt-compiler:$hilt_version"
+
+    // Kotlinx serialization
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinx_serialization_version"
+    implementation "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:$kotlinx_retrofit_version"
+
+    // Retrofit
+    implementation "com.squareup.retrofit2:retrofit:$retrofit_version"
+    implementation "com.squareup.okhttp3:logging-interceptor:$logging_version"
+
+    // Room
+    implementation "androidx.room:room-runtime:$room_version"
+    implementation "androidx.room:room-ktx:$room_version"
+    ksp "androidx.room:room-compiler:$room_version"
+
+    // Tests
+    testImplementation "junit:junit:$junit_version"
+    androidTestImplementation "androidx.test.ext:junit:$junit_ui_version"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$espresso_core_version"
+}

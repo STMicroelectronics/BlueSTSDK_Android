@@ -1,0 +1,59 @@
+/*
+ * Copyright (c) 2022(-0001) STMicroelectronics.
+ * All rights reserved.
+ * This software is licensed under terms that can be found in the LICENSE file in
+ * the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
+ */
+
+plugins {
+    id 'com.android.library'
+    id 'org.jetbrains.kotlin.android'
+}
+
+apply from: file('publish.gradle')
+
+android {
+    compileSdk rootProject.compileSdk
+
+    defaultConfig {
+        minSdk rootProject.minSdk
+        targetSdk rootProject.targetSdk
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
+
+        ndk {
+            moduleName "opusUser"
+        }
+
+        sourceSets.main {
+            jniLibs.srcDir 'src/main/jniLibs'
+            jni.srcDirs = [] //disable automatic ndk-build call
+        }
+    }
+
+    buildTypes {
+        getByName("release") {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    namespace 'com.st.BlueSTSDK.Features.Audio.Opus'
+}
+
+dependencies {
+    // Core
+    implementation "androidx.core:core-ktx:$core_ktx_version"
+
+    // Tests
+    testImplementation "junit:junit:$junit_version"
+    androidTestImplementation "androidx.test.ext:junit:$junit_ui_version"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$espresso_core_version"
+}

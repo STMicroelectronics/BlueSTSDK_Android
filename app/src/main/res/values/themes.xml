@@ -1,0 +1,20 @@
+<!--
+  ~ Copyright (c) 2022(-0001) STMicroelectronics.
+  ~ All rights reserved.
+  ~ This software is licensed under terms that can be found in the LICENSE file in
+  ~ the root directory of this software component.
+  ~ If no LICENSE file comes with this software, it is provided AS-IS.
+  -->
+<resources>
+    <!-- Base application theme. -->
+    <style name="Theme.StDemo" parent="Theme.MaterialComponents.DayNight.DarkActionBar"/>
+
+    <style name="Theme.StDemo.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="Theme.StDemo.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="Theme.StDemo.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+</resources>
