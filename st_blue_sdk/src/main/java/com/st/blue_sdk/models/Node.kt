@@ -36,6 +36,9 @@ data class Node(
     val boardType
         get() = advertiseInfo?.getBoardType() ?: Boards.Model.GENERIC
 
+    val familyType
+        get() = advertiseInfo?.getFamilyType() ?: Boards.Family.OTHER_FAMILY
+
     val isSleeping
         get() = advertiseInfo?.isBoardSleeping() ?: false
 

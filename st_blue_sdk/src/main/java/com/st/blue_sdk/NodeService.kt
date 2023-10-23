@@ -8,7 +8,6 @@
 package com.st.blue_sdk
 
 import android.annotation.SuppressLint
-import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGattCharacteristic
 import android.util.Log
 import com.st.blue_sdk.bt.advertise.BleAdvertiseInfo
@@ -103,6 +102,8 @@ class NodeService(
 
     fun getDeviceStatus() = bleHal.getDeviceStatus()
 
+    fun getChunkProgressUpdates() = bleHal.getChunkProgressUpdates()
+
     fun getRssi() = bleHal.getRssi()
 
     fun isConnected(): Boolean = bleHal.isConnected()
@@ -192,8 +193,11 @@ class NodeService(
         val protocolVersion = advertiseInfo.getProtocolVersion()
 
         characteristicWithFeatures.clear()
-        val boardModel: Boards.Model =
-            Boards.getModelFromIdentifier(advertiseInfo.getDeviceId().toInt())
+        val deviceId = advertiseInfo.getDeviceId().toInt()
+        val sdkVersion = advertiseInfo.getProtocolVersion().toInt()
+        val boardModel: Boards.Model = advertiseInfo.getBoardType()
+
+        val containsRemoteFeatures = Boards.containsRemoteFeatures(deviceId,sdkVersion)
 
         bleHal.getDiscoveredServices().map { service ->
             service.characteristics.forEach { characteristic ->
@@ -227,7 +231,8 @@ class NodeService(
                                 features = characteristic.buildFeatures(
                                     advertiseMask = featureMap,
                                     protocolVersion = protocolVersion,
-                                    boardModel = boardModel
+                                    boardModel = boardModel,
+                                    containsRemoteFeatures = containsRemoteFeatures
                                 )
                             )
                         )

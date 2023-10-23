@@ -67,18 +67,24 @@ class CharacteristicFwUpgrade(
         fun buildFwUpgradeParams(
             firmwareType: FirmwareType,
             boardType: WbOTAUtils.WBBoardType,
-            fileDescriptor: FwFileDescriptor
+            fileDescriptor: FwFileDescriptor,
+            address: String,
+            nbSectorsToErase: String
         ): FwUpgradeParams {
 
             val firstSectorToDelete = WbOTAUtils.getFirstSectorToDelete(boardType, firmwareType)
 
-            val sectorCount = WbOTAUtils.getNumberOfSectorsToDelete(
-                boardType,
-                firmwareType,
-                fileDescriptor.getFileSize()
-            )
+            var sectorCount = nbSectorsToErase.toShortOrNull()
 
-            val address = WbOTAUtils.getMemoryAddress(boardType)
+            if(sectorCount == null) {
+                sectorCount = WbOTAUtils.getNumberOfSectorsToDelete(
+                    boardType,
+                    firmwareType,
+                    fileDescriptor.getFileSize()
+                )
+            }
+
+            val address = java.lang.Long.decode(address) //WbOTAUtils.getMemoryAddress(boardType)
 
             return FwUpgradeParams.Stm32WbParams(
                 offset = firstSectorToDelete.toLong(),
@@ -268,9 +274,8 @@ class CharacteristicFwUpgrade(
     }
 
     private suspend fun writeOTAFile() {
-
         supervisorScope {
-            val isWBA = (otaNodeService.getNode().boardType == Boards.Model.WBA_BOARD)
+            val isWBAProtocol = (otaNodeService.getNode().familyType == Boards.Family.WBA_FAMILY || otaNodeService.getNode().boardType == Boards.Model.NUCLEO_WB09KE)
 
             val payloadSize =
                 otaNodeService.bleHal.requestPayloadSize(maxPayloadSize = MAX_PAYLOAD_SIZE)
@@ -308,13 +313,18 @@ class CharacteristicFwUpgrade(
             }
 
             val writeDataFile: suspend CoroutineScope.() -> Unit  = {
+
+                val maxPayloadSize = otaNodeService.getNode().maxPayloadSize
+                val multipleRequired = if(isWBAProtocol) 16 else 1
+                val maxPacketLength = maxPayloadSize - (maxPayloadSize % multipleRequired)
+
                 while (uploadedData < fileSize) {
-                    val maxPayloadSize = otaNodeService.getNode().maxPayloadSize
+
                     val writtenDataCount = transferFwFile(
                         stream,
                         fileSize,
                         uploadedData,
-                        if(isWBA) min(240, maxPayloadSize) else maxPayloadSize
+                        maxPacketLength
                     )
 
                     uploadedData += writtenDataCount
@@ -345,9 +355,9 @@ class CharacteristicFwUpgrade(
             }.launchIn(this)
 
             Log.d(TAG, "Starting FW upgrade")
-            startFwUpload(isWBA)
+            startFwUpload(isWBAProtocol)
 
-            if(!isWBA) {
+            if(!isWBAProtocol) {
                 writeDataFile()
             }
         }
@@ -359,28 +369,19 @@ class CharacteristicFwUpgrade(
         wbUpdateJob = null
     }
 
-    private suspend fun startFwUpload(isWBA: Boolean) {
-
+    private suspend fun startFwUpload(isWBAProtocol: Boolean) {
         val otaControlFeature =
             otaNodeService.getNodeFeatures().firstOrNull { it.name == OTAControl.NAME }
                 ?: return
 
         val commandId = if (fwType == FirmwareType.BLE_FW) START_M0_COMMAND else START_M4_COMMAND
-        val nbSectorsToErase: Long? = if(isWBA) getNbOfSectorsToErase(fileDescriptor.getFileSize()) else null
+
+        val nbSectorsToErase = if(isWBAProtocol) updateArgs.sectorCount.toLong() else null
         val startUploadRequest = StartUpload(otaControlFeature, commandId, updateArgs.address, nbSectorsToErase)
         otaNodeService.writeFeatureCommand(
             featureCommand = startUploadRequest,
             responseTimeout = UPLOAD_RESPONSE_DELAY
         )
-    }
-
-    private fun getNbOfSectorsToErase(fileSize: Long): Long { // 1 sector = 8192 bytes
-        val sectors = fileSize / 8192.0
-        val floorSectors = fileSize / 8192
-        if (sectors == floorSectors.toDouble()) {
-            return floorSectors
-        }
-        return floorSectors + 1
     }
 
     private suspend fun cancelFwUpload() {
@@ -413,6 +414,7 @@ class CharacteristicFwUpgrade(
         val uploadRequest = UploadOTAData(otaControlFeature, 0x00, payload)
         val writeResult = otaNodeService.writeFeatureCommand(
             featureCommand = uploadRequest,
+            writeTimeout = 3000, //bigger timeout for phones not supporting PHY 2M
             responseTimeout = UPLOAD_RESPONSE_DELAY,
             retry = 3,
             retryDelay = 250
@@ -448,7 +450,7 @@ class CharacteristicFwUpgrade(
 
         node.advertiseInfo ?: return false
 
-        if (node.advertiseInfo.getDeviceId() == OTA_NODE_ID || node.boardType == Boards.Model.WBA_BOARD) {
+        if (node.advertiseInfo.getDeviceId() == OTA_NODE_ID || node.familyType == Boards.Family.WBA_FAMILY || node.boardType == Boards.Model.NUCLEO_WB09KE) {
             return true
         }
 

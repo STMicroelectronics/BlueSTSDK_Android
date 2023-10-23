@@ -67,7 +67,8 @@ class BlueSTSDKAdvertiseFilter : AdvertiseFilter {
 //                if (it[1 + offset].toInt() and 0x80 == 0x80) it[1 + offset].toInt() and 0xFF
 //                else it[1 + offset].toInt() and 0x1F
 
-            val model: Boards.Model = Boards.getModelFromIdentifier(deviceId)
+            val model: Boards.Model = Boards.getModelFromIdentifier(deviceId,protocolVersion.toInt())
+            val family: Boards.Family = Boards.getFamilyFromModel(model)
             val isSleeping = getNodeSleepingState(it[1 + offset],model)
             val hasGeneralPurpose = getHasGenericPurposeFeature(it[1 + offset],model)
             val featureMap = NumberConversion.BigEndian.bytesToUInt32(it, 2 + offset)
@@ -89,6 +90,7 @@ class BlueSTSDKAdvertiseFilter : AdvertiseFilter {
                 deviceId.toByte(),
                 protocolVersion,
                 model,
+                family,
                 isSleeping,
                 hasGeneralPurpose
             )

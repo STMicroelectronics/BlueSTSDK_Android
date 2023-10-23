@@ -6,7 +6,9 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class RawData(
-    val data: FeatureField<ByteArray?>
+    val data: FeatureField<ByteArray?>,
+    val bytesRec: FeatureField<Int>,
+    val numberPackets: FeatureField<Int>
 ) : Loggable {
     override val logHeader = data.logHeader
     override val logValue = data.logValue

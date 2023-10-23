@@ -12,6 +12,7 @@ import android.net.Uri
 import com.st.blue_sdk.board_catalog.models.BoardDescription
 import com.st.blue_sdk.board_catalog.models.BoardFirmware
 import com.st.blue_sdk.board_catalog.models.DtmiModel
+import com.st.blue_sdk.board_catalog.models.Sensor
 
 interface BoardCatalogRepo {
     suspend fun reset(url: String?=null)
@@ -20,13 +21,17 @@ interface BoardCatalogRepo {
 
     suspend fun getBoardsDescription(): List<BoardDescription>
 
+    suspend fun getSensorAdapters(): List<Sensor>
+
+    suspend fun getSensorAdapter(uniqueId: Int): Sensor?
+
     suspend fun getFwDetailsNode(deviceId: String, bleFwId: String): BoardFirmware?
 
     suspend fun getFwCompatible(deviceId: String): List<BoardFirmware>
 
     suspend fun getFw(deviceId: String, fwName: String): List<BoardFirmware>
 
-    suspend fun getDtmiModel(deviceId: String, bleFwId: String): DtmiModel?
+    suspend fun getDtmiModel(deviceId: String, bleFwId: String,isBeta: Boolean): DtmiModel?
 
     suspend fun setBoardCatalog(fileUri: Uri, contentResolver: ContentResolver): List<BoardFirmware>
 

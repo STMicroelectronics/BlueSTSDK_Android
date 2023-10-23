@@ -509,6 +509,10 @@ class CharacteristicWithACKFwUpgrade(
         val endIndex =
             if (lastOtaAckEvery != 0.toByte()) (lastOtaAckEvery - (seqNum + 1) % OTA_ACK_EVERY) % lastOtaAckEvery + 1 else 0
 
+
+        //Set MaxPayload Size
+        (feature as NewImageTUContentFeature).setMaxPayLoadSize(nodeService.getNode().maxPayloadSize)
+
         for (i in 0 until endIndex) {
 
             // checksum:1 byte + payload:fw_image_packet_size byte +  needsAck:1 byte + SeqNum:2 byte
@@ -527,6 +531,7 @@ class CharacteristicWithACKFwUpgrade(
 
             val message = byteArrayOf(checksum) + temp
 
+            //Log.i("BlueNRGFota","SeqNum=${localSeqNumber}Message = ${message.contentToString()}")
             val writeCommand = ImageTUUpload(feature as NewImageTUContentFeature, message)
             nodeService.writeFeatureCommand(featureCommand = writeCommand, responseTimeout = 5)
             if (needsAck == 0.toByte()) {
@@ -554,6 +559,7 @@ class CharacteristicWithACKFwUpgrade(
         for (element in message) {
             checksum = checksum xor element
         }
+        //Log.i("BlueNRGFota", "size=${message.size}checksum=$checksum")
         return checksum
     }
 

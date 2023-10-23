@@ -32,6 +32,10 @@ class NewImageFeature(
         const val SEND_PARAMETER: Byte = 0x01
     }
 
+    fun setMaxPayLoadSize(payLoadSize: Int) {
+        maxPayloadSize = payLoadSize
+    }
+
     override fun extractData(
         timeStamp: Long,
         data: ByteArray,

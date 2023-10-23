@@ -12,12 +12,14 @@ import android.net.Uri
 import com.st.blue_sdk.board_catalog.models.BoardDescription
 import com.st.blue_sdk.board_catalog.models.BoardFirmware
 import com.st.blue_sdk.board_catalog.models.DtmiModel
+import com.st.blue_sdk.board_catalog.models.Sensor
 import com.st.blue_sdk.common.Resource
 import com.st.blue_sdk.features.Feature
 import com.st.blue_sdk.features.FeatureCommand
 import com.st.blue_sdk.features.FeatureResponse
 import com.st.blue_sdk.features.FeatureUpdate
 import com.st.blue_sdk.logger.Logger
+import com.st.blue_sdk.models.ChunkProgress
 import com.st.blue_sdk.models.Node
 import com.st.blue_sdk.services.debug.DebugMessage
 import com.st.blue_sdk.services.fw_version.FwVersionBoard
@@ -48,7 +50,7 @@ interface BlueManager {
 
     fun getRssi(nodeId: String)
 
-    fun connectToNode(nodeId: String, maxPayloadSize: Int = 248): Flow<Node>
+    fun connectToNode(nodeId: String, maxPayloadSize: Int = 248, enableServer: Boolean = true): Flow<Node>
 
     fun getNode(nodeId: String): Node?
 
@@ -87,6 +89,8 @@ interface BlueManager {
 
     fun getDebugMessages(nodeId: String): Flow<DebugMessage>?
 
+    fun getChunkProgressUpdates(nodeId: String): Flow<ChunkProgress>?
+
     suspend fun writeFeatureCommand(
         nodeId: String,
         featureCommand: FeatureCommand,
@@ -101,7 +105,7 @@ interface BlueManager {
 
     suspend fun reset(url: String?=null)
 
-    suspend fun getDtmiModel(nodeId: String): DtmiModel?
+    suspend fun getDtmiModel(nodeId: String,isBeta: Boolean): DtmiModel?
 
     suspend fun setBoardCatalog(fileUri: Uri, contentResolver: ContentResolver): List<BoardFirmware>
 
@@ -112,6 +116,8 @@ interface BlueManager {
     ): DtmiModel?
 
     suspend fun getBoardFirmware(nodeId: String): BoardFirmware?
+
+    suspend fun getSensorAdapter(uniqueId: Int): Sensor?
 
     suspend fun upgradeFw(nodeId: String): FwConsole?
 

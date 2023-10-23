@@ -63,17 +63,20 @@ fun UUID.getGPFeature(): Feature<*> {
 fun BluetoothGattCharacteristic.buildFeatures(
     advertiseMask: Long,
     protocolVersion: Short,
-    boardModel: Boards.Model
+    boardModel: Boards.Model,
+    containsRemoteFeatures: Boolean = false
 ): List<Feature<*>> = uuid.buildFeatures(
     advertiseMask = advertiseMask,
     protocolVersion = protocolVersion,
-    boardModel = boardModel
+    boardModel = boardModel,
+    containsRemoteFeatures = containsRemoteFeatures
 )
 
 fun UUID.buildFeatures(
     advertiseMask: Long,
     protocolVersion: Short,
-    boardModel: Boards.Model
+    boardModel: Boards.Model,
+    containsRemoteFeatures: Boolean=false
 ): List<Feature<*>> {
     val featureMask = (mostSignificantBits shr SHR_MASK).toInt()
     val features = mutableListOf<Feature<*>>()
@@ -84,6 +87,7 @@ fun UUID.buildFeatures(
             features.add(
                 Feature.createFeature(
                     boardModel = boardModel,
+                    containsRemoteFeatures=containsRemoteFeatures,
                     type = Feature.Type.STANDARD,
                     identifier = mask.toInt(),
                     isEnabled =
@@ -101,7 +105,7 @@ fun UUID.buildFeatures(
     return features
 }
 
-fun UUID.buildFeatures(boardModel: Boards.Model): List<Feature<*>> {
+fun UUID.buildFeatures(boardModel: Boards.Model,containsRemoteFeatures: Boolean = false): List<Feature<*>> {
     val featureMask = (mostSignificantBits shr SHR_MASK).toInt()
     val features = mutableListOf<Feature<*>>()
 
@@ -111,6 +115,7 @@ fun UUID.buildFeatures(boardModel: Boards.Model): List<Feature<*>> {
             features.add(
                 Feature.createFeature(
                     boardModel = boardModel,
+                    containsRemoteFeatures= containsRemoteFeatures,
                     type = Feature.Type.STANDARD,
                     identifier = mask.toInt(),
                     isEnabled = true

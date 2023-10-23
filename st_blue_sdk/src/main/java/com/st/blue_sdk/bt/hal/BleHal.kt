@@ -7,12 +7,12 @@
  */
 package com.st.blue_sdk.bt.hal
 
-import android.annotation.SuppressLint
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattService
 import com.st.blue_sdk.bt.advertise.BleAdvertiseInfo
 import com.st.blue_sdk.models.BleNotification
+import com.st.blue_sdk.models.ChunkProgress
 import com.st.blue_sdk.models.Node
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
@@ -90,6 +90,11 @@ interface BleHal {
      *  @return BLE messages arrived on any notifiable characteristic subscribed by the user
      */
     fun getDeviceNotifications(): Flow<BleNotification>
+
+    /**
+     *  @return progression of a chunk transmission
+     */
+    fun getChunkProgressUpdates(): Flow<ChunkProgress>
 
     /**
      * @return true if current connection status is Connected, ServicesDiscovered or Ready

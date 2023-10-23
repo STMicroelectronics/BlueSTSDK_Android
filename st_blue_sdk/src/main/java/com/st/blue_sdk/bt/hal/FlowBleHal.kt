@@ -8,7 +8,11 @@
 package com.st.blue_sdk.bt.hal
 
 import android.annotation.SuppressLint
-import android.bluetooth.*
+import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothGatt
+import android.bluetooth.BluetoothGattCharacteristic
+import android.bluetooth.BluetoothGattDescriptor
+import android.bluetooth.BluetoothGattService
 import android.content.Context
 import android.content.IntentFilter
 import android.util.Log
@@ -22,13 +26,28 @@ import com.st.blue_sdk.bt.hal.BleHal.Companion.NOTIFICATION_UUID
 import com.st.blue_sdk.bt.hal.BleHal.Companion.SERVICE_CHANGED_CHAR_UUID
 import com.st.blue_sdk.bt.hal.BleHal.Companion.SERVICE_CHANGED_SERVICE_UUID
 import com.st.blue_sdk.bt.hal.BleHal.Companion.TAG
-import com.st.blue_sdk.models.*
+import com.st.blue_sdk.models.BleNotification
+import com.st.blue_sdk.models.ChunkProgress
+import com.st.blue_sdk.models.ConnectionStatus
+import com.st.blue_sdk.models.Node
+import com.st.blue_sdk.models.NodeState
+import com.st.blue_sdk.models.RssiData
 import com.st.blue_sdk.utils.hasBluetoothPermission
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.onSubscription
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import java.util.*
+import kotlinx.coroutines.withTimeout
+import java.util.Date
+import java.util.UUID
 
 class FlowBleHal(
     private val context: Context,
@@ -50,6 +69,11 @@ class FlowBleHal(
                 rssi = RssiData(rssi, Date())
             )
         )
+
+    /**
+     * Flow to notify chunk progression
+     * */
+    private val chunkStateFlow = MutableStateFlow(ChunkProgress())
 
     private var discoverServicesJob: Job? = null
 
@@ -137,6 +161,8 @@ class FlowBleHal(
 
     override fun getDeviceNotifications(): Flow<BleNotification> = gattBridge.notificationFlow
 
+    override fun getChunkProgressUpdates(): Flow<ChunkProgress> = chunkStateFlow
+
     override fun isConnected(): Boolean =
         deviceStateFlow.value.connectionStatus.current in NodeState.Connected..NodeState.Ready
 
@@ -174,7 +200,8 @@ class FlowBleHal(
 
         val node = deviceStateFlow.value
         if (isConnected().not() || node.deviceGatt == null) {
-            throw IllegalStateException()
+            //throw IllegalStateException()
+            return listOf()
         }
 
         Log.d(TAG, "Node Services discovery started")
@@ -230,7 +257,8 @@ class FlowBleHal(
 
         val node = deviceStateFlow.value
         if (isConnected().not() || node.deviceGatt == null) {
-            throw IllegalStateException()
+            //throw IllegalStateException()
+            return null
         }
 
         if (canReadCharacteristic(characteristic).not()) {
@@ -312,7 +340,8 @@ class FlowBleHal(
 
         val node = deviceStateFlow.value
         if (isConnected().not() || node.deviceGatt == null) {
-            throw IllegalStateException()
+            //throw IllegalStateException()
+            return false
         }
 
         if (canWriteCharacteristic(characteristic).not()) {
@@ -328,7 +357,14 @@ class FlowBleHal(
 
         val defaultValue = BleEvent.CharacteristicWrite(false, characteristic)
 
-        chunks.forEach {
+        chunkStateFlow.emit(
+            value = ChunkProgress(
+                total = chunks.size,
+                current = 0
+            )
+        )
+
+        chunks.forEachIndexed { index, chunk ->
 
             val writeResult =
                 mutex.enqueueWithTimeout(
@@ -338,10 +374,10 @@ class FlowBleHal(
                     gattBridge.bleEventsFlow.onSubscription {
                         Log.d(
                             TAG,
-                            "Writing characteristic with uuid ${characteristic.uuid}, value ${it.contentToString()}"
+                            "Writing characteristic with uuid ${characteristic.uuid}, value ${chunk.contentToString()}"
                         )
 
-                        characteristic.value = it
+                        characteristic.value = chunk
 
                         val hasWriteData = node.deviceGatt.writeCharacteristic(characteristic)
 
@@ -352,6 +388,13 @@ class FlowBleHal(
                         if (hasWriteData.not()) {
                             emit(defaultValue)
                         }
+
+                        chunkStateFlow.emit(
+                            value = ChunkProgress(
+                                current = index + 1,
+                                total = chunks.size
+                            )
+                        )
                     }.firstOrNull {
                         it is BleEvent.CharacteristicWrite && (it.characteristic?.uuid == characteristic.uuid)
                     } as BleEvent.CharacteristicWrite
@@ -361,6 +404,8 @@ class FlowBleHal(
 
             if (successful.not())
                 return false
+
+
         }
 
         return successful
@@ -410,7 +455,8 @@ class FlowBleHal(
 
         val node = deviceStateFlow.value
         if (isConnected().not() || node.deviceGatt == null) {
-            throw IllegalStateException()
+            //throw IllegalStateException()
+            return false
         }
 
         if (canEnableCharacteristicNotification(characteristic).not()) {
@@ -635,7 +681,7 @@ class FlowBleHal(
         discoverServicesJob?.cancel()
     }
 
-    private fun clearCache(){
+    private fun clearCache() {
         runCatching {
             deviceStateFlow.value.deviceGatt?.let { gatt ->
                 gatt.javaClass.getMethod("refresh")?.let { localMethod ->

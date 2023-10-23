@@ -27,6 +27,8 @@ interface BleAdvertiseInfo {
 
     fun getBoardType(): Boards.Model
 
+    fun getFamilyType(): Boards.Family
+
     fun isBoardSleeping(): Boolean
 
     fun hasGeneralPurpose(): Boolean

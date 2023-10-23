@@ -32,4 +32,6 @@ data class BoardCatalog(
     val characteristics: List<BleCharacteristic>? = null,
     @SerialName(value = "boards")
     val boards: List<BoardDescription>? = null,
+    @SerialName(value = "sensor_adapters")
+    val sensorAdapters: List<Sensor>? = null,
 )

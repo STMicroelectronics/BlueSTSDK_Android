@@ -56,6 +56,9 @@ class OtaServiceImpl @Inject constructor(
         private val STM32WBA_NEW_FW_UPGRADE_PROTOCOL =
             FwVersionBoard("STM32WBA OTA", "STM32WBA", 1, 0, 0)
 
+        private val STM32WB09_NEW_FW_UPGRADE_PROTOCOL =
+            FwVersionBoard("STM32WB09 OTA", "STM32WB09", 1, 0, 0)
+
         const val DEFAULT_BOARD_NAME = "BLUENRG OTA"
         const val DEFAULT_MCU_NAME = "BLUENRG"
 
@@ -98,7 +101,7 @@ class OtaServiceImpl @Inject constructor(
 
         val nodeId = nodeService.getNode().device.address
         val advInfo = nodeService.getNode().advertiseInfo ?: return null
-        val boardModel = Boards.getModelFromIdentifier(advInfo.getDeviceId().toInt())
+        val boardModel = advInfo.getBoardType()
 
         val updateMethod = getFwUpdateStrategy(nodeId)
         if (updateMethod == UpgradeStrategy.CHARACTERISTIC) {
@@ -128,7 +131,7 @@ class OtaServiceImpl @Inject constructor(
 
             return when (boardModel) {
                 Boards.Model.SENSOR_TILE_BOX -> {
-                    if (boardFirmware != null) {
+                    if (boardFirmware == null) {
                         if (stBoxHasNewFwUpgradeProtocol(getFwVersion(nodeId))) {
                             //"Special" Fota for SensorTile.box official Fw
                             DebugFwUpgradeWithResume(coroutineScope, nodeService.debugService)
@@ -167,8 +170,20 @@ class OtaServiceImpl @Inject constructor(
         nodeServiceConsumer.getNodeService(nodeId)?.let { nodeService ->
 
             if (hasOTACharacteristics(nodeId)) {
-                val isWBA = (nodeService.getNode().boardType == Boards.Model.WBA_BOARD)
-                return if(isWBA) STM32WBA_NEW_FW_UPGRADE_PROTOCOL else STM32WB_NEW_FW_UPGRADE_PROTOCOL
+                return when(nodeService.getNode().boardType) {
+                    Boards.Model.WB55_NUCLEO_BOARD,
+                    Boards.Model.WB5M_DISCOVERY_BOARD,
+                    Boards.Model.WB55_USB_DONGLE_BOARD,
+                    Boards.Model.WB15_NUCLEO_BOARD,
+                    Boards.Model.WB1M_DISCOVERY_BOARD -> STM32WB_NEW_FW_UPGRADE_PROTOCOL
+
+                    Boards.Model.WBA5X_NUCLEO_BOARD,
+                    Boards.Model.WBA_DISCOVERY_BOARD-> STM32WBA_NEW_FW_UPGRADE_PROTOCOL
+
+                    Boards.Model.NUCLEO_WB09KE -> STM32WB09_NEW_FW_UPGRADE_PROTOCOL
+
+                    else -> STM32WB_NEW_FW_UPGRADE_PROTOCOL
+                }
             }
 
             nodeService.getNodeFeatures()

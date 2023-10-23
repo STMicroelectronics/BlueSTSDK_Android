@@ -13,8 +13,6 @@ import com.st.blue_sdk.models.Boards
 
 // TODO: move this item in P2P demo package
 object P2PConfiguration {
-
-    private const val PROTOCOL_V2 = 0x02
     private const val WB_ROUTER_NODE_ID = 0x85
 
     sealed class DeviceId(val id: Byte) {
@@ -40,31 +38,54 @@ object P2PConfiguration {
         }
     }
 
-    fun getDeviceIdByBoardId(boardId: Int): DeviceId? {
-        return when (boardId) {
-            0x83 -> DeviceId.Device1
-            0x84 -> DeviceId.Device2
-            0x87 -> DeviceId.Device3
-            0x88 -> DeviceId.Device4
-            0x89 -> DeviceId.Device5
-            0x8A -> DeviceId.Device6
-            else -> null
+    //This must be removed
+//    fun getDeviceIdByBoardId(boardId: Int): DeviceId? {
+//        return when (boardId) {
+//            0x83 -> DeviceId.Device1
+//            0x84 -> DeviceId.Device2
+//            0x87 -> DeviceId.Device3
+//            0x88 -> DeviceId.Device4
+//            0x89 -> DeviceId.Device5
+//            0x8A -> DeviceId.Device6
+//            else -> null
+//        } //   }
+
+    fun getDeviceIdByBoardId(boardId: Int, sdkVersion: Int): DeviceId? {
+        return if(sdkVersion==1) {
+            when (boardId) {
+                0x83 -> DeviceId.Device1
+                0x84 -> DeviceId.Device2
+                0x87 -> DeviceId.Device3
+                0x88 -> DeviceId.Device4
+                0x89 -> DeviceId.Device5
+                0x8A -> DeviceId.Device6
+                else -> null
+            }
+        } else {
+            if(boardId==0x83) {
+                DeviceId.Device1
+            } else {
+                null
+            }
         }
     }
 
     fun isValidDeviceNode(
         boardId: Int,
+        sdkVersion: Int,
         protocolVersion: Short,
         boardFirmware: BoardFirmware?
     ): Boolean {
 
-        val boardModel = Boards.getModelFromIdentifier(boardId)
-        if (boardModel == Boards.Model.WB_BOARD) {
-            val deviceId = runCatching { getDeviceIdByBoardId(boardId) }.getOrNull()
+        val boardModel = Boards.getModelFromIdentifier(boardId,sdkVersion)
+        val familyModel = Boards.getFamilyFromModel(boardModel)
+        if (familyModel == Boards.Family.WB_FAMILY) {
+            val deviceId = runCatching { getDeviceIdByBoardId(boardId,protocolVersion.toInt()) }.getOrNull()
             return deviceId != null
         }
 
-        if (protocolVersion.toInt() == PROTOCOL_V2) {
+        //if (protocolVersion.toInt() == PROTOCOL_V2) {
+        if(familyModel== Boards.Family.WBA_FAMILY) {
             boardFirmware?.let {
                 return it.fota.type == BoardFotaType.WB_MODE
             }
@@ -73,8 +94,9 @@ object P2PConfiguration {
         return false
     }
 
-    fun isValidDeviceRouter(boardId: Int): Boolean {
-        val boardModel = Boards.getModelFromIdentifier(boardId)
-        return boardModel == Boards.Model.WB_BOARD && boardId == WB_ROUTER_NODE_ID
+    fun isValidDeviceRouter(boardId: Int,sdkVersion: Int): Boolean {
+        val boardModel = Boards.getModelFromIdentifier(boardId,sdkVersion)
+        val familyModel = Boards.getFamilyFromModel(boardModel)
+        return familyModel == Boards.Family.WB_FAMILY && boardId == WB_ROUTER_NODE_ID
     }
 }

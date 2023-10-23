@@ -21,6 +21,7 @@ data class BlueStSdkAdvertiseInfo(
     private val deviceId: Byte,
     private val protocolVersion: Short,
     private val model: Boards.Model,
+    private val family: Boards.Family,
     private val isSleeping: Boolean,
     private val hasGeneralPurpose: Boolean
 ) : BleAdvertiseInfo {
@@ -40,6 +41,8 @@ data class BlueStSdkAdvertiseInfo(
     override fun getProtocolVersion() = protocolVersion
 
     override fun getBoardType() = model
+
+    override fun getFamilyType() = family
 
     override fun isBoardSleeping() = isSleeping
 

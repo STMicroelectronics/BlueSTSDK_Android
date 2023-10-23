@@ -38,6 +38,9 @@ data class BoardFirmware(
     @ColumnInfo(name = "dtmi")
     @SerialName("dtmi")
     val dtmi: String? = null,
+    @ColumnInfo(name = "flow_enable")
+    @SerialName("flow_enable")
+    val flowEnable: Int? = null,
     @ColumnInfo(name = "cloud_apps")
     @SerialName(value = "cloud_apps")
     val cloudApps: List<CloudApp>,
@@ -56,6 +59,9 @@ data class BoardFirmware(
     @ColumnInfo(name = "fota")
     @SerialName("fota")
     var fota: FotaDetails,
+    @ColumnInfo(name = "compatible_sensor_adapters")
+    @SerialName("compatible_sensor_adapters")
+    var compatibleSensorAdapters: List<Int>?=null
 ) {
 
     fun friendlyName(): String =
@@ -63,7 +69,7 @@ data class BoardFirmware(
 
 
     fun boardModel(): Boards.Model =
-        Boards.getModelFromIdentifier(Integer.decode(bleDevId))
+        Boards.getModelFromIdentifier(Integer.decode(bleDevId), sDkVersion = 2)
 
     companion object {
         fun mock() = BoardFirmware(
@@ -76,7 +82,18 @@ data class BoardFirmware(
             characteristics = emptyList(),
             optionBytes = emptyList(),
             fwDesc = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer tempor posuere enim, et imperdiet quam mattis at.",
-            fota = FotaDetails(),
+            fota = FotaDetails()
         )
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is BoardFirmware) return false
+
+        if (bleDevId != other.bleDevId) return false
+        if (bleFwId != other.bleFwId) return false
+
+        return true
+    }
+
 }

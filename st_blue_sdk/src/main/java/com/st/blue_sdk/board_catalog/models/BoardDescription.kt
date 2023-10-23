@@ -8,6 +8,7 @@ import kotlinx.serialization.UseSerializers
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import com.st.blue_sdk.models.Boards
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -33,6 +34,9 @@ data class BoardDescription(
     @ColumnInfo(name = "brd_name")
     @SerialName(value = "brd_name")
     val boardName: String,
+    @ColumnInfo(name = "brd_variant")
+    @SerialName(value = "brd_variant")
+    val boardVariant: String?=null,
     @ColumnInfo(name = "components")
     @SerialName(value = "components")
     val components: List<String>?=null,
@@ -53,5 +57,11 @@ data class BoardDescription(
     val orderURL: String? = null,
     @ColumnInfo(name = "video_url")
     @SerialName(value = "video_url")
-    val videoURL: String? = null
-)
+    val videoURL: String? = null,
+    @ColumnInfo(name = "release_date")
+    @SerialName(value = "release_date")
+    val releaseDate: String? = null
+) {
+    fun boardModel(): Boards.Model =
+        Boards.getModelFromIdentifier(Integer.decode(bleDevId), sDkVersion = 2)
+}

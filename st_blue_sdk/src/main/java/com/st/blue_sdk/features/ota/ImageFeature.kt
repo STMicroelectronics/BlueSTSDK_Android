@@ -28,6 +28,10 @@ class ImageFeature(
         const val NAME = "ImageFeature"
     }
 
+    fun setMaxPayLoadSize(payLoadSize: Int) {
+        maxPayloadSize = payLoadSize
+    }
+
     override fun extractData(
         timeStamp: Long,
         data: ByteArray,

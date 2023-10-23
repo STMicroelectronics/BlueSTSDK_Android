@@ -20,6 +20,7 @@ import com.st.blue_sdk.board_catalog.BoardCatalogRepo
 import com.st.blue_sdk.board_catalog.models.BoardDescription
 import com.st.blue_sdk.board_catalog.models.BoardFirmware
 import com.st.blue_sdk.board_catalog.models.DtmiModel
+import com.st.blue_sdk.board_catalog.models.Sensor
 import com.st.blue_sdk.bt.advertise.AdvertiseFilter
 import com.st.blue_sdk.bt.advertise.BlueNRGAdvertiseFilter
 import com.st.blue_sdk.bt.advertise.BlueSTSDKAdvertiseFilter
@@ -34,6 +35,7 @@ import com.st.blue_sdk.features.exported.ExportedAudioOpusMusicFeature
 import com.st.blue_sdk.features.exported.ExportedAudioOpusVoiceFeature
 import com.st.blue_sdk.features.exported.ExportedFeature
 import com.st.blue_sdk.logger.Logger
+import com.st.blue_sdk.models.ChunkProgress
 import com.st.blue_sdk.models.Node
 import com.st.blue_sdk.services.NodeServerConsumer
 import com.st.blue_sdk.services.NodeServerProducer
@@ -68,6 +70,8 @@ class BlueManagerImpl @Inject constructor(
     private val nodeServerProducer: NodeServerProducer,
     private val otaService: OtaService
 ) : BlueManager {
+
+    private var serverWasEnable=true
 
     companion object {
         private val TAG = BlueManager::class.java.simpleName
@@ -228,7 +232,7 @@ class BlueManagerImpl @Inject constructor(
             val fwCompatibleList = catalog.getFwCompatible(deviceId = catalogInfo.bleDevId)
                 .filter { (it.fwName != catalogInfo.fwName) || (it.fwVersion != catalogInfo.fwVersion) }
                 .filter { it.fota.bootloaderType == catalogInfo.fota.bootloaderType }
-                .filter { it.fota.fwUrl != null }.sortedBy { it.fwName }
+                .filter { !it.fota.fwUrl.isNullOrEmpty() }.sortedBy { it.fwName }
 
             val fwUpdate = catalog.getFw(
                 deviceId = catalogInfo.bleDevId, fwName = catalogInfo.fwName
@@ -296,12 +300,14 @@ class BlueManagerImpl @Inject constructor(
         nodeServiceConsumer.getNodeService(deviceAddress) != null
 
     @SuppressLint("MissingPermission")
-    override fun connectToNode(nodeId: String, maxPayloadSize: Int): Flow<Node> {
+    override fun connectToNode(nodeId: String, maxPayloadSize: Int, enableServer: Boolean): Flow<Node> {
         val nodeService = nodeServiceConsumer.getNodeService(nodeId) ?: throw IllegalStateException(
             "Unable to find NodeService for $nodeId"
         )
 
         stopScan()
+
+        serverWasEnable = enableServer
         connectFromNode(node = nodeService.bleHal.getDevice())
 
         return nodeService.connectToNode(autoConnect = false, maxPayloadSize = maxPayloadSize)
@@ -406,10 +412,16 @@ class BlueManagerImpl @Inject constructor(
         return service.getConfigControlUpdates()
     }
 
-    override fun getDebugMessages(nodeId: String): Flow<DebugMessage>? {
+    override fun getDebugMessages(nodeId: String): Flow<DebugMessage> {
         val service = nodeServiceConsumer.getNodeService(nodeId)
             ?: throw IllegalStateException("Unable to find NodeService for $nodeId")
         return service.getDebugMessages()
+    }
+
+    override fun getChunkProgressUpdates(nodeId: String): Flow<ChunkProgress> {
+        val service = nodeServiceConsumer.getNodeService(nodeId)
+            ?: throw IllegalStateException("Unable to find NodeService for $nodeId")
+        return service.getChunkProgressUpdates()
     }
 
     override suspend fun writeFeatureCommand(
@@ -430,11 +442,11 @@ class BlueManagerImpl @Inject constructor(
         )
     }
 
-    override suspend fun getDtmiModel(nodeId: String): DtmiModel? {
+    override suspend fun getDtmiModel(nodeId: String,isBeta: Boolean): DtmiModel? {
         val nodeService = nodeServiceConsumer.getNodeService(nodeId) ?: return null
         val advInfo = nodeService.getNode().advertiseInfo ?: return null
         return advInfo.getFwInfo()?.let {
-            catalog.getDtmiModel(it.deviceId, it.fwId)
+            catalog.getDtmiModel(it.deviceId, it.fwId,isBeta)
         }
     }
 
@@ -473,6 +485,10 @@ class BlueManagerImpl @Inject constructor(
         return getBoardFirmware(nodeService = nodeService)
     }
 
+    override suspend fun getSensorAdapter(uniqueId: Int): Sensor? {
+       return catalog.getSensorAdapter(uniqueId=uniqueId)
+    }
+
     override suspend fun upgradeFw(nodeId: String): FwConsole? {
         return otaService.updateFirmware(nodeId)
     }
@@ -489,13 +505,19 @@ class BlueManagerImpl @Inject constructor(
     private fun connectFromNode(node: Node): Boolean {
         val server = nodeServerConsumer.getNodeServer(node.device.address)
             ?: nodeServerProducer.createServer(node, EXPORTED_MAP)
-        return server.connectToPeripheral()
+        return if(serverWasEnable) {
+            server.connectToPeripheral()
+        } else {
+            false
+        }
     }
 
     private fun disconnectFromNode(nodeId: String? = null): Boolean {
         if (nodeId == null) {
             nodeServerConsumer.getNodeServers().forEach {
-                it.disconnectFromPeripheral()
+                if(serverWasEnable) {
+                    it.disconnectFromPeripheral()
+                }
             }
 
             nodeServerProducer.clear()
@@ -503,7 +525,9 @@ class BlueManagerImpl @Inject constructor(
             return true
         } else {
             nodeServerConsumer.getNodeServer(nodeId)?.let { server ->
-                server.disconnectFromPeripheral()
+                if(serverWasEnable) {
+                    server.disconnectFromPeripheral()
+                }
 
                 nodeServerProducer.removeServer(nodeId = nodeId)
 

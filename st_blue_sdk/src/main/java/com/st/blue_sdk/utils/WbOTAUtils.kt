@@ -26,29 +26,53 @@ object WbOTAUtils {
         object WB1x : WBBoardType()
 
         object WBA : WBBoardType()
+
+        object WB09 : WBBoardType()
     }
 
     private val APPLICATION_MEMORY_LAYOUTS = listOf(
         OTAMemoryLayout(0x00.toShort(), 0x00.toShort(), 0x0000.toShort()), //Undef
         OTAMemoryLayout(0x07.toShort(), 0x7F.toShort(), 0x1000.toShort() /* 4k*/), //WB55
         OTAMemoryLayout(0x0E.toShort(), 0x24.toShort(), 0x800.toShort() /* 2k*/), //WB15
-        OTAMemoryLayout(0x3E.toShort(), 0x3F.toShort(), 0x2000.toShort() /* 8k*/) //WBA
+        OTAMemoryLayout(0x3E.toShort(), 0x3F.toShort(), 0x2000.toShort() /* 8k*/), //WBA
+        OTAMemoryLayout(0x7F.toShort(), 0x100.toShort(), 0x800.toShort() /* 2k*/) //WB09
     )
 
     private val BLE_MEMORY_LAYOUTS = listOf(
         OTAMemoryLayout(0x000.toShort(), 0x00.toShort(), 0x0000.toShort()), //Undef
         OTAMemoryLayout(0x0F.toShort(), 0x7F.toShort(), 0x1000.toShort() /* 4k*/), //WB55
         OTAMemoryLayout(0x0E.toShort(), 0x3C.toShort(), 0x800.toShort() /* 2k*/), //WB15
-        OTAMemoryLayout(0x7B.toShort(), 0x3F.toShort(), 0x2000.toShort() /* 8k*/) //WBA
+        OTAMemoryLayout(0x7B.toShort(), 0x3F.toShort(), 0x2000.toShort() /* 8k*/), //WBA
+        OTAMemoryLayout(0xFC.toShort(), 0x100.toShort(), 0x800.toShort() /* 2k*/), //WB09
     )
 
     private val MEMORY_ADDRESSES = listOf(
         OTAMemoryAddress(0x00, 0x00, 0x00), // undef
-        OTAMemoryAddress(0x7000, 0x089000, 0x1000), // wb
-        OTAMemoryAddress(0x7000, 0x01C000, 0x800), // wb15
-        OTAMemoryAddress(0x7C000, 0xCA000, 0x2000), // wba //true min is 0x28000 but as the min is the one actually taken, we put the default value as the min
-
+        OTAMemoryAddress(0x7000, -1, 0x1000), // wb
+        OTAMemoryAddress(0x7000, -1, 0x800), // wb15
+        OTAMemoryAddress(0x28000, 0xCA000, 0x2000), // wba // default address is 0x7C000
+        OTAMemoryAddress(0x00000, 0x7FFFF, 0x800), //wb09 // default address is 0x3F800
     )
+
+    fun checkAddressAndNbSectorsInRange(boardType: WBBoardType, firmwareType: FirmwareType, address: String?, nbSectorsToErase: String?): Int { //returns a code corresponding to the error
+        if(address.isNullOrEmpty() || address.length < 3 || address[0] != '0' || address[1] != 'x' || (address.substring(2).replace("[^[0-9][a-f][A-F]]".toRegex(), "").length + 2 != address.length)) return 0
+        if(nbSectorsToErase.isNullOrEmpty() || (nbSectorsToErase.replace("[^[0-9]]".toRegex(), "").length != nbSectorsToErase.length)) return 1
+
+        val boardIndex = getSelectionIndexByBoardType(boardType)
+        val addressLong = java.lang.Long.decode(address)
+        val nbSectorsInt = nbSectorsToErase.toInt()
+
+        val minAndMaxAddress = MEMORY_ADDRESSES[boardIndex]
+        val maxSector = when (firmwareType) {
+            FirmwareType.BOARD_FW -> APPLICATION_MEMORY_LAYOUTS[boardIndex].nSector
+            FirmwareType.BLE_FW -> BLE_MEMORY_LAYOUTS[boardIndex].nSector
+        }
+
+        if(addressLong < minAndMaxAddress.min || (minAndMaxAddress.max != (-1).toLong() && addressLong > minAndMaxAddress.max)) return 2
+        if(nbSectorsInt > maxSector) return 3
+
+        return -1
+    }
 
     fun getFirstSectorToDelete(boardType: WBBoardType, firmwareType: FirmwareType): Short {
 
@@ -124,6 +148,7 @@ object WbOTAUtils {
             is WBBoardType.WB5xOrWB3x -> 1
             is WBBoardType.WB1x -> 2
             is WBBoardType.WBA -> 3
+            is WBBoardType.WB09 -> 4
         }
     }
 }

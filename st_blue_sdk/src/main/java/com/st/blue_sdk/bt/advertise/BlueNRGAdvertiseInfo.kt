@@ -27,6 +27,8 @@ class BlueNRGAdvertiseInfo(private val name: String) : BleAdvertiseInfo {
 
     override fun getBoardType() = Boards.Model.STEVAL_IDB008VX
 
+    override fun getFamilyType() = Boards.Family.OTHER_FAMILY
+
     override fun isBoardSleeping() = false
 
     override fun hasGeneralPurpose() = false

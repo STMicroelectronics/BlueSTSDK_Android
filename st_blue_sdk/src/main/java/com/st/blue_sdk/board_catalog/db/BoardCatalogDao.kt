@@ -13,6 +13,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.st.blue_sdk.board_catalog.models.BoardDescription
 import com.st.blue_sdk.board_catalog.models.BoardFirmware
+import com.st.blue_sdk.board_catalog.models.Sensor
 
 @Dao
 interface BoardCatalogDao {
@@ -20,6 +21,9 @@ interface BoardCatalogDao {
     suspend fun getDeviceFirmwares(): List<BoardFirmware>
     @Query("SELECT * FROM board_description ORDER BY ble_dev_id DESC")
     suspend fun getBoardsDescription(): List<BoardDescription>?
+
+    @Query("SELECT * FROM sensor_adapters ORDER BY unique_id DESC")
+    suspend fun getSensorsDescription(): List<Sensor>?
 
     @Query("DELETE FROM board_firmware")
     suspend fun deleteAllEntries()
@@ -32,4 +36,7 @@ interface BoardCatalogDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun addDesc(boardDescr: List<BoardDescription>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun addSensors(sensorDescr: List<Sensor>)
 }

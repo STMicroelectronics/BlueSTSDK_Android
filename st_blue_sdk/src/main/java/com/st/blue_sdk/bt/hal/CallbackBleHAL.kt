@@ -8,7 +8,11 @@
 package com.st.blue_sdk.bt.hal
 
 import android.annotation.SuppressLint
-import android.bluetooth.*
+import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothGatt
+import android.bluetooth.BluetoothGattCharacteristic
+import android.bluetooth.BluetoothGattDescriptor
+import android.bluetooth.BluetoothGattService
 import android.content.Context
 import android.content.IntentFilter
 import android.util.Log
@@ -21,12 +25,29 @@ import com.st.blue_sdk.bt.hal.BleHal.Companion.NOTIFICATION_UUID
 import com.st.blue_sdk.bt.hal.BleHal.Companion.SERVICE_CHANGED_CHAR_UUID
 import com.st.blue_sdk.bt.hal.BleHal.Companion.SERVICE_CHANGED_SERVICE_UUID
 import com.st.blue_sdk.bt.hal.BleHal.Companion.TAG
-import com.st.blue_sdk.models.*
+import com.st.blue_sdk.models.BleNotification
+import com.st.blue_sdk.models.ChunkProgress
+import com.st.blue_sdk.models.ConnectionStatus
+import com.st.blue_sdk.models.Node
+import com.st.blue_sdk.models.NodeState
+import com.st.blue_sdk.models.RssiData
 import com.st.blue_sdk.utils.hasBluetoothPermission
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CancellableContinuation
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.flow.*
-import java.util.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withTimeout
+import java.util.Date
+import java.util.UUID
 
 class CallbackBleHAL(
     private val context: Context,
@@ -55,6 +76,11 @@ class CallbackBleHAL(
         extraBufferCapacity = 30,
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
+
+    /**
+     * Flow to notify chunk progression
+     * */
+    private val chunkStateFlow = MutableStateFlow(ChunkProgress())
 
     private var discoverServicesJob: Job? = null
 
@@ -133,6 +159,7 @@ class CallbackBleHAL(
     override fun getDeviceStatus() = deviceStateFlow
 
     override fun getDeviceNotifications(): SharedFlow<BleNotification> = notificationsFlow
+    override fun getChunkProgressUpdates(): Flow<ChunkProgress> = chunkStateFlow
 
     override fun isConnected(): Boolean =
         deviceStateFlow.value.connectionStatus.current in NodeState.Connected..NodeState.Ready
@@ -323,14 +350,21 @@ class CallbackBleHAL(
             .chunked(payloadSize ?: deviceStateFlow.value.maxPayloadSize)
             .map { it.toByteArray() }
 
-        chunks.forEach {
+        chunkStateFlow.emit(
+            value = ChunkProgress(
+                total = chunks.size,
+                current = 0
+            )
+        )
+
+        chunks.forEachIndexed { index, chunk ->
             successful =
                 successful && bleOperationsQueue.enqueueOperation(BleOperation.WriteCharacteristic {
 
-                    characteristic.value = it
+                    characteristic.value = chunk
                     Log.d(
                         TAG,
-                        "Writing characteristic ${characteristic.uuid} with data ${it.contentToString()}"
+                        "Writing characteristic ${characteristic.uuid} with data ${chunk.contentToString()}"
                     )
 
                     if (awaitFeedback.not()) {
@@ -346,6 +380,13 @@ class CallbackBleHAL(
                             characteristicWriteContinuation?.cancel()
                             characteristicWriteContinuation = it
                             node.deviceGatt.writeCharacteristic(characteristic)
+
+                            chunkStateFlow.tryEmit(
+                                value = ChunkProgress(
+                                    total = chunks.size,
+                                    current = index + 1
+                                )
+                            )
                         },
                         onOperationTimeOut = { characteristicWriteContinuation?.cancel() }
                     ) ?: false

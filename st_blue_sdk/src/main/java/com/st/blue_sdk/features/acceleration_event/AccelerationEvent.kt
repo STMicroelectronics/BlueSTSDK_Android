@@ -7,9 +7,11 @@
  */
 package com.st.blue_sdk.features.acceleration_event
 
+import android.util.Log
 import com.st.blue_sdk.features.*
 import com.st.blue_sdk.features.acceleration_event.request.EnableDetectionAccelerationEvent
 import com.st.blue_sdk.features.acceleration_event.response.EnableAccelerationEventResponse
+import com.st.blue_sdk.features.extended.ext_configuration.ExtConfiguration
 import com.st.blue_sdk.utils.NumberConversion
 
 class AccelerationEvent(
@@ -40,7 +42,7 @@ class AccelerationEvent(
 
         val numBytes = minOf(data.size - dataOffset, 3)
 
-        val accEvent = if(numBytes>=3) {
+        val accEvent = if (numBytes >= 3) {
             //Extract Event&Pedometer data
             AccelerationEventInfo(
                 accEvent = getListAccelerationType(
@@ -58,7 +60,7 @@ class AccelerationEvent(
                     name = "Steps"
                 ),
             )
-        } else if ((numBytes>=2) && mIsPedometerEnabled) {
+        } else if ((numBytes >= 2) && mIsPedometerEnabled) {
             //Extract Pedometer data
             //if we have only pedometer data... we had also a pedometer event
             AccelerationEventInfo(
@@ -150,7 +152,7 @@ class AccelerationEvent(
     override fun packCommandData(featureBit: Int?, command: FeatureCommand): ByteArray? {
         if (command is EnableDetectionAccelerationEvent) {
             return if (command.enable) {
-                if(command.event==DetectableEventType.Pedometer) {
+                if (command.event == DetectableEventType.Pedometer) {
                     mIsPedometerEnabled = true
                 }
                 packCommandRequest(
@@ -159,7 +161,7 @@ class AccelerationEvent(
                     byteArrayOf(1)
                 )
             } else {
-                if(command.event==DetectableEventType.Pedometer) {
+                if (command.event == DetectableEventType.Pedometer) {
                     mIsPedometerEnabled = false
                 }
                 packCommandRequest(
@@ -185,6 +187,7 @@ class AccelerationEvent(
                         event = event
                     )
                 }
+
                 else -> null
             }
         }
@@ -203,6 +206,12 @@ enum class DetectableEventType(val byte: Byte) {
     Tilt('t'.code.toByte());
 
     companion object {
-        fun create(byte: Byte): DetectableEventType = values().first { it.byte == byte }
+        fun create(byte: Byte): DetectableEventType =
+            try {
+                values().first { it.byte == byte }
+            } catch (e: Exception) {
+                Log.d("Acceleration Event", e.stackTraceToString())
+                None
+            }
     }
 }

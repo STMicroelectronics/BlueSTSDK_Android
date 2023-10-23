@@ -41,10 +41,25 @@ class BinaryContent(
                 data = FeatureField(
                     name = "BinaryContent",
                     value = binaryContent
+                ),
+                bytesRec = FeatureField(
+                    name = "bytesRec",
+                    value = stl2TransportProtocol.getBytesReceived()
+                ),
+                numberPackets =  FeatureField(
+                    name = "numberPackets",
+                    value = stl2TransportProtocol.getNumberPackets()
                 )
             )
         )
     }
+
+    fun setMaxPayLoadSize(payLoadSize: Int) {
+        maxPayloadSize = payLoadSize
+        stl2TransportProtocol.setMaxPayLoadSize(payLoadSize)
+    }
+
+    fun getMaxPayLoadSize() = maxPayloadSize
 
     override fun packCommandData(featureBit: Int?, command: FeatureCommand): ByteArray? =
         when (command) {

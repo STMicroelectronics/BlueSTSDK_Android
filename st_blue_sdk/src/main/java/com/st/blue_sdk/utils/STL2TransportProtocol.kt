@@ -12,36 +12,59 @@ import java.io.ByteArrayOutputStream
 import java.nio.charset.StandardCharsets
 import kotlin.math.min
 
-class STL2TransportProtocol(private val maxPayloadSize: Int = 20) {
+class STL2TransportProtocol(private var maxPayloadSize: Int = 20) {
 
     private var currentMessage: ByteArrayOutputStream? = null
+    private var bytesRec=0
+    private var numberPackets=0
 
     fun decapsulate(byteCommand: ByteArray): ByteArray? {
         if (byteCommand[0] == TP_START_PACKET) {
             currentMessage = ByteArrayOutputStream().apply {
                 write(byteCommand, 1, byteCommand.size - 1)
             }
-            val startMessage = currentMessage?.toByteArray()?.let { String(it) } ?: ""
-            Log.d(TAG, "startMessage: $startMessage")
+//            val startMessage = currentMessage?.toByteArray()?.let { String(it) } ?: ""
+//            Log.d(TAG, "startMessage: ${String(byteCommand)}")
+            bytesRec=byteCommand.size-1
+            numberPackets=1
+//            Log.d(TAG, "startMessage: ${currentMessage!!.size()} ...$totalSize")
         } else if (byteCommand[0] == TP_START_END_PACKET) {
-            val discardMessage = currentMessage?.toByteArray()?.let { String(it) } ?: ""
-            Log.d(TAG, "discardMessage: $discardMessage")
-            currentMessage = ByteArrayOutputStream()
+//            val lastMessage = currentMessage?.toByteArray()?.let { String(it) } ?: ""
+//            Log.d(TAG, "discardMessage: $lastMessage")
+//            currentMessage = ByteArrayOutputStream()
+            bytesRec=byteCommand.size-1
+            numberPackets=1
+            currentMessage = ByteArrayOutputStream().apply {
+                write(byteCommand, 1, byteCommand.size - 1)
+            }
             return currentMessage!!.toByteArray()
         } else if (byteCommand[0] == TP_MIDDLE_PACKET) {
             currentMessage?.write(byteCommand, 1, byteCommand.size - 1)
-            val currentMessageStr = currentMessage?.toByteArray()?.let { String(it) } ?: ""
-            Log.d(TAG, "currentMessageStr: $currentMessageStr")
+//            val currentMessageStr = currentMessage?.toByteArray()?.let { String(it) } ?: ""
+//            Log.d(TAG, "currentMessageStr: $currentMessageStr")
+            bytesRec+=byteCommand.size-1
+            numberPackets++
+//            Log.d(TAG, "middleMessage: ${currentMessage!!.size()} ...$totalSize")
         } else if (byteCommand[0] == TP_END_PACKET) {
             if (currentMessage != null) {
                 currentMessage!!.write(byteCommand, 1, byteCommand.size - 1)
-                val finalMessage = currentMessage?.toByteArray()?.let { String(it) } ?: ""
-                Log.d(TAG, "finalMessage $finalMessage")
+//                val finalMessage = currentMessage?.toByteArray()?.let { String(it) } ?: ""
+//                Log.d(TAG, "finalMessage ${String(byteCommand)}")
+                bytesRec+=byteCommand.size-1
+                numberPackets++
+//                Log.d(TAG, "finalMessage: ${currentMessage!!.size()} ...$totalSize")
                 return currentMessage!!.toByteArray()
             }
         }
         return null
     }
+
+    fun setMaxPayLoadSize(maxPayLoad: Int) {maxPayloadSize = maxPayLoad}
+
+    fun getMaxPayLoadSize() = maxPayloadSize
+    
+    fun getNumberPackets() = numberPackets
+    fun getBytesReceived() = bytesRec
 
     private fun toBytes(s: Short): ByteArray {
         return byteArrayOf(

@@ -13,7 +13,6 @@ import android.content.SharedPreferences
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.Uri
-import android.os.Build
 import android.util.Log
 import androidx.core.content.edit
 import androidx.core.content.getSystemService
@@ -27,6 +26,7 @@ import com.st.blue_sdk.board_catalog.models.BoardDescription
 import com.st.blue_sdk.board_catalog.models.BoardFirmware
 import com.st.blue_sdk.board_catalog.models.DtmiContent
 import com.st.blue_sdk.board_catalog.models.DtmiModel
+import com.st.blue_sdk.board_catalog.models.Sensor
 import com.st.blue_sdk.board_catalog.models.toDtmiContent
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
@@ -35,7 +35,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import java.nio.charset.StandardCharsets
@@ -55,30 +54,28 @@ class BoardCatalogRepoImpl @Inject constructor(
 ) : BoardCatalogRepo {
 
     private var dtmiModelCache: MutableList<DtmiModel> = mutableListOf()
-    private var cache: MutableList<BoardFirmware> = mutableListOf()
-    private var cacheDescription: MutableList<BoardDescription> = mutableListOf()
+    private var cache: MutableSet<BoardFirmware> = mutableSetOf()
+    private var cacheBoardsDescription: MutableList<BoardDescription> = mutableListOf()
+    private var cacheSensorAdapters: MutableList<Sensor> = mutableListOf()
 
     private val mutex = Mutex()
 
+    private var catalogRequestOnGoing = false
+
     init {
         coroutineScope.launch {
-            getBoardCatalog()
+            //getBoardCatalog()
+            fillCachesFromDB()
         }
     }
 
-    @Suppress("DEPRECATION")
     private val ConnectivityManager?.isCurrentlyConnected: Boolean
         get() = when (this) {
             null -> false
-            else -> when {
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ->
-                    activeNetwork
-                        ?.let(::getNetworkCapabilities)
-                        ?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-                        ?: false
-
-                else -> activeNetworkInfo?.isConnected ?: false
-            }
+            else -> activeNetwork
+                ?.let(::getNetworkCapabilities)
+                ?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                ?: false
         }
 
     private fun checkRecoverSavedCustomDTMI(): List<DtmiContent>? {
@@ -100,16 +97,38 @@ class BoardCatalogRepoImpl @Inject constructor(
 
     private suspend fun needSync(): Boolean {
         mutex.withLock {
-            if (context.getSystemService<ConnectivityManager>().isCurrentlyConnected.not()) return false
-            if (cache.isEmpty()) return true
+            if(catalogRequestOnGoing) {
+//                Log.i("DB","Catalog catalogRequestOnGoing==$catalogRequestOnGoing, skip update")
+                return false
+            }
+
+            if (context.getSystemService<ConnectivityManager>().isCurrentlyConnected.not()) {
+//                Log.i("DB","Catalog No Internet Connection, skip update")
+                return false
+            }
+//            if (cache.isEmpty()) {
+//                Log.i("DB","Catalog cache empty, force update")
+//                return true
+//            }
 
             val lastSyncStAppVersion = pref.getString(LAST_SYNC_VERSION_PREF, "")
-            if (lastSyncStAppVersion != stAppVersion) return true
+            if (lastSyncStAppVersion != stAppVersion) {
+//                Log.i("DB","Catalog lastSyncStAppVersion=$lastSyncStAppVersion!=$stAppVersion, force update")
+                return true
+            }
 
             val now = Date().time
             val lastSyncTimestamp = pref.getLong(LAST_SYNC_TIMESTAMP_PREF, 0L)
             val lastSyncDate = Date(lastSyncTimestamp)
             val minSyncInterval = Date(now - MIN_SYNC_INTERVAL)
+
+//            Log.i("DB","Catalog lastSyncTimestamp = $lastSyncTimestamp")
+//            Log.i("DB","Catalog lastSyncDate = $lastSyncDate")
+//            Log.i("DB","Catalog minSyncInterval = $minSyncInterval")
+//
+//            if(lastSyncDate.before(minSyncInterval)) {
+//                Log.i("DB","Catalog <minSyncInterval, force update")
+//            }
 
             return if (lastSyncDate.before(minSyncInterval)) {
                 try {
@@ -132,16 +151,21 @@ class BoardCatalogRepoImpl @Inject constructor(
     }
 
     private suspend fun sync(url: String? = null) {
+        Log.i("DB","sync()")
+        catalogRequestOnGoing = true
         mutex.withLock {
             try {
                 db.deleteAllEntries()
                 db.deleteAllDescEntries()
                 cache.clear()
-                cacheDescription.clear()
+                cacheBoardsDescription.clear()
+                cacheSensorAdapters.clear()
                 val firmwares = if (url != null)
                     api.getFirmwaresFromUrl(url + "catalog.json")
                 else
                     api.getFirmwares()
+
+                catalogRequestOnGoing = false
                 firmwares.bleListBoardFirmwareV1?.let {
                     cache.addAll(it)
                     db.add(it)
@@ -153,7 +177,12 @@ class BoardCatalogRepoImpl @Inject constructor(
 
                 firmwares.boards?.let{
                     db.addDesc(it)
-                    cacheDescription.addAll(it)
+                    cacheBoardsDescription.addAll(it)
+                }
+                
+                firmwares.sensorAdapters?.let {
+                    db.addSensors(it)
+                    cacheSensorAdapters.addAll(it)
                 }
 
                 val savedBoardsModelString = pref.getString(CUSTOM_BOARDS_MODEL, null)
@@ -188,10 +217,12 @@ class BoardCatalogRepoImpl @Inject constructor(
 
 
     override suspend fun reset(url: String?) {
+        Log.i("DB","reset()")
         sync(url)
     }
 
     override suspend fun getBoardCatalog(): List<BoardFirmware> {
+//        Log.i("DB","getBoardCatalog()")
         withContext(Dispatchers.IO) {
             if (cache.isEmpty()) {
                 cache.addAll(db.getDeviceFirmwares())
@@ -202,15 +233,55 @@ class BoardCatalogRepoImpl @Inject constructor(
             }
         }
 
-        return cache
+        return cache.toList()
+    }
+
+    private suspend fun fillCachesFromDB() {
+//        Log.i("DB","fillCachesFromDB()")
+//        Log.i("DB","caches ${cache.size} ${cacheBoardsDescription.size}")
+        cache.clear()
+        cache.addAll(db.getDeviceFirmwares())
+        cacheBoardsDescription.clear()
+        cacheSensorAdapters.clear()
+        val descr = db.getBoardsDescription()
+        if(descr!=null) {
+            cacheBoardsDescription.addAll(descr)
+        }
+        val sensors = db.getSensorsDescription()
+        if(sensors!=null) {
+            cacheSensorAdapters.addAll(sensors)
+        }
+//        Log.i("DB","caches2 ${cache.size} ${cacheBoardsDescription.size}")
     }
 
     override suspend fun getBoardsDescription(): List<BoardDescription> {
+//        Log.i("DB","getBoardsDescription()")
         withContext(Dispatchers.IO) {
-            if (cacheDescription.isEmpty()) {
+            if (cacheBoardsDescription.isEmpty()) {
+//                Log.i("DB","cacheBoardsDescription.isEmpty()")
                 val retrievedBoardsDesc = db.getBoardsDescription()
                 if(retrievedBoardsDesc!=null) {
-                    cacheDescription.addAll(retrievedBoardsDesc)
+//                    Log.i("DB","retrievedBoardsDesc.size=${retrievedBoardsDesc.size}")
+                    cacheBoardsDescription.addAll(retrievedBoardsDesc)
+                }
+            }
+
+            if (needSync()) {
+//                Log.i("DB","needSync()")
+                sync()
+            }
+        }
+
+        return cacheBoardsDescription
+    }
+
+    override suspend fun getSensorAdapters(): List<Sensor> {
+//        Log.i("DB","getBoardsDescription()")
+        withContext(Dispatchers.IO) {
+            if (cacheSensorAdapters.isEmpty()) {
+                val retrieveSensorAdaptersDesc = db.getSensorsDescription()
+                if(retrieveSensorAdaptersDesc!=null) {
+                    cacheSensorAdapters.addAll(retrieveSensorAdaptersDesc)
                 }
             }
 
@@ -219,7 +290,14 @@ class BoardCatalogRepoImpl @Inject constructor(
             }
         }
 
-        return cacheDescription
+        return cacheSensorAdapters
+    }
+
+    override suspend fun getSensorAdapter(uniqueId: Int): Sensor? {
+        if (needSync()) {
+            sync()
+        }
+        return cacheSensorAdapters.firstOrNull{uniqueId==it.unique_id}
     }
 
     override suspend fun getFwCompatible(deviceId: String): List<BoardFirmware> {
@@ -243,7 +321,7 @@ class BoardCatalogRepoImpl @Inject constructor(
         return cache.find { it.bleFwId == bleFwId && deviceId == it.bleDevId }
     }
 
-    override suspend fun getDtmiModel(deviceId: String, bleFwId: String): DtmiModel? {
+    override suspend fun getDtmiModel(deviceId: String, bleFwId: String, isBeta: Boolean): DtmiModel? {
         if (needSync()) {
             sync()
         }
@@ -255,7 +333,6 @@ class BoardCatalogRepoImpl @Inject constructor(
             if (it.contains(ST_DTMI)) {
                 String.format(BuildConfig.DTMI_AZURE_DB_BASE_URL, it)
             } else {
-                val isBeta = false
                 if (isBeta) {
                     String.format(BuildConfig.DTMI_GITHUB_DB_BASE_URL_BETA, it)
                 } else {
@@ -351,6 +428,7 @@ class BoardCatalogRepoImpl @Inject constructor(
         contentResolver: ContentResolver
     ): List<BoardFirmware> {
 
+//        Log.i("DB","setBoardCatalog()")
         try {
             val inStream = contentResolver.openInputStream(fileUri)
             if (inStream != null) {
@@ -376,7 +454,7 @@ class BoardCatalogRepoImpl @Inject constructor(
             Log.w(TAG, ex.localizedMessage, ex)
         }
 
-        return cache
+        return cache.toList()
     }
 
     companion object {
