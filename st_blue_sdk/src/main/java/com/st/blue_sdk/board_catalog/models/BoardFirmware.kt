@@ -5,14 +5,19 @@
  * the root directory of this software component.
  * If no LICENSE file comes with this software, it is provided AS-IS.
  */
+@file:UseSerializers(FirmwareMaturityTypeSerializer::class)
 
 package com.st.blue_sdk.board_catalog.models
+
+import com.st.blue_sdk.board_catalog.api.serializers.FirmwareMaturityTypeSerializer
+import kotlinx.serialization.UseSerializers
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import com.st.blue_sdk.models.Boards
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+
 
 @Entity(
     primaryKeys = ["ble_dev_id", "ble_fw_id"],
@@ -38,9 +43,6 @@ data class BoardFirmware(
     @ColumnInfo(name = "dtmi")
     @SerialName("dtmi")
     val dtmi: String? = null,
-    @ColumnInfo(name = "flow_enable")
-    @SerialName("flow_enable")
-    val flowEnable: Int? = null,
     @ColumnInfo(name = "cloud_apps")
     @SerialName(value = "cloud_apps")
     val cloudApps: List<CloudApp>,
@@ -61,7 +63,11 @@ data class BoardFirmware(
     var fota: FotaDetails,
     @ColumnInfo(name = "compatible_sensor_adapters")
     @SerialName("compatible_sensor_adapters")
-    var compatibleSensorAdapters: List<Int>?=null
+    var compatibleSensorAdapters: List<Int>?=null,
+    @SerialName("demo_decorator")
+    var demoDecorator: DemoDecorator?=null,
+    @SerialName("maturity")
+    var maturity: FirmwareMaturity?=null
 ) {
 
     fun friendlyName(): String =
@@ -82,7 +88,8 @@ data class BoardFirmware(
             characteristics = emptyList(),
             optionBytes = emptyList(),
             fwDesc = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer tempor posuere enim, et imperdiet quam mattis at.",
-            fota = FotaDetails()
+            fota = FotaDetails(),
+            maturity = FirmwareMaturity.RELEASE
         )
     }
 
@@ -96,4 +103,22 @@ data class BoardFirmware(
         return true
     }
 
+    override fun hashCode(): Int {
+        var result = bleDevId.hashCode()
+        result = 31 * result + bleFwId.hashCode()
+        result = 31 * result + brdName.hashCode()
+        result = 31 * result + fwVersion.hashCode()
+        result = 31 * result + fwName.hashCode()
+        result = 31 * result + (dtmi?.hashCode() ?: 0)
+        result = 31 * result + cloudApps.hashCode()
+        result = 31 * result + characteristics.hashCode()
+        result = 31 * result + optionBytes.hashCode()
+        result = 31 * result + fwDesc.hashCode()
+        result = 31 * result + (changelog?.hashCode() ?: 0)
+        result = 31 * result + fota.hashCode()
+        result = 31 * result + (compatibleSensorAdapters?.hashCode() ?: 0)
+        result = 31 * result + (demoDecorator?.hashCode() ?: 0)
+        result = 31 * result + (maturity?.hashCode() ?: 0)
+        return result
+    }
 }

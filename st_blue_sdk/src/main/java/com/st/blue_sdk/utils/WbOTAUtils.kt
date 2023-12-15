@@ -48,9 +48,9 @@ object WbOTAUtils {
 
     private val MEMORY_ADDRESSES = listOf(
         OTAMemoryAddress(0x00, 0x00, 0x00), // undef
-        OTAMemoryAddress(0x7000, -1, 0x1000), // wb
-        OTAMemoryAddress(0x7000, -1, 0x800), // wb15
-        OTAMemoryAddress(0x28000, 0xCA000, 0x2000), // wba // default address is 0x7C000
+        OTAMemoryAddress(0x7000, 0x0D7000, 0x1000), // wb
+        OTAMemoryAddress(0x7000, 0x029000, 0x800), // wb15
+        OTAMemoryAddress(0x28000, Long.MAX_VALUE, 0x2000), // wba // default address is 0x7C000 // previously 0xCA000 as max but problem for User Conf (default value higher than max address)
         OTAMemoryAddress(0x00000, 0x7FFFF, 0x800), //wb09 // default address is 0x3F800
     )
 
@@ -71,10 +71,12 @@ object WbOTAUtils {
         if(addressLong < minAndMaxAddress.min || (minAndMaxAddress.max != (-1).toLong() && addressLong > minAndMaxAddress.max)) return 2
         if(nbSectorsInt > maxSector) return 3
 
+        if(addressLong % minAndMaxAddress.sectorSize != 0.toLong()) return 4
+
         return -1
     }
 
-    fun getFirstSectorToDelete(boardType: WBBoardType, firmwareType: FirmwareType): Short {
+    /*fun getFirstSectorToDelete(boardType: WBBoardType, firmwareType: FirmwareType): Short {
 
         val boardIndex = getSelectionIndexByBoardType(boardType)
 
@@ -90,6 +92,12 @@ object WbOTAUtils {
             FirmwareType.BOARD_FW -> APPLICATION_MEMORY_LAYOUTS[boardIndex].fistSector
             FirmwareType.BLE_FW -> BLE_MEMORY_LAYOUTS[boardIndex].fistSector
         }
+    }*/
+
+    fun getFirstSectorToDelete(boardType: WBBoardType, address: Long): Long {
+        val boardIndex = getSelectionIndexByBoardType(boardType)
+        val sectorSize = MEMORY_ADDRESSES[boardIndex].sectorSize
+        return address / sectorSize
     }
 
     fun getNumberOfSectorsToDelete(

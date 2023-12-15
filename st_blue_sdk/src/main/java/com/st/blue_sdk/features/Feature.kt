@@ -77,6 +77,7 @@ import com.st.blue_sdk.features.pedometer.Pedometer
 import com.st.blue_sdk.features.pressure.Pressure
 import com.st.blue_sdk.features.proximity.Proximity
 import com.st.blue_sdk.features.proximity_gesture.ProximityGesture
+import com.st.blue_sdk.features.extended.raw_pnpl_controlled.RawPnPLControlled
 import com.st.blue_sdk.features.remote.humidity.RemoteHumidity
 import com.st.blue_sdk.features.remote.pressure.RemotePressure
 import com.st.blue_sdk.features.remote.switch.RemoteSwitch
@@ -528,6 +529,10 @@ abstract class Feature<T>(
                     isEnabled = isEnabled,
                     identifier = identifier,
                     maxPayloadSize = maxPayloadSize
+                )
+                0x23 -> RawPnPLControlled(
+                    isEnabled = isEnabled,
+                    identifier = identifier
                 )
                 else -> throw UnsupportedOperationException("$type unknown")
 

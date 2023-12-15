@@ -10,6 +10,7 @@ package com.st.blue_sdk.models
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
 import com.st.blue_sdk.board_catalog.models.BoardFirmware
+import com.st.blue_sdk.board_catalog.models.FirmwareMaturity
 import com.st.blue_sdk.board_catalog.models.OptionByte
 import com.st.blue_sdk.bt.advertise.BleAdvertiseInfo
 import com.st.blue_sdk.bt.advertise.getOptBytes
@@ -108,6 +109,16 @@ data class Node(
             catalogInfo.fwName,
             catalogInfo.fwVersion
         )
+    }
+
+    val fwMaturity = if(catalogInfo!=null) {
+        if(catalogInfo.maturity!=null) {
+            catalogInfo.maturity
+        } else {
+            FirmwareMaturity.RELEASE
+        }
+    } else {
+        FirmwareMaturity.RELEASE
     }
 
     //FixLP

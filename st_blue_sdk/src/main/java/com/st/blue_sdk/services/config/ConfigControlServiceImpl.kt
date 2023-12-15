@@ -8,6 +8,7 @@
 package com.st.blue_sdk.services.config
 
 import android.bluetooth.BluetoothGattCharacteristic
+import android.util.Log
 import com.st.blue_sdk.NodeService
 import com.st.blue_sdk.bt.hal.BleHal
 import com.st.blue_sdk.features.Feature

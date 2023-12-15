@@ -48,6 +48,24 @@ data class DtmiModel(
         return emptyList()
     }
 
+    fun filterComponentsByProperty(propName: String): List<Pair<DtmiContent.DtmiComponentContent, DtmiContent.DtmiInterfaceContent>> {
+        val interfaces =
+            contents.filterIsInstance<DtmiContent.DtmiInterfaceContent>()
+
+        val componentsWithInterface =
+            interfaces.firstOrNull()?.contents?.filterIsInstance<DtmiContent.DtmiComponentContent>()
+                ?.mapNotNull { component ->
+                    interfaces.find { it.id == component.schema }?.let { interfaceContent ->
+                        Pair(component, interfaceContent)
+                    }
+                } ?: emptyList()
+
+        val componentsWithPropertyName = componentsWithInterface.filter{ component ->
+            component.second.contents.firstOrNull {content -> content.name == propName}!=null }
+
+        return componentsWithPropertyName
+    }
+
     fun extractComponent(compName: String): List<Pair<DtmiContent.DtmiComponentContent, DtmiContent.DtmiInterfaceContent>> {
         val interfaces =
             contents.filterIsInstance<DtmiContent.DtmiInterfaceContent>()
@@ -70,6 +88,7 @@ const val JSON_KEY_CONTEXT = "@context"
 const val JSON_KEY_DISPLAY_NAME = "displayName"
 const val JSON_KEY_CONTENTS = "contents"
 const val JSON_KEY_SCHEMA = "schema"
+const val JSON_KEY_SCHEMA_DEEP = "dtmi:dtdl:property:schema;2"
 const val JSON_KEY_INIT = "initialValue"
 const val JSON_KEY_NAME = "name"
 const val JSON_KEY_DESCRIPTION = "description"
@@ -174,7 +193,11 @@ fun JsonObject.toDtmiContent(
         }
     }
 
-    val schemaJson = get(JSON_KEY_SCHEMA)
+    var schemaJson = get(JSON_KEY_SCHEMA)
+    if(schemaJson==null) {
+        schemaJson = get(JSON_KEY_SCHEMA_DEEP)
+    }
+
     val name = (get(JSON_KEY_NAME) as JsonPrimitive?)?.contentOrNull ?: ""
 
     val contextJson = get(JSON_KEY_CONTEXT)
@@ -537,7 +560,7 @@ fun JsonObject.toDtmiContent(
                         initialValue = get(JSON_KEY_INIT),
                         colors = get(JSON_KEY_COLORS)
                     )
-                        ?: throw IllegalStateException("a complex property cannot be a null schema"),
+                        ?: throw IllegalStateException("$name ->a complex property cannot be a null schema"),
                     displayUnit = displayUnit,
                     name = name,
                     unit = unit,

@@ -72,7 +72,7 @@ class CharacteristicFwUpgrade(
             nbSectorsToErase: String
         ): FwUpgradeParams {
 
-            val firstSectorToDelete = WbOTAUtils.getFirstSectorToDelete(boardType, firmwareType)
+            //val firstSectorToDelete = WbOTAUtils.getFirstSectorToDelete(boardType, firmwareType)
 
             var sectorCount = nbSectorsToErase.toShortOrNull()
 
@@ -85,6 +85,8 @@ class CharacteristicFwUpgrade(
             }
 
             val address = java.lang.Long.decode(address) //WbOTAUtils.getMemoryAddress(boardType)
+
+            val firstSectorToDelete = WbOTAUtils.getFirstSectorToDelete(boardType, address)
 
             return FwUpgradeParams.Stm32WbParams(
                 offset = firstSectorToDelete.toLong(),
@@ -313,10 +315,13 @@ class CharacteristicFwUpgrade(
             }
 
             val writeDataFile: suspend CoroutineScope.() -> Unit  = {
-
+                val maxPacketLength: Int
+                if(isWBAProtocol) {
                 val maxPayloadSize = otaNodeService.getNode().maxPayloadSize
-                val multipleRequired = if(isWBAProtocol) 16 else 1
-                val maxPacketLength = maxPayloadSize - (maxPayloadSize % multipleRequired)
+                    maxPacketLength = maxPayloadSize - (maxPayloadSize % 16)
+                } else {
+                    maxPacketLength = 244
+                }
 
                 while (uploadedData < fileSize) {
 

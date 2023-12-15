@@ -26,6 +26,7 @@ import com.st.blue_sdk.board_catalog.models.BoardDescription
 import com.st.blue_sdk.board_catalog.models.BoardFirmware
 import com.st.blue_sdk.board_catalog.models.DtmiContent
 import com.st.blue_sdk.board_catalog.models.DtmiModel
+import com.st.blue_sdk.board_catalog.models.FirmwareMaturity
 import com.st.blue_sdk.board_catalog.models.Sensor
 import com.st.blue_sdk.board_catalog.models.toDtmiContent
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -187,7 +188,8 @@ class BoardCatalogRepoImpl @Inject constructor(
 
                 val savedBoardsModelString = pref.getString(CUSTOM_BOARDS_MODEL, null)
                 savedBoardsModelString?.let {
-                    val result = json.decodeFromString<BoardCatalog>(savedBoardsModelString)?.let { boardCatalog ->
+                    val result = json.decodeFromString<BoardCatalog>(savedBoardsModelString)
+                        ?.let { boardCatalog ->
                         boardCatalog.bleListBoardFirmwareV1?.let {
                             db.add(it)
                             cache.addAll(it)
@@ -321,7 +323,11 @@ class BoardCatalogRepoImpl @Inject constructor(
         return cache.find { it.bleFwId == bleFwId && deviceId == it.bleDevId }
     }
 
-    override suspend fun getDtmiModel(deviceId: String, bleFwId: String, isBeta: Boolean): DtmiModel? {
+    override suspend fun getDtmiModel(
+        deviceId: String,
+        bleFwId: String,
+        isBeta: Boolean
+    ): DtmiModel? {
         if (needSync()) {
             sync()
         }
@@ -434,13 +440,19 @@ class BoardCatalogRepoImpl @Inject constructor(
             if (inStream != null) {
                 val text = inStream.bufferedReader(StandardCharsets.ISO_8859_1).readText()
                 inStream.close()
-                val result = json.decodeFromString<BoardCatalog>(text)?.let {  boardCatalog ->
+                val result = json.decodeFromString<BoardCatalog>(text).let { boardCatalog ->
                     cache.clear()
                     boardCatalog.bleListBoardFirmwareV1?.let {
+                        it.forEach { it2 ->
+                            if (it2.bleFwId == "0xFF") it2.maturity = FirmwareMaturity.CUSTOM
+                        }
                         db.add(it)
                         //it.forEach { it2 -> cache.add(it2) }
                     }
                     boardCatalog.bleListBoardFirmwareV2?.let {
+                        it.forEach { it2 ->
+                            if (it2.bleFwId == "0xFF") it2.maturity = FirmwareMaturity.CUSTOM
+                        }
                         db.add(it)
                         //it.forEach { it2 -> cache.add(it2) }
                     }

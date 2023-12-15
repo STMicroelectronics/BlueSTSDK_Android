@@ -2,14 +2,12 @@ package com.st.blue_sdk.board_catalog.api.serializers
 
 import com.st.blue_sdk.board_catalog.models.BootLoaderType
 import kotlinx.serialization.KSerializer
-import kotlinx.serialization.Serializer
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 
-@Serializer(forClass = BootLoaderType::class)
 class BootLoaderTypeSerializer : KSerializer<BootLoaderType> {
 
     override val descriptor: SerialDescriptor =

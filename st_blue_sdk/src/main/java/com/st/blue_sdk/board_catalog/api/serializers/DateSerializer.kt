@@ -9,7 +9,6 @@ package com.st.blue_sdk.board_catalog.api.serializers
 
 import android.util.Log
 import kotlinx.serialization.KSerializer
-import kotlinx.serialization.Serializer
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
@@ -18,7 +17,6 @@ import kotlinx.serialization.encoding.Encoder
 import java.text.SimpleDateFormat
 import java.util.*
 
-@Serializer(forClass = Date::class)
 class DateSerializer : KSerializer<Date> {
 
     private var formatStrings = listOf(

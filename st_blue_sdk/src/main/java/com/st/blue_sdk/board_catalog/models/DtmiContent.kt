@@ -48,13 +48,14 @@ sealed class DtmiContent(
                         "sensors" -> ContentType.SENSOR
                         "algorithms" -> ContentType.ALGORITHM
                         "other" -> ContentType.OTHER
+                        "actuators" -> ContentType.ACTUATORS
                         else -> ContentType.NONE
                     }
                 }
             }
 
         enum class ContentType {
-            SENSOR, ALGORITHM, OTHER, NONE
+            SENSOR, ALGORITHM, OTHER, ACTUATORS, NONE
         }
     }
 
