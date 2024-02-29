@@ -24,7 +24,7 @@ class Acceleration(
     companion object {
         const val DATA_MAX = 16000f
         const val NUMBER_BYTES = 6
-        const val NAME = "Acceleration"
+        const val NAME = "Accelerometer"
     }
 
     override fun extractData(
@@ -59,6 +59,7 @@ class Acceleration(
         )
 
         return FeatureUpdate(
+            featureName = name,
             timeStamp = timeStamp,
             rawData = data,
             readByte = NUMBER_BYTES,

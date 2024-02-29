@@ -10,6 +10,8 @@ package com.st.blue_sdk.features.extended.raw_pnpl_controlled
 import android.util.Log
 import com.st.blue_sdk.board_catalog.models.DtmiContent
 import com.st.blue_sdk.features.*
+import com.st.blue_sdk.features.extended.raw_pnpl_controlled.model.RawPnPLCustom
+import com.st.blue_sdk.features.extended.raw_pnpl_controlled.model.RawPnPLCustomEntry
 import com.st.blue_sdk.features.extended.raw_pnpl_controlled.model.RawPnPLEntry
 import com.st.blue_sdk.features.extended.raw_pnpl_controlled.model.RawPnPLEntryFormat
 import com.st.blue_sdk.features.extended.raw_pnpl_controlled.model.RawPnPLStreamIdEntry
@@ -35,7 +37,7 @@ class RawPnPLControlled(
     companion object {
         const val NAME = "Raw PnPL Controlled"
         const val PROPERTY_NAME_ST_BLE_STREAM = "st_ble_stream"
-        val HIDE_PROPERTIES_NAME = arrayOf("min", "max", "unit", "format")
+        val HIDE_PROPERTIES_NAME = arrayOf("min", "max", "unit", "format", "elements", "output")
         const val STREAM_ID_NOT_FOUND: Int = 0xFF
     }
 
@@ -59,6 +61,7 @@ class RawPnPLControlled(
             data = rawValues
         )
         return FeatureUpdate(
+            featureName = name,
             timeStamp = timeStamp,
             rawData = data,
             readByte = data.size - dataOffset,
@@ -125,11 +128,25 @@ fun readRawPnPLFormat(
                             val componentName = entry.key
                             var streamId = 0
                             val formats = mutableListOf<RawPnPLEntry>()
+                            var customFormat: RawPnPLCustom? = null
 
                             configuration.entries.forEach { singleEntry ->
                                 if (singleEntry.value is JsonPrimitive) {
-                                    streamId =
-                                        (singleEntry.value as JsonPrimitive).content.toInt()
+                                    if (singleEntry.key == "id") {
+                                        streamId =
+                                            (singleEntry.value as JsonPrimitive).content.toInt()
+                                    } else {
+                                        val customString =
+                                            (singleEntry.value as JsonPrimitive).content
+                                        val jsonDec = Json { encodeDefaults = true }
+                                        customFormat =
+                                            try {
+                                                jsonDec.decodeFromString<RawPnPLCustom>(customString)
+                                            } catch (e: Exception) {
+                                                Log.d("readRawPnPLFormat", e.stackTraceToString())
+                                                null
+                                            }
+                                    }
                                 } else if (singleEntry.value is JsonObject) {
                                     val name = singleEntry.key
 
@@ -158,7 +175,8 @@ fun readRawPnPLFormat(
                                 RawPnPLStreamIdEntry(
                                     componentName = componentName,
                                     streamId = streamId,
-                                    formats = formats
+                                    formats = formats,
+                                    customFormat = customFormat
                                 )
                             )
                         }
@@ -275,6 +293,106 @@ fun decodeRawPnPLData(
                             for (index in 0 until formatRawPnpLEntry.format.elements) {
                                 if (rawData.size >= (counter + 4)) {
                                     formatRawPnpLEntry.format.values.add(
+                                        NumberConversion.LittleEndian.bytesToFloat(
+                                            rawData,
+                                            counter
+                                        )
+                                    )
+                                    counter += 4
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            foundStream.customFormat?.let { customFormat ->
+                customFormat.output.forEach { output ->
+                    output.values.clear()
+                    when (output.type) {
+                        RawPnPLCustomEntry.RawPnPLCustomEntryFormat.uint8_t -> {
+                            for (index in 0 until output.elements) {
+                                if (rawData.size > counter) {
+                                    output.values.add(rawData[counter])
+                                    counter++
+                                }
+                            }
+                        }
+
+                        RawPnPLCustomEntry.RawPnPLCustomEntryFormat.char,
+                        RawPnPLCustomEntry.RawPnPLCustomEntryFormat.int8_t -> {
+                            for (index in 0 until output.elements) {
+                                if (rawData.size >= counter) {
+                                    output.values.add(
+                                        NumberConversion.byteToUInt8(
+                                            rawData,
+                                            counter
+                                        ).toInt()
+                                    )
+                                    counter++
+                                }
+                            }
+                        }
+
+                        RawPnPLCustomEntry.RawPnPLCustomEntryFormat.uint16_t -> {
+                            for (index in 0 until output.elements) {
+                                if (rawData.size >= (counter + 2)) {
+                                    output.values.add(
+                                        NumberConversion.LittleEndian.bytesToUInt16(
+                                            rawData,
+                                            counter
+                                        )
+                                    )
+                                    counter += 2
+                                }
+                            }
+                        }
+
+                        RawPnPLCustomEntry.RawPnPLCustomEntryFormat.int16_t -> {
+                            for (index in 0 until output.elements) {
+                                if (rawData.size >= (counter + 2)) {
+                                    output.values.add(
+                                        NumberConversion.LittleEndian.bytesToInt16(
+                                            rawData,
+                                            counter
+                                        )
+                                    )
+                                    counter += 2
+                                }
+                            }
+                        }
+
+                        RawPnPLCustomEntry.RawPnPLCustomEntryFormat.uint32_t -> {
+                            for (index in 0 until output.elements) {
+                                if (rawData.size >= (counter + 4)) {
+                                    output.values.add(
+                                        NumberConversion.LittleEndian.bytesToUInt32(
+                                            rawData,
+                                            counter
+                                        )
+                                    )
+                                    counter += 4
+                                }
+                            }
+                        }
+
+                        RawPnPLCustomEntry.RawPnPLCustomEntryFormat.int32_t -> {
+                            for (index in 0 until output.elements) {
+                                if (rawData.size >= (counter + 4)) {
+                                    output.values.add(
+                                        NumberConversion.LittleEndian.bytesToInt32(
+                                            rawData,
+                                            counter
+                                        )
+                                    )
+                                    counter += 4
+                                }
+                            }
+                        }
+
+                        RawPnPLCustomEntry.RawPnPLCustomEntryFormat.float -> {
+                            for (index in 0 until output.elements) {
+                                if (rawData.size >= (counter + 4)) {
+                                    output.values.add(
                                         NumberConversion.LittleEndian.bytesToFloat(
                                             rawData,
                                             counter

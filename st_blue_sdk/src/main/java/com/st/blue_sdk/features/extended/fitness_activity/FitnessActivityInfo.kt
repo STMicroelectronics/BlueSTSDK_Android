@@ -10,6 +10,7 @@ package com.st.blue_sdk.features.extended.fitness_activity
 import com.st.blue_sdk.features.FeatureField
 import com.st.blue_sdk.logger.Loggable
 import kotlinx.serialization.Serializable
+import kotlin.experimental.and
 
 @Serializable
 data class FitnessActivityInfo(
@@ -19,6 +20,9 @@ data class FitnessActivityInfo(
     override val logHeader: String = "${activity.logHeader}, ${count.logHeader}"
 
     override val logValue: String = "${activity.logValue}, ${count.logValue}"
+
+    override val logDoubleValues: List<Double> =
+        listOf(getFitnessActivityCode(activity.value).toDouble(), count.value.toDouble())
 
     override fun toString(): String {
         val sampleValue = StringBuilder()
@@ -34,4 +38,20 @@ enum class FitnessActivityType {
     Squat,
     PushUp,
     Error
+}
+
+fun getFitnessActivityType(activity: Short) = when ((activity and 0x0F).toInt()) {
+    0x00 -> FitnessActivityType.NoActivity
+    0x01 -> FitnessActivityType.BicepCurl
+    0x02 -> FitnessActivityType.Squat
+    0x03 -> FitnessActivityType.PushUp
+    else -> FitnessActivityType.Error
+}
+
+fun getFitnessActivityCode(activity: FitnessActivityType) = when (activity) {
+    FitnessActivityType.BicepCurl -> 0x01.toByte()
+    FitnessActivityType.Squat -> 0x02.toByte()
+    FitnessActivityType.PushUp -> 0x03.toByte()
+    FitnessActivityType.NoActivity -> 0x00.toByte()
+    FitnessActivityType.Error -> 0x0F.toByte()
 }

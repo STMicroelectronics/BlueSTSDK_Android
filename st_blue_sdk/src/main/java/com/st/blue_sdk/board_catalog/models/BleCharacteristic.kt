@@ -7,8 +7,14 @@
  */
 package com.st.blue_sdk.board_catalog.models
 
+import androidx.room.Entity
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+
+@Entity(
+    primaryKeys = ["uuid"],
+    tableName = "bleCharacteristic"
+)
 
 @Serializable
 data class BleCharacteristic(

@@ -15,6 +15,8 @@ data class BodySensorLocationInfo(
     override val logValue: String =
         bodySensorLocation.logValue
 
+    override val logDoubleValues: List<Double> = listOf()
+
     override fun toString(): String {
         val sampleValue = StringBuilder()
         sampleValue.append("\t${bodySensorLocation.name} = ${bodySensorLocation.value}\n")

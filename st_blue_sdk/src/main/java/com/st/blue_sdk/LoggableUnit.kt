@@ -18,4 +18,5 @@ class LoggableUnit : Loggable {
 
     override fun toString(): String = "No Data"
 
+    override val logDoubleValues: List<Double> = listOf()
 }

@@ -16,21 +16,29 @@ class PredictiveSpeedStatusInfo(
     val statusX: FeatureField<Status>,
     val statusY: FeatureField<Status>,
     val statusZ: FeatureField<Status>,
-    val speedX: FeatureField<Float?>,
-    val speedY: FeatureField<Float?>,
-    val speedZ: FeatureField<Float?>
+    val speedX: FeatureField<Float>,
+    val speedY: FeatureField<Float>,
+    val speedZ: FeatureField<Float>
 ) : Loggable {
     override val logHeader: String =
         "${statusX.logHeader}, ${statusY.logHeader}, ${statusZ.logHeader}, ${speedX.logHeader}, ${speedY.logHeader}, ${speedZ.logHeader}"
 
     override val logValue: String =
         "${statusX.logValue}, ${statusY.logValue}, ${statusZ.logValue}, ${speedX.logValue}, ${speedY.logValue}, ${speedZ.logValue}"
+    override val logDoubleValues: List<Double> = listOf(
+        Status.statusToByte(statusX.value).toDouble(),
+        Status.statusToByte(statusY.value).toDouble(),
+        Status.statusToByte(statusZ.value).toDouble(),
+        speedX.value.toDouble(),
+        speedY.value.toDouble(),
+        speedZ.value.toDouble()
+    )
 
     override fun toString(): String {
         val sampleValue = StringBuilder()
-        sampleValue.append("\t${statusX.name} = ${statusX.value} ${statusX.unit}\n")
-        sampleValue.append("\t${statusY.name} = ${statusY.value} ${statusY.unit}\n")
-        sampleValue.append("\t${statusZ.name} = ${statusZ.value} ${statusZ.unit}\n")
+        sampleValue.append("\t${statusX.name} = ${statusX.value}\n")
+        sampleValue.append("\t${statusY.name} = ${statusY.value}\n")
+        sampleValue.append("\t${statusZ.name} = ${statusZ.value}\n")
         sampleValue.append("\t${speedX.name} = ${speedX.value} ${speedX.unit}\n")
         sampleValue.append("\t${speedY.name} = ${speedY.value} ${speedY.unit}\n")
         sampleValue.append("\t${speedZ.name} = ${speedZ.value} ${speedZ.unit}\n")

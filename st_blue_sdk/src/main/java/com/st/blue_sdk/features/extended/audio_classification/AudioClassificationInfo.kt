@@ -20,6 +20,9 @@ data class AudioClassificationInfo(
 
     override val logValue: String = "${classification.logValue}, ${algorithm.logValue}"
 
+    override val logDoubleValues: List<Double> =
+        listOf(getAudioClassificationCode(classification.value).toDouble())
+
     companion object {
         const val ALGORITHM_NOT_DEFINED: Short = 0xFF
     }
@@ -43,4 +46,27 @@ enum class AudioClassType {
     AscOff,
     AscOn,
     Error
+}
+
+fun getAudioClassification(audioClassification: Short) =
+    when (audioClassification.toInt()) {
+        -1 -> AudioClassType.Unknown
+        0x00 -> AudioClassType.Indoor
+        0x01 -> AudioClassType.Outdoor
+        0x02 -> AudioClassType.InVehicle
+        0x03 -> AudioClassType.BabyIsCrying
+        -16 -> AudioClassType.AscOff
+        -15 -> AudioClassType.AscOn
+        else -> AudioClassType.Error
+    }
+
+fun getAudioClassificationCode(classification: AudioClassType) = when (classification) {
+    AudioClassType.Unknown -> -1
+    AudioClassType.Indoor -> 0x00
+    AudioClassType.Outdoor -> 0x01
+    AudioClassType.InVehicle -> 0x02
+    AudioClassType.BabyIsCrying -> 0x03
+    AudioClassType.AscOff -> -16
+    AudioClassType.AscOn -> -15
+    AudioClassType.Error -> -32
 }

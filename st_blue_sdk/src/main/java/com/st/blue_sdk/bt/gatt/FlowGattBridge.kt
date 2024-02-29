@@ -7,8 +7,14 @@
  */
 package com.st.blue_sdk.bt.gatt
 
-import android.bluetooth.*
+import android.bluetooth.BluetoothGatt
+import android.bluetooth.BluetoothGattCallback
+import android.bluetooth.BluetoothGattCharacteristic
+import android.bluetooth.BluetoothGattDescriptor
+import android.bluetooth.BluetoothGattService
+import android.bluetooth.BluetoothProfile
 import android.util.Log
+import com.st.blue_sdk.bt.hal.BleHal
 import com.st.blue_sdk.models.BleNotification
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -142,8 +148,7 @@ class GattBridgeFlow : BluetoothGattCallback(), GattBridge {
 
     override fun onCharacteristicChanged(
         gatt: BluetoothGatt?,
-        characteristic: BluetoothGattCharacteristic?
-    ) {
+        characteristic: BluetoothGattCharacteristic?) {
         characteristic?.let {
             Log.d(
                 TAG,

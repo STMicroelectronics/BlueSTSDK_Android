@@ -55,6 +55,7 @@ class ExpectedImageTUSeqNumberFeature(
         )
 
         return FeatureUpdate(
+            featureName = name,
             readByte = numByte,
             timeStamp = timeStamp,
             data = ExpectedImageSeqNumber(nextExpectedCharBlock, errorAck),

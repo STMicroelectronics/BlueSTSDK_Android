@@ -111,15 +111,12 @@ data class Node(
         )
     }
 
-    val fwMaturity = if(catalogInfo!=null) {
-        if(catalogInfo.maturity!=null) {
-            catalogInfo.maturity
+    val fwMaturity = catalogInfo?.maturity
+        ?: if(isCustomFw) {
+            FirmwareMaturity.CUSTOM
         } else {
             FirmwareMaturity.RELEASE
         }
-    } else {
-        FirmwareMaturity.RELEASE
-    }
 
     //FixLP
     var maxPayloadSize = mtu - BLE_PACKET_HEADER_LEN

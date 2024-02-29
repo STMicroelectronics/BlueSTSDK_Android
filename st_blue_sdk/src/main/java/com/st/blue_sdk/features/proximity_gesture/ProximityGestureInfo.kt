@@ -20,6 +20,9 @@ data class ProximityGestureInfo(
 
     override val logValue: String = gesture.logValue
 
+    override val logDoubleValues: List<Double> =
+        listOf(ProximityGesture.getGestureTypeCode(gesture.value).toDouble())
+
     override fun toString(): String {
         val sampleValue = StringBuilder()
         sampleValue.append("\t${gesture.name} = ${gesture.value}\n")

@@ -21,7 +21,8 @@ data class FeatureUpdate<T>(
     val timeStamp: Long,
     val notificationTime: Date = Date(),
     val data: T,
-    val rawData: ByteArray
+    val rawData: ByteArray,
+    val featureName: String
 ) : Loggable where T : Loggable {
     override val logHeader: String =
         "notificationTime, timeStamp, RawData, ${data.logHeader.replace("%", "%%")}"
@@ -30,6 +31,8 @@ data class FeatureUpdate<T>(
 
     override val logValue: String =
         "$notificationTime, $timeStamp, $rawDataString, ${data.logValue}"
+
+    override val logDoubleValues: List<Double> = listOf()
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -41,9 +44,7 @@ data class FeatureUpdate<T>(
 
         if (timeStamp != other.timeStamp) return false
 
-        if (data != other.data) return false
-
-        return true
+        return data == other.data
     }
 
     override fun hashCode(): Int {

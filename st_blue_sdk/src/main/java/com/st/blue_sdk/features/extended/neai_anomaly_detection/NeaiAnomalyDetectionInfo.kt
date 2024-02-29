@@ -2,6 +2,7 @@ package com.st.blue_sdk.features.extended.neai_anomaly_detection
 
 import com.st.blue_sdk.features.FeatureField
 import com.st.blue_sdk.logger.Loggable
+import com.st.blue_sdk.utils.NumberConversion
 
 data class NeaiAnomalyDetectionInfo(
     val phase: FeatureField<PhaseType>,
@@ -17,6 +18,14 @@ data class NeaiAnomalyDetectionInfo(
     override val logValue: String =
         "${phase.value}, ${state.value}, ${phaseProgress.value}," +
                 "${status.value}, ${similarity.value}"
+
+    override val logDoubleValues: List<Double> = listOf(
+        NeaiAnomalyDetection.getPhaseCode(phase.value).toDouble(),
+        NeaiAnomalyDetection.getStateValueCode(state.value).toDouble(),
+        phaseProgress.value.toDouble(),
+        NeaiAnomalyDetection.getStatusValueCode(status.value).toDouble(),
+        similarity.value.toDouble()
+    )
 
     override fun toString(): String {
         val sampleValue = StringBuilder()

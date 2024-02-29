@@ -8,6 +8,7 @@
 package com.st.blue_sdk.features.beam_forming
 
 import com.st.blue_sdk.features.FeatureField
+import com.st.blue_sdk.features.beam_forming.BeamForming.Companion.getBeamDirectionCode
 import com.st.blue_sdk.logger.Loggable
 import kotlinx.serialization.Serializable
 
@@ -18,6 +19,8 @@ class BeamFormingInfo(
     override val logHeader: String = beamDirection.logHeader
 
     override val logValue: String = beamDirection.logValue
+    override val logDoubleValues: List<Double> =
+        listOf(getBeamDirectionCode(beamDirection.value).toDouble())
 
     override fun toString(): String {
         val sampleValue = StringBuilder()

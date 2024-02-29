@@ -12,4 +12,6 @@ data class RawData(
 ) : Loggable {
     override val logHeader = data.logHeader
     override val logValue = data.logValue
+
+    override val logDoubleValues: List<Double> = listOf()
 }

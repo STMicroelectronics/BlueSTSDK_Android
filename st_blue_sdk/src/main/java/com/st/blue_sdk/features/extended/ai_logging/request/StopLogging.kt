@@ -5,7 +5,7 @@
  * the root directory of this software component.
  * If no LICENSE file comes with this software, it is provided AS-IS.
  */
-package com.st.blue_sdk.features.extended.ai_logging.requst
+package com.st.blue_sdk.features.extended.ai_logging.request
 
 import com.st.blue_sdk.features.FeatureCommand
 import com.st.blue_sdk.features.extended.ai_logging.AiLogging

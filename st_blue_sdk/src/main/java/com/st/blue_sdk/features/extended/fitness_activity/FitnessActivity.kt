@@ -10,7 +10,6 @@ package com.st.blue_sdk.features.extended.fitness_activity
 import com.st.blue_sdk.features.*
 import com.st.blue_sdk.features.extended.fitness_activity.request.EnableActivityDetection
 import com.st.blue_sdk.utils.NumberConversion
-import kotlin.experimental.and
 
 class FitnessActivity(
     name: String = NAME,
@@ -37,7 +36,7 @@ class FitnessActivity(
 
         val fitnessActivity = FitnessActivityInfo(
             activity = FeatureField(
-                value = getActivityType(NumberConversion.byteToUInt8(data, dataOffset)),
+                value = getFitnessActivityType(NumberConversion.byteToUInt8(data, dataOffset)),
                 name = "Activity"
             ),
             count = FeatureField(
@@ -47,23 +46,9 @@ class FitnessActivity(
         )
 
         return FeatureUpdate(
+            featureName = name,
             timeStamp = timeStamp, rawData = data, readByte = NUMBER_BYTES, data = fitnessActivity
         )
-    }
-
-    private fun getActivityType(activity: Short) = when ((activity and 0x0F).toInt()) {
-        0x00 -> FitnessActivityType.NoActivity
-        0x01 -> FitnessActivityType.BicepCurl
-        0x02 -> FitnessActivityType.Squat
-        0x03 -> FitnessActivityType.PushUp
-        else -> FitnessActivityType.Error
-    }
-
-    private fun getActivityCode(activity: FitnessActivityType) = when (activity) {
-        FitnessActivityType.BicepCurl -> 0x01.toByte()
-        FitnessActivityType.Squat -> 0x02.toByte()
-        FitnessActivityType.PushUp -> 0x03.toByte()
-        else -> 0x00.toByte() // NoActivity and Error case...
     }
 
     override fun packCommandData(
@@ -72,8 +57,9 @@ class FitnessActivity(
     ): ByteArray? {
         return when (command) {
             is EnableActivityDetection -> {
-                byteArrayOf(getActivityCode(command.activityType))
+                byteArrayOf(getFitnessActivityCode(command.activityType))
             }
+
             else -> null
         }
     }

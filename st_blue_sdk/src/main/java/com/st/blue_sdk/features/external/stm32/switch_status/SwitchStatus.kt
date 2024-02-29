@@ -52,8 +52,9 @@ class SwitchStatus(
         )
 
         return FeatureUpdate(
-            2,
-            timeStamp,
+            featureName = name,
+            readByte = 2,
+            timeStamp = timeStamp,
             rawData = data,
             data = SwitchInfo(deviceId, isSwitchPressed)
         )

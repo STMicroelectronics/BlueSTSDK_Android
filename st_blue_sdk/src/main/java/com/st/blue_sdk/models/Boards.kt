@@ -80,7 +80,7 @@ object Boards {
         NUCLEO_WB09KE,
 
         /** NUCLEO boards  */
-        NUCLEO, NUCLEO_F401RE, NUCLEO_L476RG, NUCLEO_L053R8, NUCLEO_F446RE
+        NUCLEO, NUCLEO_F401RE, NUCLEO_L476RG, NUCLEO_L053R8, NUCLEO_F446RE,NUCLEO_U575ZIQ,NUCLEO_U5A5ZJQ
     } //Type
 
     enum class Family {
@@ -123,7 +123,9 @@ object Boards {
             Model.NUCLEO_F401RE,
             Model.NUCLEO_L476RG,
             Model.NUCLEO_L053R8,
-            Model.NUCLEO_F446RE -> Family.NUCLEO_FAMILY
+            Model.NUCLEO_F446RE,
+            Model.NUCLEO_U575ZIQ,
+            Model.NUCLEO_U5A5ZJQ-> Family.NUCLEO_FAMILY
 
             Model.WB55_NUCLEO_BOARD,
             Model.WB5M_DISCOVERY_BOARD,
@@ -171,6 +173,8 @@ object Boards {
                     0x7E -> Model.NUCLEO_L476RG
                     0x7D -> Model.NUCLEO_L053R8
                     0x7C -> Model.NUCLEO_F446RE
+                    0x7B -> Model.NUCLEO_U575ZIQ
+                    0x7A -> Model.NUCLEO_U5A5ZJQ
                     0x8D -> Model.NUCLEO_WB09KE
                     else -> {
                         if (temp in 0x81..0x8A) {
@@ -209,6 +213,8 @@ object Boards {
                     0x7E -> Model.NUCLEO_L476RG
                     0x7D -> Model.NUCLEO_L053R8
                     0x7C -> Model.NUCLEO_F446RE
+                    0x7B -> Model.NUCLEO_U575ZIQ
+                    0x7A -> Model.NUCLEO_U5A5ZJQ
 
 
                     0x81 -> Model.WB55_NUCLEO_BOARD

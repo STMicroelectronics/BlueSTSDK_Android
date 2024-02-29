@@ -21,6 +21,9 @@ data class AccelerationInfo(
 
     override val logValue: String = "${x.logValue}, ${y.logValue}, ${z.logValue}"
 
+    override val logDoubleValues: List<Double> =
+        listOf(x.value.toDouble(), y.value.toDouble(), z.value.toDouble())
+
     override fun toString(): String {
         val sampleValue = StringBuilder()
         sampleValue.append("\t${x.name} = ${x.value} ${x.unit}\n")

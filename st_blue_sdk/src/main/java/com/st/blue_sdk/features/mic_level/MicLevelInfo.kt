@@ -19,6 +19,8 @@ data class MicLevelInfo(
 
     override val logValue: String = micsLevel.joinToString(separator = ", ") { it.logValue }
 
+    override val logDoubleValues: List<Double> = micsLevel.map { it.value.toDouble() }
+
     override fun toString(): String {
         val sampleValue = StringBuilder()
         for (element in micsLevel) {

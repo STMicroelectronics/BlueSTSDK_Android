@@ -123,7 +123,8 @@ class NodeService(
 
     suspend fun setFeaturesNotifications(
         features: List<Feature<*>>,
-        enabled: Boolean
+        enabled: Boolean,
+        onFeaturesEnabled: CoroutineScope.() -> Unit = { /** NOOP **/ }
     ): Boolean {
 
         var result = true
@@ -135,17 +136,39 @@ class NodeService(
         }.toSet()
 
         characteristicsWithFeatures.forEach {
-            val operationResult = bleHal.setCharacteristicNotification(
-                serviceUid = it.characteristic.service.uuid.toString(),
-                characteristicUid = it.characteristic.uuid.toString(),
-                enabled = enabled
-            )
-
-            if (operationResult) {
-                it.hasEnabledNotifications = enabled
+            if(enabled) {
+                it.numberEnables++
+            } else {
+                it.numberEnables--
             }
+            //For Avoiding to do this operation when it's not necessary
+            if(it.hasEnabledNotifications!=enabled) {
+                //For avoiding to remove the notification on Aggregate Features
+                if((!enabled && (it.numberEnables==0)) || enabled) {
+                    val operationResult = bleHal.setCharacteristicNotification(
+                        serviceUid = it.characteristic.service.uuid.toString(),
+                        characteristicUid = it.characteristic.uuid.toString(),
+                        enabled = enabled
+                    )
 
-            result = result && operationResult
+                    if (operationResult) {
+                        it.hasEnabledNotifications = enabled
+                        if(enabled) {
+                            coroutineScope.launch {
+                                onFeaturesEnabled.invoke(this)
+                            }
+                        }
+                    }
+
+                    result = result && operationResult
+                }
+            } else {
+                if(enabled) {
+                    coroutineScope.launch {
+                        onFeaturesEnabled.invoke(this)
+                    }
+                }
+            }
         }
 
         return result
@@ -455,5 +478,6 @@ class NodeService(
 data class CharacteristicWithFeatures(
     val characteristic: BluetoothGattCharacteristic,
     var hasEnabledNotifications: Boolean = false,
+    var numberEnables: Int = 0,
     val features: List<Feature<*>> = emptyList()
 )

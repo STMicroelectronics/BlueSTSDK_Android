@@ -17,6 +17,7 @@ import android.content.Context
 import android.net.Uri
 import android.util.Log
 import com.st.blue_sdk.board_catalog.BoardCatalogRepo
+import com.st.blue_sdk.board_catalog.models.BleCharacteristic
 import com.st.blue_sdk.board_catalog.models.BoardDescription
 import com.st.blue_sdk.board_catalog.models.BoardFirmware
 import com.st.blue_sdk.board_catalog.models.DtmiModel
@@ -234,10 +235,21 @@ class BlueManagerImpl @Inject constructor(
                 .filter { it.fota.bootloaderType == catalogInfo.fota.bootloaderType }
                 .filter { !it.fota.fwUrl.isNullOrEmpty() }.sortedBy { it.fwName }
 
-            val fwUpdate = catalog.getFw(
+            //List of fws update ordered by fw version
+            val listOfFwUpdate = catalog.getFw(
                 deviceId = catalogInfo.bleDevId, fwName = catalogInfo.fwName
-            ).filter { it.fota.fwUrl != null }.filter { it.fwVersion > catalogInfo.fwVersion }
-                .minByOrNull { it.fwVersion }
+            ).filter { it.fota.fwUrl != null }.filter { it.fwVersion > catalogInfo.fwVersion }.sortedBy { it.fwVersion }
+
+            //Search if there is a mandatory update
+            val fwMandatory = listOfFwUpdate.firstOrNull { it.fota.mandatory==true }
+
+            //the update will be the mandatory one, or the latest available
+            val fwUpdate = fwMandatory ?: listOfFwUpdate.maxByOrNull { it.fwVersion }
+
+//            val fwUpdate = catalog.getFw(
+//                deviceId = catalogInfo.bleDevId, fwName = catalogInfo.fwName
+//            ).filter { it.fota.fwUrl != null }.filter { it.fwVersion > catalogInfo.fwVersion }
+//                .minByOrNull { it.fwVersion }
 
             node.copy(
                 catalogInfo = catalogInfo, fwUpdate = fwUpdate, fwCompatibleList = fwCompatibleList
@@ -354,12 +366,13 @@ class BlueManagerImpl @Inject constructor(
     }
 
     override suspend fun enableFeatures(
-        nodeId: String, features: List<Feature<*>>
+        nodeId: String, features: List<Feature<*>>,
+        onFeaturesEnabled: CoroutineScope.() -> Unit
     ): Boolean {
         val service = nodeServiceConsumer.getNodeService(nodeId)
             ?: throw IllegalStateException("Unable to find NodeService for $nodeId")
 
-        return service.setFeaturesNotifications(features = features, true)
+        return service.setFeaturesNotifications(features = features, true,onFeaturesEnabled)
     }
 
     override suspend fun disableFeatures(
@@ -487,6 +500,10 @@ class BlueManagerImpl @Inject constructor(
 
     override suspend fun getSensorAdapter(uniqueId: Int): Sensor? {
        return catalog.getSensorAdapter(uniqueId=uniqueId)
+    }
+
+    override suspend fun getBleCharacteristics() : List<BleCharacteristic> {
+        return catalog.getBleCharacteristics()
     }
 
     override suspend fun upgradeFw(nodeId: String): FwConsole? {

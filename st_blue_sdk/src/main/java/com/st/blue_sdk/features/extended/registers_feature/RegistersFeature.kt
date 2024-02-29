@@ -82,6 +82,7 @@ class RegistersFeature(
         )
 
         return FeatureUpdate(
+            featureName = name,
             timeStamp = timeStamp, rawData = data, readByte = numberOfBytes, data = mlcInfo
         )
     }

@@ -24,6 +24,8 @@ class RemoteFeatureSwitchInfo(
     override val logValue: String =
         "${remoteNodeId.logValue}, ${remoteTimestamp.logValue}, ${switchStatus.logValue}"
 
+    override val logDoubleValues: List<Double> = listOf()
+
     override fun toString(): String {
         return "Remote node with ID: $remoteNodeId, switch value: $switchStatus"
     }

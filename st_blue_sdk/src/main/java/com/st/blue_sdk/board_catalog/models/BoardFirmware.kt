@@ -67,7 +67,7 @@ data class BoardFirmware(
     @SerialName("demo_decorator")
     var demoDecorator: DemoDecorator?=null,
     @SerialName("maturity")
-    var maturity: FirmwareMaturity?=null
+    var maturity: FirmwareMaturity = FirmwareMaturity.RELEASE
 ) {
 
     fun friendlyName(): String =
@@ -118,7 +118,7 @@ data class BoardFirmware(
         result = 31 * result + fota.hashCode()
         result = 31 * result + (compatibleSensorAdapters?.hashCode() ?: 0)
         result = 31 * result + (demoDecorator?.hashCode() ?: 0)
-        result = 31 * result + (maturity?.hashCode() ?: 0)
+        result = 31 * result + maturity.hashCode()
         return result
     }
 }

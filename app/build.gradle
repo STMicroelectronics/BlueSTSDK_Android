@@ -20,9 +20,9 @@ android {
     defaultConfig {
         applicationId "com.st.demo"
         minSdk rootProject.minSdk
-        targetSdkVersion targetSdk
-        versionCode 2
-        versionName "5.0.0"
+        targetSdkVersion rootProject.targetSdk
+        versionCode 3
+        versionName "5.2.1"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

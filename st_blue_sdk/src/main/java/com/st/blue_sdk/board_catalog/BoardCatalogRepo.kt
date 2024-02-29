@@ -9,6 +9,7 @@ package com.st.blue_sdk.board_catalog
 
 import android.content.ContentResolver
 import android.net.Uri
+import com.st.blue_sdk.board_catalog.models.BleCharacteristic
 import com.st.blue_sdk.board_catalog.models.BoardDescription
 import com.st.blue_sdk.board_catalog.models.BoardFirmware
 import com.st.blue_sdk.board_catalog.models.DtmiModel
@@ -22,6 +23,8 @@ interface BoardCatalogRepo {
     suspend fun getBoardsDescription(): List<BoardDescription>
 
     suspend fun getSensorAdapters(): List<Sensor>
+
+    suspend fun getBleCharacteristics(): List<BleCharacteristic>
 
     suspend fun getSensorAdapter(uniqueId: Int): Sensor?
 

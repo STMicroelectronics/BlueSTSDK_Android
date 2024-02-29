@@ -24,6 +24,8 @@ class RemoteHumidityInfo(
     override val logValue: String =
         "${remoteNodeId.logValue}, ${remoteTimestamp.logValue}, ${humidity.logValue}"
 
+    override val logDoubleValues: List<Double> = listOf(humidity.value.toDouble())
+
     override fun toString(): String {
         return "Remote node with ID: $remoteNodeId collected humidity value: $humidity"
     }

@@ -37,6 +37,7 @@ class BodySensorLocation(
         offset++
 
         return FeatureUpdate(
+            featureName = name,
             readByte = offset - dataOffset,
             rawData = data,
             timeStamp = timeStamp,

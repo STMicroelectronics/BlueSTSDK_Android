@@ -8,9 +8,9 @@
 package com.st.blue_sdk.features.extended.ai_logging
 
 import com.st.blue_sdk.features.*
-import com.st.blue_sdk.features.extended.ai_logging.requst.StartLogging
-import com.st.blue_sdk.features.extended.ai_logging.requst.StopLogging
-import com.st.blue_sdk.features.extended.ai_logging.requst.UpdateAnnotation
+import com.st.blue_sdk.features.extended.ai_logging.request.StartLogging
+import com.st.blue_sdk.features.extended.ai_logging.request.StopLogging
+import com.st.blue_sdk.features.extended.ai_logging.request.UpdateAnnotation
 import com.st.blue_sdk.utils.NumberConversion
 import java.nio.charset.StandardCharsets
 import kotlin.math.roundToInt
@@ -46,6 +46,7 @@ class AiLogging(
         require(data.size - dataOffset >= NUMBER_BYTES) { "There are no $NUMBER_BYTES bytes available to read for $name feature" }
 
         return FeatureUpdate(
+            featureName = name,
             timeStamp = timeStamp,
             rawData = data,
             readByte = NUMBER_BYTES,

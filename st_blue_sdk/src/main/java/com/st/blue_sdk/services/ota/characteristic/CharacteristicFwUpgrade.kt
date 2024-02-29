@@ -84,14 +84,14 @@ class CharacteristicFwUpgrade(
                 )
             }
 
-            val address = java.lang.Long.decode(address) //WbOTAUtils.getMemoryAddress(boardType)
+            val address2 = java.lang.Long.decode(address) //WbOTAUtils.getMemoryAddress(boardType)
 
-            val firstSectorToDelete = WbOTAUtils.getFirstSectorToDelete(boardType, address)
+            val firstSectorToDelete = WbOTAUtils.getFirstSectorToDelete(boardType, address2)
 
             return FwUpgradeParams.Stm32WbParams(
                 offset = firstSectorToDelete.toLong(),
                 sectorCount = sectorCount.toByte(),
-                address = address
+                address = address2
             )
         }
     }
@@ -317,7 +317,7 @@ class CharacteristicFwUpgrade(
             val writeDataFile: suspend CoroutineScope.() -> Unit  = {
                 val maxPacketLength: Int
                 if(isWBAProtocol) {
-                val maxPayloadSize = otaNodeService.getNode().maxPayloadSize
+                    val maxPayloadSize = otaNodeService.getNode().maxPayloadSize
                     maxPacketLength = maxPayloadSize - (maxPayloadSize % 16)
                 } else {
                     maxPacketLength = 244

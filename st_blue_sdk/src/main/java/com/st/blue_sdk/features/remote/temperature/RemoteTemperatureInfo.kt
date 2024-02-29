@@ -24,6 +24,8 @@ class RemoteTemperatureInfo(
     override val logValue: String =
         "${remoteNodeId.logValue}, ${remoteTimestamp.logValue}, ${temperature.logValue}"
 
+    override val logDoubleValues: List<Double> = listOf(temperature.value.toDouble())
+
     override fun toString(): String {
         return "Remote node with ID: $remoteNodeId collected temperature value: $temperature"
     }

@@ -26,6 +26,8 @@ data class AudioOpusConf(
     override val logValue =
         "${cmd.logValue}, ${frameSize.logValue}, ${samplingFreq.logValue}, ${channels.logValue}, ${onOff.logValue}"
 
+    override val logDoubleValues: List<Double> = listOf()
+
     fun isConfCommand() = when (cmd.value) {
         BV_OPUS_CONF_CMD -> false
         BV_OPUS_CONTROL -> true

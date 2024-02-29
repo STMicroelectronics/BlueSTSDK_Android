@@ -64,6 +64,7 @@ class OTAControl(
         data: ByteArray,
         dataOffset: Int
     ): FeatureUpdate<LoggableUnit> = FeatureUpdate(
+        featureName = name,
         timeStamp = timeStamp,
         rawData = byteArrayOf(),
         readByte = 0,

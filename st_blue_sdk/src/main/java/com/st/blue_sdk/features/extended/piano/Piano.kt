@@ -63,6 +63,7 @@ class Piano(
             }
 
         return FeatureUpdate(
+            featureName = name,
             timeStamp = timeStamp,
             rawData = data,
             readByte = numberBytes,

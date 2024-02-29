@@ -5,14 +5,17 @@
  * the root directory of this software component.
  * If no LICENSE file comes with this software, it is provided AS-IS.
  */
-package com.st.blue_sdk.features.extended.ai_logging.requst
+package com.st.blue_sdk.features.extended.ai_logging.request
 
 import com.st.blue_sdk.features.FeatureCommand
 import com.st.blue_sdk.features.extended.ai_logging.AiLogging
 
-class UpdateAnnotation(
+class StartLogging(
     feature: AiLogging,
-    val label: String
+    val logMask: Long,
+    val environmentalFreq: Float,
+    val inertialFreq: Float,
+    val audioVolume: Byte
 ) :
-    FeatureCommand(feature = feature, commandId = 0x3) {
+    FeatureCommand(feature = feature, commandId = 0x1) {
 }

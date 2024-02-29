@@ -26,4 +26,6 @@ data class FeatureField<T>(
     }
 
     override val logValue: String = "$value"
+
+    override val logDoubleValues: List<Double> = listOf()
 }

@@ -21,6 +21,13 @@ enum class Status {
             else -> UNKNOWN
         }
 
+        fun statusToByte(status: Status) = when (status) {
+            GOOD -> 0x00
+            WARNING -> 0x01
+            BAD -> 0x02
+            UNKNOWN -> 0xFF
+        }
+
         fun extractXStatus(value: Short) =
             statusFromByte((value.toInt() shr 4 and 0x03).toByte())
 

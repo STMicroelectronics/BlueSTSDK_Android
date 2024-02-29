@@ -13,18 +13,23 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 class MotorTimeParameterInfo(
-    val accPeakX: FeatureField<Float?>,
-    val accPeakY: FeatureField<Float?>,
-    val accPeakZ: FeatureField<Float?>,
-    val rmsSpeedX: FeatureField<Float?>,
-    val rmsSpeedY: FeatureField<Float?>,
-    val rmsSpeedZ: FeatureField<Float?>
+    val accPeakX: FeatureField<Float>,
+    val accPeakY: FeatureField<Float>,
+    val accPeakZ: FeatureField<Float>,
+    val rmsSpeedX: FeatureField<Float>,
+    val rmsSpeedY: FeatureField<Float>,
+    val rmsSpeedZ: FeatureField<Float>
 ) : Loggable {
     override val logHeader: String =
         "${accPeakX.logHeader}, ${accPeakY.logHeader}, ${accPeakZ.logHeader}, ${rmsSpeedX.logHeader}, ${rmsSpeedY.logHeader}, ${rmsSpeedZ.logHeader}"
 
     override val logValue: String =
         "${accPeakX.logValue}, ${accPeakY.logValue}, ${accPeakZ.logValue}, ${rmsSpeedX.logValue}, ${rmsSpeedY.logValue}, ${rmsSpeedZ.logValue}"
+
+    override val logDoubleValues: List<Double> = listOf(
+        accPeakX.value.toDouble(), accPeakY.value.toDouble(), accPeakZ.value.toDouble(),
+        rmsSpeedX.value.toDouble(), rmsSpeedY.value.toDouble(), rmsSpeedZ.value.toDouble()
+    )
 
     override fun toString(): String {
         val sampleValue = StringBuilder()

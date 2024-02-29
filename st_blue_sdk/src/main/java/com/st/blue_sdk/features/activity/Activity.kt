@@ -10,7 +10,6 @@ package com.st.blue_sdk.features.activity
 import com.st.blue_sdk.features.*
 import com.st.blue_sdk.utils.NumberConversion
 import java.util.*
-import kotlin.experimental.and
 
 class Activity(
     name: String = NAME,
@@ -26,19 +25,6 @@ class Activity(
 
     companion object {
         const val NAME = "Activity Recognition"
-    }
-
-    private fun getActivityType(activity: Short) = when ((activity and 0x0F).toInt()) {
-        0x00 -> ActivityType.NoActivity
-        0x01 -> ActivityType.Stationary
-        0x02 -> ActivityType.Walking
-        0x03 -> ActivityType.FastWalking
-        0x04 -> ActivityType.Jogging
-        0x05 -> ActivityType.Biking
-        0x06 -> ActivityType.Driving
-        0x07 -> ActivityType.Stairs
-        0x08 -> ActivityType.AdultInCar
-        else -> ActivityType.Error
     }
 
     override fun extractData(
@@ -93,6 +79,7 @@ class Activity(
             }
 
         return FeatureUpdate(
+            featureName = name,
             timeStamp = timeStamp, rawData = data, readByte = numberOfBytes, data = activityInfo
         )
     }

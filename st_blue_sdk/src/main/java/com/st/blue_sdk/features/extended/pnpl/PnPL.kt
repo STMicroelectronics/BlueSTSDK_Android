@@ -63,6 +63,7 @@ class PnPL(
             }
 
         return FeatureUpdate(
+            featureName = name,
             readByte = data.size,
             timeStamp = timeStamp,
             rawData = data,

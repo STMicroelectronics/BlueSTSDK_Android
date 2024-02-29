@@ -37,8 +37,9 @@ class StepperMotor(
     ): FeatureUpdate<StepperMotorInfo> {
 
         val statusIndex = NumberConversion.byteToUInt8(data, dataOffset).toInt()
-        val motorStatus = StepperMotorInfo.StepperMotorState.values()[statusIndex]
+        val motorStatus = StepperMotorInfo.StepperMotorState.entries[statusIndex]
         return FeatureUpdate(
+            featureName = name,
             readByte = 1,
             timeStamp = timeStamp,
             rawData = data,

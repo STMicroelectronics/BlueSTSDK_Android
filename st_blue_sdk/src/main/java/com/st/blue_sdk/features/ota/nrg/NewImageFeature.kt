@@ -67,6 +67,7 @@ class NewImageFeature(
         )
 
         return FeatureUpdate(
+            featureName = name,
             readByte = 9,
             timeStamp = timeStamp,
             data = NewImageInfo(otaAckEvery, imageSize, baseAddress),

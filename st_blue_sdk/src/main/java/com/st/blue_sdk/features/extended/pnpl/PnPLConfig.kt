@@ -12,4 +12,6 @@ data class PnPLConfig(
     override val logHeader = deviceStatus.logHeader
 
     override val logValue: String = deviceStatus.logValue
+
+    override val logDoubleValues: List<Double> = listOf()
 }

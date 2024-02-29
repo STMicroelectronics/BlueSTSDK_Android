@@ -25,6 +25,22 @@ class MemsGesture(
 
     companion object {
         const val NAME = "MEMS Gesture"
+
+        fun getGestureType(gesture: Short) = when ((gesture and 0x0F).toInt()) {
+            0x00 -> MemsGestureType.Unknown
+            0x01 -> MemsGestureType.PickUp
+            0x02 -> MemsGestureType.Glance
+            0x03 -> MemsGestureType.WakeUp
+            else -> MemsGestureType.Error
+        }
+
+        fun getGestureTypeCode(gesture: MemsGestureType) = when (gesture) {
+            MemsGestureType.Unknown -> 0x00
+            MemsGestureType.PickUp -> 0x01
+            MemsGestureType.Glance -> 0x02
+            MemsGestureType.WakeUp -> 0x03
+            MemsGestureType.Error -> 0x0F
+        }
     }
 
     override fun extractData(
@@ -43,16 +59,9 @@ class MemsGesture(
             )
         )
         return FeatureUpdate(
+            featureName = name,
             timeStamp = timeStamp, rawData = data, readByte = 1, data = gesture
         )
-    }
-
-    private fun getGestureType(gesture: Short) = when ((gesture and 0x0F).toInt()) {
-        0x00 -> MemsGestureType.Unknown
-        0x01 -> MemsGestureType.PickUp
-        0x02 -> MemsGestureType.Glance
-        0x03 -> MemsGestureType.WakeUp
-        else -> MemsGestureType.Error
     }
 
     override fun packCommandData(featureBit: Int?, command: FeatureCommand): ByteArray? = null

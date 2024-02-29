@@ -24,6 +24,8 @@ class RemotePressureInfo(
     override val logValue: String =
         "${remoteNodeId.logValue}, ${remoteTimestamp.logValue}, ${pressure.logValue}"
 
+    override val logDoubleValues: List<Double> = listOf(pressure.value.toDouble())
+
     override fun toString(): String {
         return "Remote node with ID: $remoteNodeId collected pressure value: $pressure"
     }

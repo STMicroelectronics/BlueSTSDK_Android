@@ -45,6 +45,7 @@ class Proximity(
         )
 
         return FeatureUpdate(
+            featureName = name,
             timeStamp = timeStamp,
             rawData = data,
             readByte = NUMBER_BYTES,

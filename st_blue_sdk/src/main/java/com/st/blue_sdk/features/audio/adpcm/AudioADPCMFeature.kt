@@ -35,6 +35,7 @@ class AudioADPCMFeature(
         require(data.size - dataOffset >= NUMBER_BYTES) { "There are no $NUMBER_BYTES bytes available to read for $name feature" }
 
         return FeatureUpdate(
+            featureName = name,
             rawData = data,
             readByte = NUMBER_BYTES,
             timeStamp = timeStamp,

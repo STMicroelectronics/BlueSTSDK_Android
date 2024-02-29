@@ -18,6 +18,7 @@ data class COSensorInfo(
     override val logHeader: String = concentration.logHeader
 
     override val logValue: String = concentration.logValue
+    override val logDoubleValues: List<Double> = listOf(concentration.value.toDouble())
 
     override fun toString(): String {
         val sampleValue = StringBuilder()

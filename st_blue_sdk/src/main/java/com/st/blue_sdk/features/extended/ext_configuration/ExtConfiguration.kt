@@ -50,6 +50,7 @@ class ExtConfiguration(
         dataOffset: Int
     ): FeatureUpdate<LoggableUnit> {
         return FeatureUpdate(
+            featureName = name,
             timeStamp = timeStamp,
             rawData = data,
             readByte = 0,

@@ -43,6 +43,7 @@ class AudioADPCMSyncFeature(
         preSample = preSample or (((data[5].toInt()) shl 24) and 0xFF000000.toInt())
 
         return FeatureUpdate(
+            featureName = name,
             rawData = data,
             readByte = NUMBER_BYTES,
             timeStamp = timeStamp,

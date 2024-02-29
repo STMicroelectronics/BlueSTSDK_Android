@@ -23,4 +23,6 @@ data class FotaDetails(
     val fwUrl: String? = null,
     @SerialName("bootloader_type")
     val bootloaderType: BootLoaderType? = BootLoaderType.NONE,
+    @SerialName("mandatory")
+    val mandatory: Boolean? = false
 )

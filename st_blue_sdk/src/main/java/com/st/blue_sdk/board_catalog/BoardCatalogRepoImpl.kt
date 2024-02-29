@@ -21,6 +21,7 @@ import com.st.blue_sdk.board_catalog.api.BoardCatalogApi
 import com.st.blue_sdk.board_catalog.api.di.StAppVersion
 import com.st.blue_sdk.board_catalog.db.BoardCatalogDao
 import com.st.blue_sdk.board_catalog.di.Preferences
+import com.st.blue_sdk.board_catalog.models.BleCharacteristic
 import com.st.blue_sdk.board_catalog.models.BoardCatalog
 import com.st.blue_sdk.board_catalog.models.BoardDescription
 import com.st.blue_sdk.board_catalog.models.BoardFirmware
@@ -58,6 +59,7 @@ class BoardCatalogRepoImpl @Inject constructor(
     private var cache: MutableSet<BoardFirmware> = mutableSetOf()
     private var cacheBoardsDescription: MutableList<BoardDescription> = mutableListOf()
     private var cacheSensorAdapters: MutableList<Sensor> = mutableListOf()
+    private var cacheBleCharacteristics: MutableList<BleCharacteristic> = mutableListOf()
 
     private val mutex = Mutex()
 
@@ -98,7 +100,7 @@ class BoardCatalogRepoImpl @Inject constructor(
 
     private suspend fun needSync(): Boolean {
         mutex.withLock {
-            if(catalogRequestOnGoing) {
+            if (catalogRequestOnGoing) {
 //                Log.i("DB","Catalog catalogRequestOnGoing==$catalogRequestOnGoing, skip update")
                 return false
             }
@@ -152,7 +154,7 @@ class BoardCatalogRepoImpl @Inject constructor(
     }
 
     private suspend fun sync(url: String? = null) {
-        Log.i("DB","sync()")
+        Log.i("DB", "sync()")
         catalogRequestOnGoing = true
         mutex.withLock {
             try {
@@ -161,6 +163,7 @@ class BoardCatalogRepoImpl @Inject constructor(
                 cache.clear()
                 cacheBoardsDescription.clear()
                 cacheSensorAdapters.clear()
+                cacheBleCharacteristics.clear()
                 val firmwares = if (url != null)
                     api.getFirmwaresFromUrl(url + "catalog.json")
                 else
@@ -176,31 +179,36 @@ class BoardCatalogRepoImpl @Inject constructor(
                     db.add(it)
                 }
 
-                firmwares.boards?.let{
+                firmwares.boards?.let {
                     db.addDesc(it)
                     cacheBoardsDescription.addAll(it)
                 }
-                
+
                 firmwares.sensorAdapters?.let {
                     db.addSensors(it)
                     cacheSensorAdapters.addAll(it)
                 }
 
+                firmwares.characteristics?.let {
+                    db.addBleCharacteristics(it)
+                    cacheBleCharacteristics.addAll(it)
+                }
+
                 val savedBoardsModelString = pref.getString(CUSTOM_BOARDS_MODEL, null)
                 savedBoardsModelString?.let {
                     val result = json.decodeFromString<BoardCatalog>(savedBoardsModelString)
-                        ?.let { boardCatalog ->
-                        boardCatalog.bleListBoardFirmwareV1?.let {
-                            db.add(it)
-                            cache.addAll(it)
-                            //it.forEach { it2 -> cache.add(it2) }
+                        .let { boardCatalog ->
+                            boardCatalog.bleListBoardFirmwareV1?.let {
+                                db.add(it)
+                                cache.addAll(it)
+                                //it.forEach { it2 -> cache.add(it2) }
+                            }
+                            boardCatalog.bleListBoardFirmwareV2?.let {
+                                db.add(it)
+                                cache.addAll(it)
+                                //it.forEach { it2 -> cache.add(it2) }
+                            }
                         }
-                        boardCatalog.bleListBoardFirmwareV2?.let {
-                            db.add(it)
-                            cache.addAll(it)
-                            //it.forEach { it2 -> cache.add(it2) }
-                        }
-                    }
                 }
 
                 val remoteChecksum = if (url != null) {
@@ -219,7 +227,7 @@ class BoardCatalogRepoImpl @Inject constructor(
 
 
     override suspend fun reset(url: String?) {
-        Log.i("DB","reset()")
+        Log.i("DB", "reset()")
         sync(url)
     }
 
@@ -245,14 +253,13 @@ class BoardCatalogRepoImpl @Inject constructor(
         cache.addAll(db.getDeviceFirmwares())
         cacheBoardsDescription.clear()
         cacheSensorAdapters.clear()
+        cacheBleCharacteristics.clear()
         val descr = db.getBoardsDescription()
-        if(descr!=null) {
-            cacheBoardsDescription.addAll(descr)
-        }
+        cacheBoardsDescription.addAll(descr)
         val sensors = db.getSensorsDescription()
-        if(sensors!=null) {
-            cacheSensorAdapters.addAll(sensors)
-        }
+        cacheSensorAdapters.addAll(sensors)
+        val bleChars = db.getBleCharacteristics()
+        cacheBleCharacteristics.addAll(bleChars)
 //        Log.i("DB","caches2 ${cache.size} ${cacheBoardsDescription.size}")
     }
 
@@ -262,10 +269,7 @@ class BoardCatalogRepoImpl @Inject constructor(
             if (cacheBoardsDescription.isEmpty()) {
 //                Log.i("DB","cacheBoardsDescription.isEmpty()")
                 val retrievedBoardsDesc = db.getBoardsDescription()
-                if(retrievedBoardsDesc!=null) {
-//                    Log.i("DB","retrievedBoardsDesc.size=${retrievedBoardsDesc.size}")
-                    cacheBoardsDescription.addAll(retrievedBoardsDesc)
-                }
+                cacheBoardsDescription.addAll(retrievedBoardsDesc)
             }
 
             if (needSync()) {
@@ -282,9 +286,7 @@ class BoardCatalogRepoImpl @Inject constructor(
         withContext(Dispatchers.IO) {
             if (cacheSensorAdapters.isEmpty()) {
                 val retrieveSensorAdaptersDesc = db.getSensorsDescription()
-                if(retrieveSensorAdaptersDesc!=null) {
-                    cacheSensorAdapters.addAll(retrieveSensorAdaptersDesc)
-                }
+                cacheSensorAdapters.addAll(retrieveSensorAdaptersDesc)
             }
 
             if (needSync()) {
@@ -295,11 +297,30 @@ class BoardCatalogRepoImpl @Inject constructor(
         return cacheSensorAdapters
     }
 
+
+    override suspend fun getBleCharacteristics(): List<BleCharacteristic> {
+//        Log.i("DB","getBoardsDescription()")
+        withContext(Dispatchers.IO) {
+            if (cacheBleCharacteristics.isEmpty()) {
+                val retrieveBleCharacteristics= db.getBleCharacteristics()
+                cacheBleCharacteristics.addAll(retrieveBleCharacteristics)
+            }
+
+            if (needSync()) {
+                sync()
+            }
+        }
+
+        return cacheBleCharacteristics
+    }
+
+
+
     override suspend fun getSensorAdapter(uniqueId: Int): Sensor? {
         if (needSync()) {
             sync()
         }
-        return cacheSensorAdapters.firstOrNull{uniqueId==it.unique_id}
+        return cacheSensorAdapters.firstOrNull { uniqueId == it.unique_id }
     }
 
     override suspend fun getFwCompatible(deviceId: String): List<BoardFirmware> {
@@ -442,18 +463,20 @@ class BoardCatalogRepoImpl @Inject constructor(
                 inStream.close()
                 val result = json.decodeFromString<BoardCatalog>(text).let { boardCatalog ->
                     cache.clear()
-                    boardCatalog.bleListBoardFirmwareV1?.let {
-                        it.forEach { it2 ->
-                            if (it2.bleFwId == "0xFF") it2.maturity = FirmwareMaturity.CUSTOM
+                    boardCatalog.bleListBoardFirmwareV1?.let { listFw ->
+                        listFw.forEach { firmware ->
+                            if (firmware.bleFwId == "0xFF") firmware.maturity =
+                                FirmwareMaturity.CUSTOM
                         }
-                        db.add(it)
+                        db.add(listFw)
                         //it.forEach { it2 -> cache.add(it2) }
                     }
-                    boardCatalog.bleListBoardFirmwareV2?.let {
-                        it.forEach { it2 ->
-                            if (it2.bleFwId == "0xFF") it2.maturity = FirmwareMaturity.CUSTOM
+                    boardCatalog.bleListBoardFirmwareV2?.let { listFw ->
+                        listFw.forEach { firmware ->
+                            if (firmware.bleFwId == "0xFF")
+                                firmware.maturity = FirmwareMaturity.CUSTOM
                         }
-                        db.add(it)
+                        db.add(listFw)
                         //it.forEach { it2 -> cache.add(it2) }
                     }
                     cache.addAll(db.getDeviceFirmwares())

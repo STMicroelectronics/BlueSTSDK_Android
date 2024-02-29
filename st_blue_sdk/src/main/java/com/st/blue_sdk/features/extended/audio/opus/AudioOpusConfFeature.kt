@@ -108,6 +108,7 @@ class AudioOpusConfFeature(
         return when {
             data[OPUS_CONF_CMD_ID_INDEX] == BV_OPUS_CONF_CMD -> {
                 FeatureUpdate(
+                    featureName = name,
                     rawData = data,
                     readByte = 4,
                     timeStamp = timeStamp,
@@ -124,6 +125,7 @@ class AudioOpusConfFeature(
             }
             data[OPUS_CONF_CMD_ID_INDEX] == BV_OPUS_CONTROL -> {
                 FeatureUpdate(
+                    featureName = name,
                     rawData = data,
                     readByte = 2,
                     timeStamp = timeStamp,
@@ -138,6 +140,7 @@ class AudioOpusConfFeature(
                 )
             }
             else -> FeatureUpdate(
+                featureName = name,
                 rawData = data,
                 readByte = 0,
                 timeStamp = timeStamp,

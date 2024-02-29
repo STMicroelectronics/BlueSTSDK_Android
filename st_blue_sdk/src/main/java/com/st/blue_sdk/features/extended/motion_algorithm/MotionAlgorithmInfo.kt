@@ -21,6 +21,15 @@ data class MotionAlgorithmInfo(
 
     override val logValue: String = "${algorithmType.logValue}, ${statusType.logValue}"
 
+    override val logDoubleValues: List<Double> = when (algorithmType.value) {
+        AlgorithmType.Unknown -> listOf()
+        AlgorithmType.PoseEstimation, AlgorithmType.DesktopTypeDetection,
+        AlgorithmType.VerticalContext -> listOf(
+            AlgorithmType.getAlgorithmCode(algorithmType.value).toDouble(),
+            statusType.value.toDouble()
+        )
+    }
+
     override fun toString(): String {
         val sampleValue = StringBuilder()
         sampleValue.append("\t${algorithmType.name} = ${algorithmType.value}\n")
@@ -32,6 +41,7 @@ data class MotionAlgorithmInfo(
                     )
                 }\n"
             )
+
             AlgorithmType.DesktopTypeDetection -> sampleValue.append(
                 "\t${statusType.name} = ${
                     DesktopType.getDesktopType(
@@ -39,6 +49,7 @@ data class MotionAlgorithmInfo(
                     )
                 }\n"
             )
+
             AlgorithmType.VerticalContext -> sampleValue.append(
                 "\t${statusType.name} = ${
                     VerticalContextType.getVerticalContextType(
@@ -87,7 +98,7 @@ enum class AlgorithmType {
             PoseEstimation -> 0x01.toByte()
             DesktopTypeDetection -> 0x02.toByte()
             VerticalContext -> 0x03.toByte()
-            else -> 0x00.toByte()
+            Unknown -> 0x00.toByte()
         }
     }
 }

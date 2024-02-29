@@ -40,6 +40,7 @@ class MemsNorm(
             )
         )
         return FeatureUpdate(
+            featureName = name,
             timeStamp = timeStamp, rawData = data, readByte = NUMBER_BYTES, data = memsNorm
         )
     }

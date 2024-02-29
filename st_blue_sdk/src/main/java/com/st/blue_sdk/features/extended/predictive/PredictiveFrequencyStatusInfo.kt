@@ -16,12 +16,12 @@ class PredictiveFrequencyStatusInfo(
     val statusX: FeatureField<Status>,
     val statusY: FeatureField<Status>,
     val statusZ: FeatureField<Status>,
-    val worstXFreq: FeatureField<Float?>,
-    val worstYFreq: FeatureField<Float?>,
-    val worstZFreq: FeatureField<Float?>,
-    val worstXValue: FeatureField<Float?>,
-    val worstYValue: FeatureField<Float?>,
-    val worstZValue: FeatureField<Float?>
+    val worstXFreq: FeatureField<Float>,
+    val worstYFreq: FeatureField<Float>,
+    val worstZFreq: FeatureField<Float>,
+    val worstXValue: FeatureField<Float>,
+    val worstYValue: FeatureField<Float>,
+    val worstZValue: FeatureField<Float>
 ) : Loggable {
     override val logHeader: String =
         "${statusX.logHeader}, ${statusY.logHeader}, ${statusZ.logHeader}, ${worstXFreq.logHeader}, ${worstYFreq.logHeader}, ${worstZFreq.logHeader}, ${worstXValue.logHeader}, ${worstYValue.logHeader}, ${worstZValue.logHeader}"
@@ -29,11 +29,24 @@ class PredictiveFrequencyStatusInfo(
     override val logValue: String =
         "${statusX.logValue}, ${statusY.logValue}, ${statusZ.logValue}, ${worstXFreq.logValue}, ${worstYFreq.logValue}, ${worstZFreq.logValue}, ${worstXValue.logValue}, ${worstYValue.logValue}, ${worstZValue.logValue}"
 
+
+    override val logDoubleValues: List<Double> = listOf(
+        Status.statusToByte(statusX.value).toDouble(),
+        Status.statusToByte(statusY.value).toDouble(),
+        Status.statusToByte(statusZ.value).toDouble(),
+        worstXFreq.value.toDouble(),
+        worstYFreq.value.toDouble(),
+        worstZFreq.value.toDouble(),
+        worstXValue.value.toDouble(),
+        worstYValue.value.toDouble(),
+        worstZValue.value.toDouble()
+    )
+
     override fun toString(): String {
         val sampleValue = StringBuilder()
-        sampleValue.append("\t${statusX.name} = ${statusX.value} ${statusX.unit}\n")
-        sampleValue.append("\t${statusY.name} = ${statusY.value} ${statusY.unit}\n")
-        sampleValue.append("\t${statusZ.name} = ${statusZ.value} ${statusZ.unit}\n")
+        sampleValue.append("\t${statusX.name} = ${statusX.value}\n")
+        sampleValue.append("\t${statusY.name} = ${statusY.value} \n")
+        sampleValue.append("\t${statusZ.name} = ${statusZ.value}\n")
         sampleValue.append("\t${worstXFreq.name} = ${worstXFreq.value} ${worstXFreq.unit}\n")
         sampleValue.append("\t${worstYFreq.name} = ${worstYFreq.value} ${worstYFreq.unit}\n")
         sampleValue.append("\t${worstZFreq.name} = ${worstZFreq.value} ${worstZFreq.unit}\n")

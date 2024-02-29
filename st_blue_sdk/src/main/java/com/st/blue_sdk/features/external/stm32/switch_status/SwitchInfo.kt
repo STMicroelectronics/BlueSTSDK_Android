@@ -21,6 +21,8 @@ class SwitchInfo(
 
     override val logValue: String = "${deviceId.logValue}, ${isSwitchPressed.logValue}"
 
+    override val logDoubleValues: List<Double> = listOf()
+
     override fun toString(): String {
         return "Device Id is: ${deviceId.value}, " +
                 "switchStatus is: ${if (isSwitchPressed.value) "PRESSED" else "NOT PRESSED"}"

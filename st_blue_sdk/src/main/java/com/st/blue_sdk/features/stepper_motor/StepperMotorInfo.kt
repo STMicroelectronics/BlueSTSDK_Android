@@ -25,6 +25,8 @@ class StepperMotorInfo(
 
     override val logValue: String = motorStatus.logValue
 
+    override val logDoubleValues: List<Double> = listOf()
+
     override fun toString(): String {
         val sampleValue = StringBuilder()
         sampleValue.append("\t${motorStatus.name} = ${motorStatus.value} ${motorStatus.unit}\n")

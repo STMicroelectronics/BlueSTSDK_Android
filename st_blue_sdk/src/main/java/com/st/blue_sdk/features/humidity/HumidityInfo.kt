@@ -19,6 +19,8 @@ data class HumidityInfo(
 
     override val logValue: String = humidity.logValue
 
+    override val logDoubleValues: List<Double> = listOf(humidity.value.toDouble())
+
     override fun toString(): String {
         val sampleValue = StringBuilder()
         sampleValue.append("\t${humidity.name} = ${humidity.value} ${humidity.unit}\n")

@@ -22,6 +22,8 @@ data class TemperatureInfo(
     override val logHeader: String =
         "${temperature.logHeader}, ${featureId.logHeader}"
 
+    override val logDoubleValues: List<Double> = listOf(temperature.value.toDouble())
+
     override fun toString(): String {
         val sampleValue = StringBuilder()
         sampleValue.append("\t${temperature.name} = ${temperature.value} ${temperature.unit}\n")

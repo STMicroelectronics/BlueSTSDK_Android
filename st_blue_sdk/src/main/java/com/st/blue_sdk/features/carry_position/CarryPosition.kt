@@ -9,7 +9,6 @@ package com.st.blue_sdk.features.carry_position
 
 import com.st.blue_sdk.features.*
 import com.st.blue_sdk.utils.NumberConversion
-import kotlin.experimental.and
 
 class CarryPosition(
     name: String = NAME,
@@ -42,22 +41,12 @@ class CarryPosition(
         )
 
         return FeatureUpdate(
+            featureName = name,
             timeStamp = timeStamp,
             rawData = data,
             readByte = 1,
             data = carryPosition
         )
-    }
-
-    private fun getCarryPosition(position: Short) = when ((position and 0x0F).toInt()) {
-        0x00 -> CarryPositionType.Unknown
-        0x01 -> CarryPositionType.OnDesk
-        0x02 -> CarryPositionType.InHand
-        0x03 -> CarryPositionType.NearHead
-        0x04 -> CarryPositionType.ShirtPocket
-        0x05 -> CarryPositionType.TrousersPocket
-        0x06 -> CarryPositionType.ArmSwing
-        else -> CarryPositionType.Error
     }
 
     override fun packCommandData(featureBit: Int?, command: FeatureCommand): ByteArray? = null

@@ -16,15 +16,14 @@ class RemoteTemperature(
     type: Type = Type.STANDARD,
     identifier: Int,
     name: String = NAME,
-    hasTimeStamp: Boolean = true,
-    isDataNotifyFeature: Boolean = true
+    hasTimeStamp: Boolean = true
 ) : Feature<RemoteTemperatureInfo>(
     isEnabled = isEnabled,
     type = type,
     identifier = identifier,
     name = name,
     hasTimeStamp = hasTimeStamp,
-    isDataNotifyFeature = isDataNotifyFeature
+    isDataNotifyFeature = true
 ) {
 
     companion object {
@@ -51,6 +50,7 @@ class RemoteTemperature(
         val temperature = NumberConversion.LittleEndian.bytesToInt16(data, dataOffset + 2) / 10.0f
 
         return FeatureUpdate(
+            featureName = name,
             readByte = data.size,
             timeStamp = timeStamp,
             rawData = data,

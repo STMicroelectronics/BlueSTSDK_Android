@@ -7,7 +7,6 @@
  */
 package com.st.blue_sdk.utils
 
-import android.util.Log
 import java.io.ByteArrayOutputStream
 import java.nio.charset.StandardCharsets
 import kotlin.math.min
@@ -66,10 +65,19 @@ class STL2TransportProtocol(private var maxPayloadSize: Int = 20) {
     fun getNumberPackets() = numberPackets
     fun getBytesReceived() = bytesRec
 
-    private fun toBytes(s: Short): ByteArray {
+    private fun Int.to2Bytes(): ByteArray {
         return byteArrayOf(
-            (s.toInt() and 0x00FF).toByte(),
-            ((s.toInt() and 0xFF00) shr (8)).toByte()
+            (this and 0x00FF).toByte(),
+            ((this and 0xFF00) shr (8)).toByte()
+        )
+    }
+
+    private fun Int.to4Bytes(): ByteArray {
+        return byteArrayOf(
+            (this and 0xFF).toByte(),
+            ((this shr 8) and 0xFF).toByte(),
+            ((this shr 16) and 0xFF).toByte(),
+            ((this shr 24) and 0xFF).toByte()
         )
     }
 
@@ -87,7 +95,11 @@ class STL2TransportProtocol(private var maxPayloadSize: Int = 20) {
                     if (codedDataLength - cnt <= mtuSize - 3) {
                         TP_START_END_PACKET
                     } else {
-                        TP_START_PACKET
+                        if(codedDataLength<MAX_LONG_PACKET) {
+                            TP_START_PACKET
+                        } else {
+                            TP_START_LONG_PACKET
+                        }
                     }
                 } else {
                     TP_END_PACKET
@@ -97,15 +109,23 @@ class STL2TransportProtocol(private var maxPayloadSize: Int = 20) {
                 TP_START_PACKET -> {
 
                     /*First part of a packet*/baos.write(head.toInt())
-                    baos.write(toBytes(codedDataLength.toShort()).reversedArray())
+                    baos.write(codedDataLength.to2Bytes().reversedArray())
                     baos.write(byteCommand, 0, mtuSize - 3)
                     size = mtuSize - 3
+                    head = TP_MIDDLE_PACKET
+                }
+                TP_START_LONG_PACKET -> {
+                    //Log.i("STL2TransportProtocol","TP_START_LONG_PACKET")
+                    /*First part of a packet*/baos.write(head.toInt())
+                    baos.write(codedDataLength.to4Bytes().reversedArray())
+                    baos.write(byteCommand, 0, mtuSize - 5)
+                    size = mtuSize - 5
                     head = TP_MIDDLE_PACKET
                 }
                 TP_START_END_PACKET -> {
 
                     /*First and last part of a packet*/baos.write(head.toInt())
-                    baos.write(toBytes(codedDataLength.toShort()).reversedArray())
+                    baos.write(codedDataLength.to2Bytes().reversedArray())
                     baos.write(byteCommand, 0, codedDataLength)
                     size = codedDataLength
                     head = TP_START_PACKET
@@ -141,7 +161,11 @@ class STL2TransportProtocol(private var maxPayloadSize: Int = 20) {
                     if (codedDataLength - cnt <= mtuSize - 3) {
                         TP_START_END_PACKET
                     } else {
-                        TP_START_PACKET
+                        if(codedDataLength<MAX_LONG_PACKET) {
+                            TP_START_PACKET
+                        } else {
+                            TP_START_LONG_PACKET
+                        }
                     }
                 } else {
                     TP_END_PACKET
@@ -151,15 +175,23 @@ class STL2TransportProtocol(private var maxPayloadSize: Int = 20) {
                 TP_START_PACKET -> {
                     //Log.i("STL2TransportProtocol","TP_START_PACKET")
                     /*First part of a packet*/baos.write(head.toInt())
-                    baos.write(toBytes(codedDataLength.toShort()).reversedArray())
+                    baos.write(codedDataLength.to2Bytes().reversedArray())
                     baos.write(byteCommand, 0, mtuSize - 3)
                     size = mtuSize - 3
+                    head = TP_MIDDLE_PACKET
+                }
+                TP_START_LONG_PACKET -> {
+                    //Log.i("STL2TransportProtocol","TP_START_LONG_PACKET")
+                    /*First part of a packet*/baos.write(head.toInt())
+                    baos.write(codedDataLength.to4Bytes().reversedArray())
+                    baos.write(byteCommand, 0, mtuSize - 5)
+                    size = mtuSize - 5
                     head = TP_MIDDLE_PACKET
                 }
                 TP_START_END_PACKET -> {
                     //Log.i("STL2TransportProtocol","TP_START_END_PACKET")
                     /*First and last part of a packet*/baos.write(head.toInt())
-                    baos.write(toBytes(codedDataLength.toShort()).reversedArray())
+                    baos.write(codedDataLength.to2Bytes().reversedArray())
                     baos.write(byteCommand, 0, codedDataLength)
                     size = codedDataLength
                     head = TP_START_PACKET
@@ -189,6 +221,8 @@ class STL2TransportProtocol(private var maxPayloadSize: Int = 20) {
         private const val TP_START_END_PACKET = 0x20.toByte()
         private const val TP_MIDDLE_PACKET = 0x40.toByte()
         private const val TP_END_PACKET = 0x80.toByte()
+        private const val MAX_LONG_PACKET = (1 shl 16)-1
+        private const val TP_START_LONG_PACKET = 0x10.toByte()
         private val CHARSET = StandardCharsets.ISO_8859_1
     }
 }

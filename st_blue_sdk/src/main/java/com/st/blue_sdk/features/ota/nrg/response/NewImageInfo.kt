@@ -23,4 +23,6 @@ data class NewImageInfo(
 
     override val logValue: String =
         "${otaAckEvery.logValue}, ${imageSize.logValue}, ${baseAddress.logValue}"
+
+    override val logDoubleValues: List<Double> = listOf()
 }

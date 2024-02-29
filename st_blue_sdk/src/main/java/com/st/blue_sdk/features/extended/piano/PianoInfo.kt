@@ -22,6 +22,8 @@ data class PianoInfo(
     override val logValue: String =
         "${keyNote.logValue}, ${command.logValue}"
 
+    override val logDoubleValues: List<Double> = listOf()
+
     override fun toString(): String {
         val sampleValue = StringBuilder()
         sampleValue.append("\t${command.name} = ${command.value}\n")

@@ -21,6 +21,8 @@ data class MemsSensorFusionInfo(
     override val logValue: String =
         quaternions.joinToString(separator = ", ") { it.logValue }
 
+    override val logDoubleValues: List<Double> = listOf()
+
     override fun toString(): String {
         val sampleValue = StringBuilder()
         quaternions.forEach { sampleValue.append("\t${it.name} = ${it.value} ${it.unit ?: ""}\n") }

@@ -26,6 +26,8 @@ class FFTData(
     override val logValue: String =
         "${sampleCount.logValue}, ${components.logValue}, ${freqStep.logValue}"
 
+    override val logDoubleValues: List<Double> = listOf()
+
     private var rawData =
         ByteArray(size = sampleCount.value * components.value * 4) // components * 4 byte each float
 

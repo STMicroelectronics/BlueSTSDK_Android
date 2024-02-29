@@ -51,6 +51,7 @@ class MemsSensorFusion(
             FeatureField(value = Quaternion(timeStamp, qi, qj, qk, qs), name = "quaternion")
 
         return FeatureUpdate(
+            featureName = name,
             timeStamp = timeStamp,
             rawData = data,
             readByte = numBytes,

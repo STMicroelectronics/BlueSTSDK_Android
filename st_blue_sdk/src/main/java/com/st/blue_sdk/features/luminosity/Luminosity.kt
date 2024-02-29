@@ -42,6 +42,7 @@ class Luminosity(
         )
 
         return FeatureUpdate(
+            featureName = name,
             rawData = data,
             readByte = 2,
             data = LuminosityInfo(luminosity),

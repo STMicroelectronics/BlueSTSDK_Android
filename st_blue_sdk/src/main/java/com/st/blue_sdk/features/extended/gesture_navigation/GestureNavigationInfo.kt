@@ -13,6 +13,9 @@ data class GestureNavigationInfo(
 
     override val logValue: String = "${gesture.value}, ${button.value}"
 
+    override val logDoubleValues: List<Double> =
+        listOf(gesture.value.value.toDouble(), button.value.value.toDouble())
+
     override fun toString(): String {
         val sampleValue = StringBuilder()
         sampleValue.append("\t${gesture.name} = ${gesture.value}\n")
@@ -34,7 +37,7 @@ enum class GestureNavigationGestureType(val value: Short) {
     Error(9);
 
     companion object {
-        fun fromShort(value: Short) = values().first { it.value == value }
+        fun fromShort(value: Short) = entries.first { it.value == value }
     }
 }
 

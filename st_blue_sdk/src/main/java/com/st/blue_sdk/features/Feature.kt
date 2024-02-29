@@ -114,7 +114,7 @@ abstract class Feature<T>(
 
         companion object {
             fun fromSuffix(suffix: String): Type {
-                return values().firstOrNull {
+                return entries.firstOrNull {
                     suffix.equals(other = it.suffix, ignoreCase = true)
                 } ?: throw IllegalArgumentException("Type for suffix $suffix not found!")
             }
@@ -151,8 +151,13 @@ abstract class Feature<T>(
 
     val uuid: UUID?
         get() = when (type) {
-            STANDARD -> null
-            else -> UUID.fromString(String.format("%08X${type.suffix}", identifier))
+            STANDARD -> {
+                null
+            }
+            GENERAL_PURPOSE ->
+                UUID.fromString(String.format("%04X${type.suffix}", identifier))
+            else ->
+                UUID.fromString(String.format("%08X${type.suffix}", identifier))
         }
 
     val mask: Int?
@@ -200,7 +205,8 @@ abstract class Feature<T>(
 
                                 0x10000000 -> MemsNorm(
                                     isEnabled = isEnabled,
-                                    identifier = identifier
+                                    identifier = identifier,
+                                    name = "Mems Norm Legacy"
                                 )
 
                                 0x08000000 -> AudioADPCMFeature(

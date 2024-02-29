@@ -20,7 +20,7 @@ class PredictiveSpeedStatus(
     type = type,
     isEnabled = isEnabled,
     identifier = identifier,
-    isDataNotifyFeature = false
+    isDataNotifyFeature = true
 ) {
     companion object {
         const val NAME = "PredictiveSpeedStatus"
@@ -37,27 +37,25 @@ class PredictiveSpeedStatus(
         val timeStatus = NumberConversion.byteToUInt8(data, dataOffset + 0)
 
         return FeatureUpdate(
+            featureName = name,
             timeStamp = timeStamp,
             readByte = NUMBER_BYTES,
             rawData = data,
             data = PredictiveSpeedStatusInfo(
                 statusX = FeatureField(
                     name = "StatusSpeed_X",
-                    unit = "mm/s",
                     min = Status.GOOD,
                     max = Status.BAD,
                     value = Status.extractXStatus(timeStatus)
                 ),
                 statusY = FeatureField(
                     name = "StatusSpeed_Y",
-                    unit = "mm/s",
                     min = Status.GOOD,
                     max = Status.BAD,
                     value = Status.extractYStatus(timeStatus)
                 ),
                 statusZ = FeatureField(
                     name = "StatusSpeed_Z",
-                    unit = "mm/s",
                     min = Status.GOOD,
                     max = Status.BAD,
                     value = Status.extractZStatus(timeStatus)

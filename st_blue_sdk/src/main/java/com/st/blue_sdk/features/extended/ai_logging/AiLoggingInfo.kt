@@ -18,6 +18,7 @@ class AiLoggingInfo(
     override val logHeader: String = isLogging.logHeader
 
     override val logValue: String = isLogging.logValue
+    override val logDoubleValues: List<Double> = listOf()
 
     override fun toString(): String {
         val sampleValue = StringBuilder()

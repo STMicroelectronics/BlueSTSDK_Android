@@ -14,4 +14,4 @@ data class BanksStatus(
     val currentBank: Int,
     val fwId1: String,
     val fwId2: String
-)
+):java.io.Serializable

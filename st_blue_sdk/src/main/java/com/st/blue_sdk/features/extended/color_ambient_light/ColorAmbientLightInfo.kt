@@ -21,6 +21,8 @@ data class ColorAmbientLightInfo(
 
     override val logValue: String = "${lux.logValue}, ${cct.logValue}, ${uvIndex.logValue}"
 
+    override val logDoubleValues: List<Double> = listOf(lux.value.toDouble(),cct.value.toDouble(),uvIndex.value.toDouble())
+
     override fun toString(): String {
         val sampleValue = StringBuilder()
         sampleValue.append("\t${lux.name} = ${lux.value} ${lux.unit}\n")

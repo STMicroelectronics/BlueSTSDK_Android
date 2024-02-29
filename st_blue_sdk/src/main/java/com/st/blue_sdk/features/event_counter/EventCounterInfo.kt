@@ -18,6 +18,7 @@ data class EventCounterInfo(
     override val logHeader: String = count.logHeader
 
     override val logValue: String = count.logValue
+    override val logDoubleValues: List<Double> = listOf(count.value.toDouble())
 
     override fun toString(): String {
         val sampleValue = StringBuilder()

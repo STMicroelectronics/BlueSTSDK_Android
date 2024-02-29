@@ -16,9 +16,9 @@ class PredictiveAccelerationStatusInfo(
     val statusX: FeatureField<Status>,
     val statusY: FeatureField<Status>,
     val statusZ: FeatureField<Status>,
-    val accX: FeatureField<Float?>,
-    val accY: FeatureField<Float?>,
-    val accZ: FeatureField<Float?>
+    val accX: FeatureField<Float>,
+    val accY: FeatureField<Float>,
+    val accZ: FeatureField<Float>
 ) : Loggable {
     override val logHeader: String =
         "${statusX.logHeader}, ${statusY.logHeader}, ${statusZ.logHeader}, ${accX.logHeader}, ${accY.logHeader}, ${accZ.logHeader}"
@@ -26,11 +26,20 @@ class PredictiveAccelerationStatusInfo(
     override val logValue: String =
         "${statusX.logValue}, ${statusY.logValue}, ${statusZ.logValue}, ${accX.logValue}, ${accY.logValue}, ${accZ.logValue}"
 
+    override val logDoubleValues: List<Double> = listOf(
+        Status.statusToByte(statusX.value).toDouble(),
+        Status.statusToByte(statusY.value).toDouble(),
+        Status.statusToByte(statusZ.value).toDouble(),
+        accX.value.toDouble(),
+        accY.value.toDouble(),
+        accZ.value.toDouble()
+    )
+
     override fun toString(): String {
         val sampleValue = StringBuilder()
-        sampleValue.append("\t${statusX.name} = ${statusX.value} ${statusX.unit}\n")
-        sampleValue.append("\t${statusY.name} = ${statusY.value} ${statusY.unit}\n")
-        sampleValue.append("\t${statusZ.name} = ${statusZ.value} ${statusZ.unit}\n")
+        sampleValue.append("\t${statusX.name} = ${statusX.value}\n")
+        sampleValue.append("\t${statusY.name} = ${statusY.value}\n")
+        sampleValue.append("\t${statusZ.name} = ${statusZ.value}\n")
         sampleValue.append("\t${accX.name} = ${accX.value} ${accX.unit}\n")
         sampleValue.append("\t${accY.name} = ${accY.value} ${accY.unit}\n")
         sampleValue.append("\t${accZ.name} = ${accZ.value} ${accZ.unit}\n")

@@ -33,6 +33,7 @@ class AudioOpusFeature(
     ): FeatureUpdate<RawAudio> {
 
         return FeatureUpdate(
+            featureName = name,
             rawData = data,
             readByte = data.size,
             timeStamp = timeStamp,

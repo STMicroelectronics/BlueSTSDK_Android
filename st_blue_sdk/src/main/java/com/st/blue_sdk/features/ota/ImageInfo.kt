@@ -24,4 +24,6 @@ data class ImageInfo(
     override val logValue: String =
         "${flashLB.logValue}, ${flashUB.logValue}, ${protocolVersionMajor.logValue}, ${protocolVersionMinor.logValue}"
 
+    override val logDoubleValues: List<Double> = listOf()
+
 }

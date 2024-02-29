@@ -10,5 +10,6 @@ package com.st.blue_sdk.features.extended.raw_pnpl_controlled.model
 data class RawPnPLStreamIdEntry(
     val componentName: String,
     val streamId: Int,
-    val formats: List<RawPnPLEntry>
+    val formats: List<RawPnPLEntry>,
+    val customFormat: RawPnPLCustom?=null
 )

@@ -42,6 +42,7 @@ class Compass(
         )
 
         return FeatureUpdate(
+            featureName = name,
             rawData = data,
             readByte = NUMBER_BYTES,
             data = CompassInfo(compass),

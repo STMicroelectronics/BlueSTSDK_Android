@@ -29,6 +29,18 @@ class SwitchFeature(
         const val NAME = "Switch"
         const val COMMAND_SWITCH_ON: Byte = 0x01
         const val COMMAND_SWITCH_OFF: Byte = 0x00
+
+        fun getStatusType(status: Short) = when (status.toInt()) {
+            0x00 -> SwitchStatusType.Off
+            0x01 -> SwitchStatusType.On
+            else -> SwitchStatusType.Error
+        }
+
+        fun getStatusTypeCode(status: SwitchStatusType) = when (status) {
+            SwitchStatusType.Off -> 0x00
+            SwitchStatusType.On -> 0x01
+            SwitchStatusType.Error -> 0xFF
+        }
     }
 
     override fun extractData(
@@ -45,15 +57,11 @@ class SwitchFeature(
             )
         )
         return FeatureUpdate(
+            featureName = name,
             timeStamp = timeStamp, rawData = data, readByte = 1, data = switch
         )
     }
 
-    private fun getStatusType(status: Short) = when (status.toInt()) {
-        0x00 -> SwitchStatusType.Off
-        0x01 -> SwitchStatusType.On
-        else -> SwitchStatusType.Error
-    }
 
     override fun packCommandData(
         featureBit: Int?,
@@ -65,11 +73,13 @@ class SwitchFeature(
                 COMMAND_SWITCH_ON,
                 byteArrayOf()
             )
+
             is SwitchOff -> packCommandRequest(
                 featureBit,
                 COMMAND_SWITCH_OFF,
                 byteArrayOf()
             )
+
             else -> null
         }
     }

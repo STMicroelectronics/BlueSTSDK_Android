@@ -25,6 +25,14 @@ data class GNSSInfo(
     override val logValue: String =
         "${latitude.logValue}, ${longitude.logValue}, ${altitude.logValue}, ${numSatellites.logValue}, ${signalQuality.logValue}"
 
+    override val logDoubleValues: List<Double> = listOf(
+        latitude.value.toDouble(),
+        longitude.value.toDouble(),
+        altitude.value.toDouble(),
+        numSatellites.value.toDouble(),
+        signalQuality.value.toDouble()
+    )
+
     override fun toString(): String {
         val sampleValue = StringBuilder()
         sampleValue.append("\t${latitude.name} = ${latitude.value} ${latitude.unit}\n")

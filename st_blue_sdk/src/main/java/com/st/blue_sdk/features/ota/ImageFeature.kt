@@ -84,6 +84,7 @@ class ImageFeature(
         )
 
         return FeatureUpdate(
+            featureName = name,
             timeStamp = timeStamp, rawData = data, readByte = readData, data = imageInfo
         )
     }

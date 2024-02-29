@@ -22,15 +22,14 @@ class RemotePressure(
     type: Type = Type.STANDARD,
     identifier: Int,
     name: String = NAME,
-    hasTimeStamp: Boolean = true,
-    isDataNotifyFeature: Boolean = true
+    hasTimeStamp: Boolean = true
 ) : Feature<RemotePressureInfo>(
     isEnabled = isEnabled,
     type = type,
     identifier = identifier,
     name = name,
     hasTimeStamp = hasTimeStamp,
-    isDataNotifyFeature = isDataNotifyFeature
+    isDataNotifyFeature = true
 ) {
 
     companion object {
@@ -60,6 +59,7 @@ class RemotePressure(
         val pressure = NumberConversion.LittleEndian.bytesToInt32(data, dataOffset + 2) / 100.0f
 
         return FeatureUpdate(
+            featureName = name,
             readByte = data.size,
             timeStamp = timeStamp,
             rawData = data,

@@ -84,6 +84,7 @@ class AccelerationEvent(
             )
         }
         return FeatureUpdate(
+            featureName = name,
             timeStamp = timeStamp, rawData = data, readByte = numBytes, data = accEvent
         )
     }
@@ -117,37 +118,6 @@ class AccelerationEvent(
         return accEventList.toList()
     }
 
-    private fun retAccelerationTypeCode(accEvent: AccelerationType) = when (accEvent) {
-        AccelerationType.OrientationTopRight -> 1
-        AccelerationType.OrientationBottomRight -> 2
-        AccelerationType.OrientationBottomLeft -> 3
-        AccelerationType.OrientationTopLeft -> 4
-        AccelerationType.OrientationUp -> 5
-        AccelerationType.OrientationDown -> 6
-        AccelerationType.Tilt -> 1.shl(3)
-        AccelerationType.FreeFall -> 1.shl(4)
-        AccelerationType.SingleTap -> 1.shl(5)
-        AccelerationType.DoubleTap -> 1.shl(6)
-        AccelerationType.WakeUp -> 1.shl(7)
-        AccelerationType.Pedometer -> 1.shl(8)
-        else -> 0
-    }
-
-    private fun getAccelerationType(accCode: Int) = when (accCode) {
-        1 -> AccelerationType.OrientationTopRight
-        2 -> AccelerationType.OrientationBottomRight
-        3 -> AccelerationType.OrientationBottomLeft
-        4 -> AccelerationType.OrientationTopLeft
-        5 -> AccelerationType.OrientationUp
-        6 -> AccelerationType.OrientationDown
-        1.shl(3) -> AccelerationType.Tilt
-        1.shl(4) -> AccelerationType.FreeFall
-        1.shl(5) -> AccelerationType.SingleTap
-        1.shl(6) -> AccelerationType.DoubleTap
-        1.shl(7) -> AccelerationType.WakeUp
-        1.shl(8) -> AccelerationType.Pedometer
-        else -> AccelerationType.NoEvent
-    }
 
     override fun packCommandData(featureBit: Int?, command: FeatureCommand): ByteArray? {
         if (command is EnableDetectionAccelerationEvent) {
@@ -208,7 +178,7 @@ enum class DetectableEventType(val byte: Byte) {
     companion object {
         fun create(byte: Byte): DetectableEventType =
             try {
-                values().first { it.byte == byte }
+                entries.first { it.byte == byte }
             } catch (e: Exception) {
                 Log.d("Acceleration Event", e.stackTraceToString())
                 None

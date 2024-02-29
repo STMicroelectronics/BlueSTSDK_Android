@@ -32,6 +32,11 @@ data class NeaiClassClassificationInfo(
                             classProb.joinToString(separator = ", ") { it.value.toString() }
                 }
 
+    override val logDoubleValues: List<Double> = listOf(
+        NeaiClassClassification.getModeCode(mode.value).toDouble(),
+        NeaiClassClassification.getPhaseCode(phase.value).toDouble()
+    )
+
 
     override fun toString(): String {
         val sampleValue = StringBuilder()

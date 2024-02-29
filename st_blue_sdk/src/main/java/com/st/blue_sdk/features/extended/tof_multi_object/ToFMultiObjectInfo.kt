@@ -23,6 +23,8 @@ data class ToFMultiObjectInfo(
     override val logValue: String =
         (listOf(nObjsFound) + distanceObjs + listOf(presenceFound)).joinToString(separator = ", ") { it.logValue }
 
+    override val logDoubleValues: List<Double> = listOf(nObjsFound.value.toDouble())
+
     override fun toString(): String {
         val sampleValue = StringBuilder()
         sampleValue.append("\tFound ${nObjsFound.value} ${nObjsFound.name}:\n")

@@ -19,6 +19,8 @@ data class GeneralPurposeInfo(
 
     override val logValue: String = data.joinToString(separator = ", ") { it.logValue }
 
+    override val logDoubleValues: List<Double> = listOf()
+
     override fun toString(): String {
         val sampleValue = StringBuilder()
         data.forEach { sampleValue.append("\t${it.name} = ${it.value}\n") }

@@ -11,4 +11,6 @@ interface Loggable {
     val logHeader: String
 
     val logValue: String
+
+    val logDoubleValues: List<Double>
 }

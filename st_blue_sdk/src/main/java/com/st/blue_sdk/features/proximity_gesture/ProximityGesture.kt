@@ -25,6 +25,22 @@ class ProximityGesture(
 
     companion object {
         const val NAME = "Proximity Gesture"
+
+        fun getGestureType(gesture: Short) = when ((gesture and 0x0F).toInt()) {
+            0x00 -> ProximityGestureType.Unknown
+            0x01 -> ProximityGestureType.Tap
+            0x02 -> ProximityGestureType.Left
+            0x03 -> ProximityGestureType.Right
+            else -> ProximityGestureType.Error
+        }
+
+        fun getGestureTypeCode(gesture: ProximityGestureType) = when (gesture) {
+            ProximityGestureType.Unknown -> 0x00
+            ProximityGestureType.Tap -> 0x01
+            ProximityGestureType.Left -> 0x02
+            ProximityGestureType.Right -> 0x03
+            ProximityGestureType.Error -> 0x0F
+        }
     }
 
     override fun extractData(
@@ -43,16 +59,9 @@ class ProximityGesture(
             )
         )
         return FeatureUpdate(
+            featureName = name,
             timeStamp = timeStamp, rawData = data, readByte = 1, data = gesture
         )
-    }
-
-    private fun getGestureType(gesture: Short) = when ((gesture and 0x0F).toInt()) {
-        0x00 -> ProximityGestureType.Unknown
-        0x01 -> ProximityGestureType.Tap
-        0x02 -> ProximityGestureType.Left
-        0x03 -> ProximityGestureType.Right
-        else -> ProximityGestureType.Error
     }
 
     override fun packCommandData(featureBit: Int?, command: FeatureCommand): ByteArray? = null

@@ -43,6 +43,7 @@ class COSensor(
         )
 
         return FeatureUpdate(
+            featureName = name,
             rawData = data,
             readByte = NUMBER_BYTES,
             data = COSensorInfo(coSensor),

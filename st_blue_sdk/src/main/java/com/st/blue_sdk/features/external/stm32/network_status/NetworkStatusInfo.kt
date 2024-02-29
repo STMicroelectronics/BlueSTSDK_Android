@@ -21,6 +21,8 @@ class NetworkStatusInfo(val connectionStatus: FeatureField<List<DeviceConnection
 
     override val logValue: String = connectionStatus.logValue
 
+    override val logDoubleValues: List<Double> = listOf()
+
     override fun toString(): String {
 
         val builder = StringBuilder()

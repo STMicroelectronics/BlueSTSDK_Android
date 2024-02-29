@@ -34,6 +34,7 @@ class BinaryContent(
         val binaryContent = stl2TransportProtocol.decapsulate(data)
 
         return FeatureUpdate(
+            featureName = name,
             readByte = data.size,
             timeStamp = timeStamp,
             rawData = data,

@@ -39,6 +39,7 @@ class OTAFileUpload(
         dataOffset: Int
     ): FeatureUpdate<LoggableUnit> {
         return FeatureUpdate(
+            featureName = name,
             timeStamp = timeStamp,
             rawData = byteArrayOf(),
             readByte = 0,

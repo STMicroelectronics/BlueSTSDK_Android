@@ -59,6 +59,7 @@ class MemsSensorFusionCompat(
         }
 
         return FeatureUpdate(
+            featureName = name,
             timeStamp = timeStamp,
             rawData = data,
             readByte = nQuat * NUMBER_BYTES,

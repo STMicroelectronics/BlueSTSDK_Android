@@ -111,6 +111,7 @@ class SDLoggingFeature(
         )
 
         return FeatureUpdate(
+            featureName = name,
             readByte = 9,
             timeStamp = timeStamp,
             rawData = data,

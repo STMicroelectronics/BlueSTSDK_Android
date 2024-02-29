@@ -19,6 +19,8 @@ data class MemsNormInfo(
 
     override val logValue: String = norm.logValue
 
+    override val logDoubleValues: List<Double> = listOf(norm.value.toDouble())
+
     override fun toString(): String {
         val sampleValue = StringBuilder()
         sampleValue.append("\t${norm.name} = ${norm.value}\n")

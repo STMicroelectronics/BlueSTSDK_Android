@@ -19,6 +19,8 @@ data class FreeFallInfo(
 
     override val logValue: String = freeFall.logValue
 
+    override val logDoubleValues: List<Double> = listOf(freeFall.value.toDouble())
+
     override fun toString(): String {
         val sampleValue = StringBuilder()
         sampleValue.append("\t${freeFall.name} = ${freeFall.value}\n")

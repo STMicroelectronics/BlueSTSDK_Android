@@ -73,20 +73,12 @@ class Battery(
         )
 
         return FeatureUpdate(
+            featureName = name,
             rawData = data,
             readByte = NUMBER_BYTES,
             timeStamp = timeStamp,
             data = batteryInfo
         )
-    }
-
-    private fun getBatteryStatus(status: Short) = when ((status and 0x7F).toInt()) {
-        0x00 -> BatteryStatus.LowBattery
-        0x01 -> BatteryStatus.Discharging
-        0x02 -> BatteryStatus.PluggedNotCharging
-        0x03 -> BatteryStatus.Charging
-        0x04 -> BatteryStatus.Unknown
-        else -> BatteryStatus.Error
     }
 
     private fun extractPercentage(rawPercentage: Short): Float {
@@ -115,11 +107,13 @@ class Battery(
                 COMMAND_GET_BATTERY_CAPACITY,
                 byteArrayOf()
             )
+
             is GetBatteryMaxAbsorbedCurrent -> packCommandRequest(
                 featureBit,
                 COMMAND_GET_MAX_ABSORBED_CURRENT,
                 byteArrayOf()
             )
+
             else -> null
         }
     }
@@ -137,6 +131,7 @@ class Battery(
                         capacity = capacity
                     )
                 }
+
                 COMMAND_GET_MAX_ABSORBED_CURRENT -> {
                     val current = NumberConversion.LittleEndian.bytesToInt16(data) / 10.0f
                     BatteryAbsorbedCurrentResponse(
@@ -145,6 +140,7 @@ class Battery(
                         current = current
                     )
                 }
+
                 else -> null
             }
         }

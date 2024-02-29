@@ -25,30 +25,54 @@ class NeaiClassClassification(
         const val N_CLASS_COMMON_NUMBER_BYTES = 6
         const val N_MAX_CLASS_NUMBER = 8
         const val CLASS_PROB_ESCAPE_CODE: Int = 0xFF
-    }
 
-    private fun getPhaseValue(phase: Short) = when ((phase and 0x0F).toInt()) {
-        0x00 -> PhaseType.Idle
-        0x01 -> PhaseType.Classification
-        0x02 -> PhaseType.Busy
-        else -> PhaseType.Null
-    }
+        fun getPhaseValue(phase: Short) = when ((phase and 0x0F).toInt()) {
+            0x00 -> PhaseType.Idle
+            0x01 -> PhaseType.Classification
+            0x02 -> PhaseType.Busy
+            else -> PhaseType.Null
+        }
 
-    private fun getStateValue(state: Short) = when ((state and 0xFF).toInt()) {
-        0x00 -> StateType.Ok
-        0x7B -> StateType.Init_Not_Called
-        0x7C -> StateType.Board_Error
-        0x7D -> StateType.Knowledge_Error
-        0x7E -> StateType.Not_Enough_Learning
-        0x7F -> StateType.Minimal_Learning_done
-        0x80 -> StateType.Unknown_Error
-        else -> StateType.Null
-    }
+        fun getPhaseCode(phaseType: PhaseType) = when (phaseType) {
+            PhaseType.Idle -> 0x00
+            PhaseType.Classification -> 0x01
+            PhaseType.Busy -> 0x02
+            PhaseType.Null -> 0x0F
+        }
 
-    private fun getModeValue(status: Short) = when ((status and 0x0F).toInt()) {
-        0x01 -> ModeType.One_Class
-        0x02 -> ModeType.N_Class
-        else -> ModeType.Null
+        fun getStateValue(state: Short) = when ((state and 0xFF).toInt()) {
+            0x00 -> StateType.Ok
+            0x7B -> StateType.Init_Not_Called
+            0x7C -> StateType.Board_Error
+            0x7D -> StateType.Knowledge_Error
+            0x7E -> StateType.Not_Enough_Learning
+            0x7F -> StateType.Minimal_Learning_done
+            0x80 -> StateType.Unknown_Error
+            else -> StateType.Null
+        }
+
+        fun getStateCode(stateType: StateType) = when (stateType) {
+            StateType.Ok -> 0x00
+            StateType.Init_Not_Called -> 0x7B
+            StateType.Board_Error -> 0x7C
+            StateType.Knowledge_Error -> 0x7D
+            StateType.Not_Enough_Learning -> 0x7E
+            StateType.Minimal_Learning_done -> 0x7F
+            StateType.Unknown_Error -> 0x80
+            StateType.Null -> 0xFF
+        }
+
+        fun getModeValue(status: Short) = when ((status and 0x0F).toInt()) {
+            0x01 -> ModeType.One_Class
+            0x02 -> ModeType.N_Class
+            else -> ModeType.Null
+        }
+
+        fun getModeCode(mode: ModeType) = when (mode) {
+            ModeType.One_Class -> 0x01
+            ModeType.N_Class -> 0x02
+            ModeType.Null -> 0xFF
+        }
     }
 
     override fun extractData(
@@ -120,6 +144,7 @@ class NeaiClassClassification(
                     )
                     bytesUsed = ONE_CLASS_NUMBER_BYTES
                 }
+
                 ModeType.N_Class -> {
                     //N Class
                     if (data.size - dataOffset == N_CLASS_UNKNOWN_CLASS_NUMBER_BYTES) {
@@ -207,6 +232,7 @@ class NeaiClassClassification(
                         bytesUsed = N_CLASS_COMMON_NUMBER_BYTES + numClasses
                     }
                 }
+
                 else -> {
                     throw IllegalArgumentException("NEAI Classification mode type not recognized")
                 }
@@ -214,6 +240,7 @@ class NeaiClassClassification(
         }
 
         return FeatureUpdate(
+            featureName = name,
             rawData = data,
             readByte = bytesUsed,
             timeStamp = timeStamp,
@@ -228,11 +255,13 @@ class NeaiClassClassification(
                 WriteStopClassificationCommand.STOP_CLASSIFICATION_COMMAND,
                 byteArrayOf()
             )
+
             is WriteStarClassificationCommand -> packCommandRequest(
                 featureBit,
                 WriteStarClassificationCommand.START_CLASSIFICATION_COMMAND,
                 byteArrayOf()
             )
+
             else -> null
         }
     }

@@ -17,6 +17,8 @@ class WillRebootInfo(feature: Feature<*>, commandId: Byte, val infoType: WillReb
     override val logHeader: String = ""
 
     override val logValue: String = ""
+
+    override val logDoubleValues: List<Double> = listOf()
 }
 
 enum class WillRebootInfoType {

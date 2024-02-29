@@ -34,7 +34,7 @@ class QVAR(
         require(data.size - dataOffset >= 4) { "There are no 4 bytes available to read for $name feature" }
 
         var numBytes = 4
-        val qvar: FeatureField<Long?> = FeatureField(
+        val qvar: FeatureField<Long> = FeatureField(
             value = NumberConversion.LittleEndian.bytesToInt32(data, dataOffset).toLong(),
             max = Long.MAX_VALUE,
             min = Long.MIN_VALUE,
@@ -89,6 +89,7 @@ class QVAR(
         )
 
         return FeatureUpdate(
+            featureName = name,
             timeStamp = timeStamp, rawData = data, readByte = numBytes, data = qvarInfo
         )
     }

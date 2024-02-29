@@ -46,6 +46,7 @@ class OTAWillReboot(
             else -> WillRebootInfoType.OTHER
         }
         return FeatureUpdate(
+            featureName = name,
             timeStamp = timeStamp,
             rawData = data,
             readByte = 1,

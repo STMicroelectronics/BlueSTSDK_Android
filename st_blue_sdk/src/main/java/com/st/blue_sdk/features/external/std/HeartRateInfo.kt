@@ -26,6 +26,8 @@ data class HeartRateInfo(
     override val logValue: String =
         "${heartRate.logValue}, ${energyExpended.logValue}, ${rrInterval.logValue}"
 
+    override val logDoubleValues: List<Double> = listOf()
+
     override fun toString(): String {
         val sampleValue = StringBuilder()
         sampleValue.append("\t${heartRate.name} = ${heartRate.value} ${heartRate.unit}\n")

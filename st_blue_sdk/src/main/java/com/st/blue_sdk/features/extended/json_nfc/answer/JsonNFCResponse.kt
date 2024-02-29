@@ -11,4 +11,6 @@ data class JsonNFCResponse(
     override val logHeader = supportedModes.logHeader
 
     override val logValue: String = supportedModes.logValue
+
+    override val logDoubleValues: List<Double> = listOf()
 }

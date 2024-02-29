@@ -34,6 +34,7 @@ class MotorTimeParameter(
         require(data.size - dataOffset >= NUMBER_BYTES) { "There are no $NUMBER_BYTES bytes available to read for $name feature" }
 
         return FeatureUpdate(
+            featureName = name,
             timeStamp = timeStamp,
             readByte = NUMBER_BYTES,
             rawData = data,

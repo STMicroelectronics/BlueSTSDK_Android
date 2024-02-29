@@ -43,6 +43,7 @@ class NewImageTUContentFeature(
         val numByte = 1
         require(data.size - dataOffset >= numByte) { "There are byte available to read" }
         return FeatureUpdate(
+            featureName = name,
             readByte = numByte,
             timeStamp = timeStamp,
             data = ImageTUContentInfo(

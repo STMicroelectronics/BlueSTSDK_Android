@@ -19,6 +19,8 @@ data class ProximityInfo(
 
     override val logValue: String = proximity.logValue
 
+    override val logDoubleValues: List<Double> = listOf(proximity.value.toDouble())
+
     companion object {
         /**
          * the sensor return this value when the object is out of range

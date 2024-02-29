@@ -13,7 +13,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class QVARInfo(
-    val qvar: FeatureField<Long?>,
+    val qvar: FeatureField<Long>,
     val flag: FeatureField<Byte?>,
     val dqvar: FeatureField<Long?>,
     val param: FeatureField<Long?>,
@@ -23,6 +23,8 @@ data class QVARInfo(
 
     override val logValue: String =
         "${qvar.logValue}, ${flag.logValue}, ${dqvar.logValue}, ${param.logValue}"
+
+    override val logDoubleValues: List<Double> = listOf(qvar.value.toDouble())
 
     override fun toString(): String {
         val sampleValue = StringBuilder()

@@ -22,6 +22,8 @@ class ExpectedImageSeqNumber(
     override val logValue: String
         get() = "${nextExpectedCharBlock.logHeader}, ${errorAck.logHeader}"
 
+    override val logDoubleValues: List<Double> = listOf()
+
     enum class ErrorCode {
 
         FLASH_WRITE_FAILED, FLASH_VERIFY_FAILED, CHECK_SUM_ERROR, SEQUENCE_ERROR, NO_ERROR, UNKNOWN_ERROR;

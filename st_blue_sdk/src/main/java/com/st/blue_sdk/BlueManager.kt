@@ -9,6 +9,7 @@ package com.st.blue_sdk
 
 import android.content.ContentResolver
 import android.net.Uri
+import com.st.blue_sdk.board_catalog.models.BleCharacteristic
 import com.st.blue_sdk.board_catalog.models.BoardDescription
 import com.st.blue_sdk.board_catalog.models.BoardFirmware
 import com.st.blue_sdk.board_catalog.models.DtmiModel
@@ -50,7 +51,11 @@ interface BlueManager {
 
     fun getRssi(nodeId: String)
 
-    fun connectToNode(nodeId: String, maxPayloadSize: Int = 248, enableServer: Boolean = true): Flow<Node>
+    fun connectToNode(
+        nodeId: String,
+        maxPayloadSize: Int = 248,
+        enableServer: Boolean = true
+    ): Flow<Node>
 
     fun getNode(nodeId: String): Node?
 
@@ -66,7 +71,10 @@ interface BlueManager {
 
     suspend fun getNodeWithFirmwareInfo(nodeId: String): Node
 
-    suspend fun enableFeatures(nodeId: String, features: List<Feature<*>>): Boolean
+    suspend fun enableFeatures(
+        nodeId: String, features: List<Feature<*>>,
+        onFeaturesEnabled: CoroutineScope.() -> Unit = { /** NOOP **/ }
+    ): Boolean
 
     suspend fun disableFeatures(nodeId: String, features: List<Feature<*>>): Boolean
 
@@ -103,9 +111,9 @@ interface BlueManager {
 
     suspend fun getBoardsDescription(): List<BoardDescription>
 
-    suspend fun reset(url: String?=null)
+    suspend fun reset(url: String? = null)
 
-    suspend fun getDtmiModel(nodeId: String,isBeta: Boolean): DtmiModel?
+    suspend fun getDtmiModel(nodeId: String, isBeta: Boolean): DtmiModel?
 
     suspend fun setBoardCatalog(fileUri: Uri, contentResolver: ContentResolver): List<BoardFirmware>
 
@@ -118,6 +126,8 @@ interface BlueManager {
     suspend fun getBoardFirmware(nodeId: String): BoardFirmware?
 
     suspend fun getSensorAdapter(uniqueId: Int): Sensor?
+
+    suspend fun getBleCharacteristics(): List<BleCharacteristic>
 
     suspend fun upgradeFw(nodeId: String): FwConsole?
 

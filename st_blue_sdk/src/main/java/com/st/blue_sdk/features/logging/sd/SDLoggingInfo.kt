@@ -23,6 +23,8 @@ class SDLoggingInfo(
 
     override val logValue: String =
         "${loggingStatus.logHeader} ,${featureIds.logValue}, ${logInterval.logValue}"
+
+    override val logDoubleValues: List<Double> = listOf()
 }
 
 enum class LoggingStatus {

@@ -10,6 +10,7 @@ package com.st.blue_sdk.features.battery
 import com.st.blue_sdk.features.FeatureField
 import com.st.blue_sdk.logger.Loggable
 import kotlinx.serialization.Serializable
+import kotlin.experimental.and
 
 @Serializable
 data class BatteryInfo(
@@ -23,6 +24,12 @@ data class BatteryInfo(
 
     override val logValue: String =
         "${status.logValue}, ${percentage.logValue}, ${voltage.logValue}, ${current.logValue}"
+    override val logDoubleValues: List<Double> = listOf(
+        percentage.value.toDouble(),
+        voltage.value.toDouble(),
+        current.value.toDouble(),
+        getBatteryCode(status.value).toDouble()
+    )
 
     override fun toString(): String {
         val sampleValue = StringBuilder()
@@ -45,4 +52,22 @@ enum class BatteryStatus {
     Charging,
     Unknown,
     Error
+}
+
+fun getBatteryStatus(status: Short) = when ((status and 0x7F).toInt()) {
+    0x00 -> BatteryStatus.LowBattery
+    0x01 -> BatteryStatus.Discharging
+    0x02 -> BatteryStatus.PluggedNotCharging
+    0x03 -> BatteryStatus.Charging
+    0x04 -> BatteryStatus.Unknown
+    else -> BatteryStatus.Error
+}
+
+fun getBatteryCode(status: BatteryStatus) = when (status) {
+    BatteryStatus.LowBattery -> 0x00
+    BatteryStatus.Discharging -> 0x01
+    BatteryStatus.PluggedNotCharging -> 0x02
+    BatteryStatus.Charging -> 0x03
+    BatteryStatus.Unknown -> 0x04
+    BatteryStatus.Error -> 0x0F
 }

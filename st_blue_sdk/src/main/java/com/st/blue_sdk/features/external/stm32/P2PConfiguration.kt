@@ -14,7 +14,6 @@ import com.st.blue_sdk.models.Boards
 // TODO: move this item in P2P demo package
 object P2PConfiguration {
     private const val WB_ROUTER_NODE_ID = 0x85
-
     sealed class DeviceId(val id: Byte) {
         object Device1 : DeviceId(id = 0x01)
         object Device2 : DeviceId(id = 0x02)

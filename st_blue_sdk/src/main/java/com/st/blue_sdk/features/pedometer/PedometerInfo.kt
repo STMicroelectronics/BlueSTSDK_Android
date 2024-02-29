@@ -20,6 +20,9 @@ data class PedometerInfo(
 
     override val logValue: String = "${steps.logValue}, ${frequency.logValue}"
 
+    override val logDoubleValues: List<Double> =
+        listOf(steps.value.toDouble(), frequency.value.toDouble())
+
     override fun toString(): String {
         val sampleValue = StringBuilder()
         sampleValue.append("\t${steps.name} = ${steps.value}\n")

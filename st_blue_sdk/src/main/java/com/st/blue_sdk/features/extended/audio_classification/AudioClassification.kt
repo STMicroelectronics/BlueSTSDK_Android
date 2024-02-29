@@ -62,6 +62,7 @@ class AudioClassification(
             }
 
         return FeatureUpdate(
+            featureName = name,
             timeStamp = timeStamp,
             rawData = data,
             readByte = numberOfBytes,
@@ -69,18 +70,6 @@ class AudioClassification(
         )
 
     }
-
-    private fun getAudioClassification(audioClassification: Short) =
-        when (audioClassification.toInt()) {
-            -1 -> AudioClassType.Unknown
-            0x00 -> AudioClassType.Indoor
-            0x01 -> AudioClassType.Outdoor
-            0x02 -> AudioClassType.InVehicle
-            0x03 -> AudioClassType.BabyIsCrying
-            -16 -> AudioClassType.AscOff
-            -15 -> AudioClassType.AscOn
-            else -> AudioClassType.Error
-        }
 
     override fun packCommandData(featureBit: Int?, command: FeatureCommand): ByteArray? = null
 

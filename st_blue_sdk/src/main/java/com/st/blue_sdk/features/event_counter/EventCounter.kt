@@ -39,6 +39,7 @@ class EventCounter(
         )
 
         return FeatureUpdate(
+            featureName = name,
             rawData = data,
             readByte = NUMBER_BYTES,
             data = EventCounterInfo(eventCounter),

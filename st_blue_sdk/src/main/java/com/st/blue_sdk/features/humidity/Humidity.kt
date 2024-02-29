@@ -43,6 +43,7 @@ class Humidity(
         )
 
         return FeatureUpdate(
+            featureName = name,
             rawData = data,
             readByte = NUMBER_BYTES,
             data = HumidityInfo(humidity),

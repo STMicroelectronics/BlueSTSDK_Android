@@ -135,8 +135,8 @@ class CallbackGattBridge : BluetoothGattCallback(), GattBridge {
     }
 
     override fun onCharacteristicChanged(
-        gatt: BluetoothGatt?,
-        characteristic: BluetoothGattCharacteristic?
+        gatt: BluetoothGatt,
+        characteristic: BluetoothGattCharacteristic
     ) {
         notificationListener?.invoke(characteristic)
     }

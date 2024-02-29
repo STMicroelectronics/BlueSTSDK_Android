@@ -58,6 +58,7 @@ class MicLevel(
         val micLevelInfo = MicLevelInfo(micsLevel = levels)
 
         return FeatureUpdate(
+            featureName = name,
             timeStamp = timeStamp,
             rawData = data,
             readByte = numberOfBytes,

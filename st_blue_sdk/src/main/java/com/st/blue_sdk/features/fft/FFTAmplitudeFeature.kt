@@ -21,7 +21,8 @@ class FFTAmplitudeFeature(
     type = type,
     identifier = identifier,
     name = name,
-    hasTimeStamp = hasTimeStamp
+    hasTimeStamp = hasTimeStamp,
+    isDataNotifyFeature = false
 ) {
 
     private var previousData: FFTData? = null
@@ -80,6 +81,7 @@ class FFTAmplitudeFeature(
         }
 
         return FeatureUpdate(
+            featureName = name,
             readByte = data.size,
             timeStamp = timeStamp,
             rawData = data,

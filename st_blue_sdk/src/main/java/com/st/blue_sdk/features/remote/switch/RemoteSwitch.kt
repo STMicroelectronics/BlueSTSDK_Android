@@ -22,15 +22,14 @@ class RemoteSwitch(
     type: Type = Type.STANDARD,
     identifier: Int,
     name: String = NAME,
-    hasTimeStamp: Boolean = true,
-    isDataNotifyFeature: Boolean = true
+    hasTimeStamp: Boolean = true
 ) : Feature<RemoteFeatureSwitchInfo>(
     isEnabled = isEnabled,
     type = type,
     identifier = identifier,
     name = name,
     hasTimeStamp = hasTimeStamp,
-    isDataNotifyFeature = isDataNotifyFeature
+    isDataNotifyFeature = false
 ) {
 
     companion object {
@@ -63,6 +62,7 @@ class RemoteSwitch(
         val switchStatus = data[dataOffset + 2]
 
         return FeatureUpdate(
+            featureName = name,
             readByte = data.size,
             timeStamp = timeStamp,
             rawData = data,
@@ -88,6 +88,7 @@ class RemoteSwitch(
                     NumberConversion.BigEndian.uint16ToBytes(command.nodeId)
                 )
             }
+
             else -> null
         }
     }

@@ -74,6 +74,7 @@ class ToFMultiObject(
         )
 
         return FeatureUpdate(
+            featureName = name,
             timeStamp = timeStamp,
             rawData = data,
             readByte = data.size - dataOffset,

@@ -19,6 +19,8 @@ data class PressureInfo(
 
     override val logValue: String = pressure.logValue
 
+    override val logDoubleValues: List<Double> = listOf(pressure.value.toDouble())
+
     override fun toString(): String {
         val sampleValue = StringBuilder()
         sampleValue.append("\t${pressure.name} = ${pressure.value} ${pressure.unit}\n")

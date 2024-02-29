@@ -21,4 +21,6 @@ class ImageTUContentInfo(
 
     override val logValue: String
         get() = expectedWriteLength.logValue
+
+    override val logDoubleValues: List<Double> = listOf()
 }

@@ -20,6 +20,8 @@ data class CloudApp(
     var shareableLink: String? = null,
     @SerialName(value = "url")
     var url: String? = null,
+    @SerialName(value = "dtmi_type")
+    var dtmiType: String? = null,
     @SerialName(value = "description")
     val description: String? = null
 )

@@ -48,6 +48,7 @@ class RemoteHumidity(
         val humidity = NumberConversion.LittleEndian.bytesToUInt16(data, dataOffset + 2) / 10.0f
 
         return FeatureUpdate(
+            featureName = name,
             readByte = data.size,
             timeStamp = timeStamp,
             rawData = data,

@@ -43,6 +43,7 @@ class ControlLedAndReboot(
     ): FeatureUpdate<LoggableUnit> {
 
         return FeatureUpdate(
+            featureName = name,
             timeStamp = timeStamp,
             rawData = byteArrayOf(),
             readByte = 0,

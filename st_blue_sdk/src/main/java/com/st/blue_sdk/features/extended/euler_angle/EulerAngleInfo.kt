@@ -21,6 +21,8 @@ data class EulerAngleInfo(
 
     override val logValue: String = "${yaw.logValue}, ${pitch.logValue}, ${roll.logValue}"
 
+    override val logDoubleValues: List<Double> = listOf(yaw.value.toDouble(),pitch.value.toDouble(),roll.value.toDouble())
+
     override fun toString(): String {
         val sampleValue = StringBuilder()
         sampleValue.append("\t${yaw.name} = ${yaw.value} ${yaw.unit}\n")

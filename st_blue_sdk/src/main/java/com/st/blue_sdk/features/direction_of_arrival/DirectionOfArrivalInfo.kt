@@ -18,6 +18,7 @@ data class DirectionOfArrivalInfo(
     override val logHeader: String = angle.logHeader
 
     override val logValue: String = angle.logValue
+    override val logDoubleValues: List<Double> = listOf(angle.value.toDouble())
 
 
     override fun toString(): String {

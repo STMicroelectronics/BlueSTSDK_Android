@@ -21,4 +21,6 @@ data class LogConfig(
     override val logHeader: String = "${device.logHeader}, ${deviceStatus.logHeader}"
 
     override val logValue: String = "${device.logValue}, ${deviceStatus.logValue}"
+
+    override val logDoubleValues: List<Double> = listOf()
 }

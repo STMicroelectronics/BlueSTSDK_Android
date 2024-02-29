@@ -18,4 +18,5 @@ data class AudioADPCMSync(
 ) : Loggable {
     override val logHeader = "${index.logHeader}, ${predSample.logHeader}"
     override val logValue = "${index.logValue}, ${predSample.logValue}"
+    override val logDoubleValues: List<Double> = listOf()
 }

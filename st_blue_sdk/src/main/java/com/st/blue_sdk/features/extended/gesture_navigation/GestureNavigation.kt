@@ -43,6 +43,7 @@ class GestureNavigation(
             )
         )
         return FeatureUpdate(
+            featureName = name,
             rawData = data,
             readByte = NUMBER_BYTES,
             timeStamp = timeStamp,

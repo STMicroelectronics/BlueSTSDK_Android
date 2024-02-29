@@ -19,6 +19,8 @@ data class MotionIntensityInfo(
 
     override val logValue: String = intensity.logValue
 
+    override val logDoubleValues: List<Double> = listOf(intensity.value.toDouble())
+
     override fun toString(): String {
         val sampleValue = StringBuilder()
         sampleValue.append("\t${intensity.name} = ${intensity.value}\n")

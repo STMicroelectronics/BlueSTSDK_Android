@@ -40,6 +40,7 @@ class GeneralPurpose(
             data = rawValues
         )
         return FeatureUpdate(
+            featureName = name,
             timeStamp = timeStamp,
             rawData = data,
             readByte = data.size - dataOffset,

@@ -22,6 +22,8 @@ data class RegistersFeatureInfo(
     override val logValue: String =
         (registers + statusPages).joinToString(separator = ", ") { it.logValue }
 
+    override val logDoubleValues: List<Double> = registers.map { it.value.toDouble() }
+
     override fun toString(): String {
         val sampleValue = StringBuilder()
         sampleValue.append("\tRegisters:\n")

@@ -18,6 +18,8 @@ data class LuminosityInfo(
     override val logHeader: String = luminosity.logHeader
     override val logValue: String = luminosity.logValue
 
+    override val logDoubleValues: List<Double> = listOf(luminosity.value.toDouble())
+
     override fun toString(): String {
         val sampleValue = StringBuilder()
         sampleValue.append("\t${luminosity.name} = ${luminosity.value} ${luminosity.unit}\n")

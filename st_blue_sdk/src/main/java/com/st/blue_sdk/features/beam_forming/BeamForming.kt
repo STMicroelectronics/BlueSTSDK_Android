@@ -72,6 +72,7 @@ class BeamForming(
             )
         )
         return FeatureUpdate(
+            featureName = name,
             timeStamp = timeStamp, rawData = data, readByte = 1, data = beamDirection
         )
     }

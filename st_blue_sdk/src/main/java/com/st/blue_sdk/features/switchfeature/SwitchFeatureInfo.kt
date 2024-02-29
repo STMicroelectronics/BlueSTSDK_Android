@@ -19,6 +19,9 @@ data class SwitchFeatureInfo(
 
     override val logValue: String = status.logValue
 
+    override val logDoubleValues: List<Double> =
+        listOf(SwitchFeature.getStatusTypeCode(status.value).toDouble())
+
 
     override fun toString(): String {
         val sampleValue = StringBuilder()
