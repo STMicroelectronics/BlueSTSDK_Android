@@ -1,0 +1,118 @@
+#
+# Copyright (c) 2022(-0001) STMicroelectronics.
+# All rights reserved.
+# This software is licensed under terms that can be found in the LICENSE file in
+# the root directory of this software component.
+# If no LICENSE file comes with this software, it is provided AS-IS.
+#
+[versions]
+# @pin https://github.com/google/accompanist#compose-versions
+accompanist = "0.34.0"
+androidGradlePlugin = "8.5.1"
+# @pin https://developer.android.com/jetpack/androidx/releases/compose#versions
+androidxComposeBom = "2024.06.00"
+androidxEspresso = "3.6.0-rc01"
+androidxHiltNavigationCompose = "1.2.0"
+# https://issuetracker.google.com/issues/336842920
+# @pin
+androidxLifecycle = "2.8.3"
+androidxNavigation = "2.7.7"
+androidxRoom = "2.6.1"
+apacheCommons = "3.11.1"
+appauth = "0.11.1"
+benManes = "0.51.0"
+hilt = "2.51.1"
+jwt = "2.0.2"
+# @pin https://developer.android.com/jetpack/androidx/releases/compose-kotlin
+kotlin = "2.0.0"
+kotlinxSerializationJson = "1.7.1"
+# @pin
+ksp = "2.0.0-1.0.22"
+littlerobots = "0.8.4"
+material2 = "1.12.0"
+okhttp = "4.12.0"
+retrofit = "2.11.0"
+retrofitKotlinxSerializationJson = "1.0.0"
+
+[libraries]
+accompanist-flowlayout = { module = "com.google.accompanist:accompanist-flowlayout", version.ref = "accompanist" }
+accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanist" }
+accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanist" }
+androidx-compose-bom = { module = "androidx.compose:compose-bom", version.ref = "androidxComposeBom" }
+androidx-compose-foundation = { module = "androidx.compose.foundation:foundation" }
+androidx-compose-foundationLayout = { module = "androidx.compose.foundation:foundation-layout" }
+androidx-material2 = { module = "com.google.android.material:material", version.ref = "material2" }
+androidx-compose-material2 = { module = "androidx.compose.material:material" }
+androidx-compose-material3 = { module = "androidx.compose.material3:material3" }
+androidx-compose-materialiconsextended = { module = "androidx.compose.material:material-icons-extended" }
+androidx-compose-runtime = { module = "androidx.compose.runtime:runtime" }
+androidx-compose-ui = { module = "androidx.compose.ui:ui" }
+androidx-compose-uitestmanifest = { module = "androidx.compose.ui:ui-test-manifest" }
+androidx-compose-uitooling = { module = "androidx.compose.ui:ui-tooling" }
+androidx-compose-uitoolingpreview = { module = "androidx.compose.ui:ui-tooling-preview" }
+androidx-compose-uiutil = { module = "androidx.compose.ui:ui-util" }
+androidx-hilt-navigationcompose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "androidxHiltNavigationCompose" }
+androidx-lifecycle-runtimecompose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "androidxLifecycle" }
+androidx-lifecycle-viewmodelcompose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "androidxLifecycle" }
+androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "androidxNavigation" }
+androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "androidxRoom" }
+androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "androidxRoom" }
+androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "androidxRoom" }
+apache-commons = { module = "commons-net:commons-net", version.ref = "apacheCommons" }
+auth0-jwtdecode = { module = "com.auth0.android:jwtdecode", version.ref = "jwt" }
+hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
+hilt-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hilt" }
+kotlinx-serializationjson = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
+okhttp-logging = { module = "com.squareup.okhttp3:logging-interceptor", version.ref = "okhttp" }
+openid-appauth = { module = "net.openid:appauth", version.ref = "appauth" }
+retrofit-core = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
+retrofit-kotlinserialization = { module = "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter", version.ref = "retrofitKotlinxSerializationJson" }
+
+[bundles]
+accompanist = [
+    "accompanist-flowlayout",
+    "accompanist-permissions",
+    "accompanist-systemuicontroller",
+]
+compose = [
+    "androidx-compose-foundation",
+    "androidx-compose-foundationLayout",
+    "androidx-compose-material2",
+    "androidx-compose-material3",
+    "androidx-compose-materialiconsextended",
+    "androidx-compose-runtime",
+    "androidx-compose-ui",
+    "androidx-compose-uiutil",
+    "androidx-hilt-navigationcompose",
+    "androidx-lifecycle-runtimecompose",
+    "androidx-lifecycle-viewmodelcompose",
+    "androidx-navigation-compose",
+]
+composeUiTooling = [
+    "androidx-compose-uitooling",
+    "androidx-compose-uitoolingpreview",
+]
+network = [
+    "apache-commons",
+    "auth0-jwtdecode",
+    "kotlinx-serializationjson",
+    "okhttp-logging",
+    "openid-appauth",
+    "retrofit-core",
+    "retrofit-kotlinserialization",
+]
+room = [
+    "androidx-room-ktx",
+    "androidx-room-runtime",
+]
+
+[plugins]
+androidApplication = { id = "com.android.application", version.ref = "androidGradlePlugin" }
+androidLibrary = { id = "com.android.library", version.ref = "androidGradlePlugin" }
+benManes = { id = "com.github.ben-manes.versions", version.ref = "benManes" }
+composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
+kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+littlerobots = { id = "nl.littlerobots.version-catalog-update", version.ref = "littlerobots" }
