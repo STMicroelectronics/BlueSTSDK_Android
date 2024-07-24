@@ -5,7 +5,7 @@
  * the root directory of this software component.
  * If no LICENSE file comes with this software, it is provided AS-IS.
  */
-package com.st.blue_sdk.features.extended.raw_pnpl_controlled.model
+package com.st.blue_sdk.features.extended.raw_controlled.model
 
 data class RawPnPLEntry(
     val name: String,

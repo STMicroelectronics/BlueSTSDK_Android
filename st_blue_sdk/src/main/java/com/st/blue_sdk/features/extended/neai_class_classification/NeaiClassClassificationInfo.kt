@@ -34,7 +34,11 @@ data class NeaiClassClassificationInfo(
 
     override val logDoubleValues: List<Double> = listOf(
         NeaiClassClassification.getModeCode(mode.value).toDouble(),
-        NeaiClassClassification.getPhaseCode(phase.value).toDouble()
+        NeaiClassClassification.getPhaseCode(phase.value).toDouble(),
+        NeaiClassClassification.getStateCode(state?.let { state.value } ?: StateType.Null)
+            .toDouble(),
+        classMajorProb?.let { classMajorProb.value.toDouble() } ?: -1.0,
+        classNum?.let { classNum.value.toDouble() } ?: -1.0
     )
 
 

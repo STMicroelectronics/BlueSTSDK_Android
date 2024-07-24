@@ -161,6 +161,15 @@ class CallbackBleHAL(
     override fun getDeviceNotifications(): SharedFlow<BleNotification> = notificationsFlow
     override fun getChunkProgressUpdates(): Flow<ChunkProgress> = chunkStateFlow
 
+    override suspend fun resetChunkProgressUpdates() {
+        chunkStateFlow.emit(
+            value = ChunkProgress(
+                total = 100,
+                current = 0
+            )
+        )
+    }
+
     override fun isConnected(): Boolean =
         deviceStateFlow.value.connectionStatus.current in NodeState.Connected..NodeState.Ready
 

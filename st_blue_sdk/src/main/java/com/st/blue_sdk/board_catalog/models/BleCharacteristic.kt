@@ -24,6 +24,8 @@ data class BleCharacteristic(
     val uuid: String,
     @SerialName(value = "uuid_type")
     val uuidType: Int? = null,
+    @SerialName(value = "max_write_length")
+    val maxWriteLength:Int? = null,
     @SerialName(value = "dtmi_name")
     val dtmiName: String? = null,
     @SerialName(value = "format_notify")

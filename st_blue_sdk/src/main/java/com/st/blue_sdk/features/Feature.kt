@@ -32,11 +32,15 @@ import com.st.blue_sdk.features.extended.fitness_activity.FitnessActivity
 import com.st.blue_sdk.features.extended.gesture_navigation.GestureNavigation
 import com.st.blue_sdk.features.extended.gnss.GNSS
 import com.st.blue_sdk.features.extended.hs_datalog_config.HSDataLogConfig
+import com.st.blue_sdk.features.extended.ispu_control.ISPUControlFeature
 import com.st.blue_sdk.features.extended.json_nfc.JsonNFC
+import com.st.blue_sdk.features.extended.medical_signal.MedicalSignal16BitFeature
+import com.st.blue_sdk.features.extended.medical_signal.MedicalSignal24BitFeature
 import com.st.blue_sdk.features.extended.motion_algorithm.MotionAlgorithm
 import com.st.blue_sdk.features.extended.motor_time_param.MotorTimeParameter
 import com.st.blue_sdk.features.extended.neai_anomaly_detection.NeaiAnomalyDetection
 import com.st.blue_sdk.features.extended.neai_class_classification.NeaiClassClassification
+import com.st.blue_sdk.features.extended.neai_extrapolation.NeaiExtrapolation
 import com.st.blue_sdk.features.extended.piano.Piano
 import com.st.blue_sdk.features.extended.pnpl.PnPL
 import com.st.blue_sdk.features.extended.predictive.PredictiveAccelerationStatus
@@ -77,7 +81,7 @@ import com.st.blue_sdk.features.pedometer.Pedometer
 import com.st.blue_sdk.features.pressure.Pressure
 import com.st.blue_sdk.features.proximity.Proximity
 import com.st.blue_sdk.features.proximity_gesture.ProximityGesture
-import com.st.blue_sdk.features.extended.raw_pnpl_controlled.RawPnPLControlled
+import com.st.blue_sdk.features.extended.raw_controlled.RawControlled
 import com.st.blue_sdk.features.remote.humidity.RemoteHumidity
 import com.st.blue_sdk.features.remote.pressure.RemotePressure
 import com.st.blue_sdk.features.remote.switch.RemoteSwitch
@@ -154,8 +158,10 @@ abstract class Feature<T>(
             STANDARD -> {
                 null
             }
+
             GENERAL_PURPOSE ->
                 UUID.fromString(String.format("%04X${type.suffix}", identifier))
+
             else ->
                 UUID.fromString(String.format("%08X${type.suffix}", identifier))
         }
@@ -536,10 +542,27 @@ abstract class Feature<T>(
                     identifier = identifier,
                     maxPayloadSize = maxPayloadSize
                 )
-                0x23 -> RawPnPLControlled(
+
+                0x23 -> RawControlled(
                     isEnabled = isEnabled,
                     identifier = identifier
                 )
+
+                0x24 -> NeaiExtrapolation(isEnabled = isEnabled, identifier = identifier)
+                0x25 -> ISPUControlFeature(
+                    isEnabled = isEnabled,
+                    identifier = identifier,
+                    maxPayloadSize = maxPayloadSize
+                )
+                0x26 -> MedicalSignal16BitFeature(
+                    isEnabled = isEnabled,
+                    identifier = identifier
+                )
+                0x27 -> MedicalSignal24BitFeature(
+                    isEnabled = isEnabled,
+                    identifier = identifier
+                )
+
                 else -> throw UnsupportedOperationException("$type unknown")
 
             }

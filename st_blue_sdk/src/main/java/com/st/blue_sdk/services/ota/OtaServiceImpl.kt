@@ -56,8 +56,8 @@ class OtaServiceImpl @Inject constructor(
         private val STM32WBA_NEW_FW_UPGRADE_PROTOCOL =
             FwVersionBoard("STM32WBA OTA", "STM32WBA", 1, 0, 0)
 
-        private val STM32WB09_NEW_FW_UPGRADE_PROTOCOL =
-            FwVersionBoard("STM32WB09 OTA", "STM32WB09", 1, 0, 0)
+        private val STM32WB0X_NEW_FW_UPGRADE_PROTOCOL =
+            FwVersionBoard("STM32WB0X OTA", "STM32WB0X", 1, 0, 0)
 
         const val DEFAULT_BOARD_NAME = "BLUENRG OTA"
         const val DEFAULT_MCU_NAME = "BLUENRG"
@@ -180,7 +180,7 @@ class OtaServiceImpl @Inject constructor(
                     Boards.Model.WBA5X_NUCLEO_BOARD,
                     Boards.Model.WBA_DISCOVERY_BOARD-> STM32WBA_NEW_FW_UPGRADE_PROTOCOL
 
-                    Boards.Model.NUCLEO_WB09KE -> STM32WB09_NEW_FW_UPGRADE_PROTOCOL
+                    Boards.Model.WB0X_NUCLEO_BOARD -> STM32WB0X_NEW_FW_UPGRADE_PROTOCOL
 
                     else -> STM32WB_NEW_FW_UPGRADE_PROTOCOL
                 }

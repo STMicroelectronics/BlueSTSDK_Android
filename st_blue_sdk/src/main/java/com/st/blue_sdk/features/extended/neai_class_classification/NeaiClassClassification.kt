@@ -1,7 +1,7 @@
 package com.st.blue_sdk.features.extended.neai_class_classification
 
 import com.st.blue_sdk.features.*
-import com.st.blue_sdk.features.extended.neai_class_classification.request.WriteStarClassificationCommand
+import com.st.blue_sdk.features.extended.neai_class_classification.request.WriteStartClassificationCommand
 import com.st.blue_sdk.features.extended.neai_class_classification.request.WriteStopClassificationCommand
 import com.st.blue_sdk.utils.NumberConversion
 import kotlin.experimental.and
@@ -256,9 +256,9 @@ class NeaiClassClassification(
                 byteArrayOf()
             )
 
-            is WriteStarClassificationCommand -> packCommandRequest(
+            is WriteStartClassificationCommand -> packCommandRequest(
                 featureBit,
-                WriteStarClassificationCommand.START_CLASSIFICATION_COMMAND,
+                WriteStartClassificationCommand.START_CLASSIFICATION_COMMAND,
                 byteArrayOf()
             )
 

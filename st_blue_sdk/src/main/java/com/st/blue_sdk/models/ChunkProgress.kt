@@ -8,6 +8,6 @@
 package com.st.blue_sdk.models
 
 data class ChunkProgress(
-    val total: Int = 0,
+    val total: Int = 100,
     val current: Int = 0
 )

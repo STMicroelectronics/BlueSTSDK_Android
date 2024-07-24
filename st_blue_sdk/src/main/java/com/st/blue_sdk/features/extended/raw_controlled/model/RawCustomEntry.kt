@@ -1,10 +1,10 @@
-package com.st.blue_sdk.features.extended.raw_pnpl_controlled.model
+package com.st.blue_sdk.features.extended.raw_controlled.model
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class RawPnPLCustomEntry(
+data class RawCustomEntry(
     @SerialName(value = "name")
     val name: String,
     @SerialName(value = "type")

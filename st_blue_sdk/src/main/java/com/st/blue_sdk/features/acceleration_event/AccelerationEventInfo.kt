@@ -14,7 +14,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class AccelerationEventInfo(
     val accEvent: List<FeatureField<AccelerationType>>,
-    val numSteps: FeatureField<Short?>
+    val numSteps: FeatureField<Short>
 ) : Loggable {
     override val logHeader: String =
         (listOf(numSteps) + accEvent).joinToString(separator = ", ") { it.logHeader }
@@ -28,8 +28,18 @@ data class AccelerationEventInfo(
     override fun toString(): String {
         val sampleValue = StringBuilder()
         accEvent.forEach { sampleValue.append("\t${it.name} = ${it.value}\n") }
-        numSteps.value?.let { sampleValue.append("\t${numSteps.name} = ${numSteps.value}\n") }
+        numSteps.value.let { sampleValue.append("\t${numSteps.name} = ${numSteps.value}\n") }
         return sampleValue.toString()
+    }
+
+    companion object {
+        fun emptyAccelerationEventInfo() =
+            AccelerationEventInfo(
+                accEvent = emptyList(), numSteps = FeatureField(
+                    value = 0,
+                    name = "Steps"
+                )
+            )
     }
 }
 

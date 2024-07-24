@@ -16,12 +16,19 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Send
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
@@ -100,25 +107,28 @@ fun BleDeviceDetail(
         Spacer(modifier = Modifier.height(4.dp))
 
         LazyColumn(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(4.dp)
         ) {
             val items = features.value.filter { it.isDataNotifyFeature }
             itemsIndexed(items = items) { index, item ->
+
                 Card(
                     modifier = Modifier
-                        .fillMaxWidth()
+                        .fillMaxWidth().padding(bottom = 4.dp,top = 4.dp)
+                        .clickable {
+                            navController.navigate("feature/${deviceId}/${item.name}")
+                        },
+                    colors = CardDefaults.cardColors(containerColor = Color(color = 0xFFF7F8FA) /*Grey1*/),
                 ) {
                     Text(
                         modifier = Modifier
-                            .padding(8.dp)
-                            .clickable {
-                                navController.navigate("feature/${deviceId}/${item.name}")
-                            },
+                            .padding(8.dp),
                         text = item.name,
                     )
                 }
                 if (items.lastIndex != index) {
-                    Divider()
+                    HorizontalDivider()
                 }
             }
         }

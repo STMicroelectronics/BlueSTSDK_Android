@@ -2,7 +2,6 @@ package com.st.blue_sdk.features.extended.neai_anomaly_detection
 
 import com.st.blue_sdk.features.FeatureField
 import com.st.blue_sdk.logger.Loggable
-import com.st.blue_sdk.utils.NumberConversion
 
 data class NeaiAnomalyDetectionInfo(
     val phase: FeatureField<PhaseType>,

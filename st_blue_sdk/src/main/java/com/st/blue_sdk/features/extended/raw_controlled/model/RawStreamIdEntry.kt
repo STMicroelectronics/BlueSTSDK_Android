@@ -5,11 +5,11 @@
  * the root directory of this software component.
  * If no LICENSE file comes with this software, it is provided AS-IS.
  */
-package com.st.blue_sdk.features.extended.raw_pnpl_controlled.model
+package com.st.blue_sdk.features.extended.raw_controlled.model
 
-data class RawPnPLStreamIdEntry(
+data class RawStreamIdEntry(
     val componentName: String,
     val streamId: Int,
     val formats: List<RawPnPLEntry>,
-    val customFormat: RawPnPLCustom?=null
+    val customFormat: RawCustom?=null
 )

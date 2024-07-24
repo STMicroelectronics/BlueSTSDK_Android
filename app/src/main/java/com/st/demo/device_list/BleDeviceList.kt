@@ -12,8 +12,6 @@ package com.st.demo.device_list
 import android.Manifest
 import android.annotation.SuppressLint
 import android.os.Build
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
@@ -22,7 +20,6 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.icons.Icons
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
@@ -40,8 +37,7 @@ import com.st.demo.R
 
 @OptIn(
     ExperimentalPermissionsApi::class,
-    ExperimentalMaterialApi::class,
-    ExperimentalMaterial3Api::class
+    ExperimentalMaterialApi::class
 )
 @SuppressLint("MissingPermission")
 @Composable
@@ -121,7 +117,7 @@ fun BleDeviceList(
                         }
 
                         if (devices.value.lastIndex != index) {
-                            Divider()
+                            HorizontalDivider()
                         }
                     }
                 }

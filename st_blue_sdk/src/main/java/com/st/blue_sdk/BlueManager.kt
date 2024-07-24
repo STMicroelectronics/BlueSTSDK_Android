@@ -99,6 +99,8 @@ interface BlueManager {
 
     fun getChunkProgressUpdates(nodeId: String): Flow<ChunkProgress>?
 
+    suspend fun resetChunkProgressUpdates(nodeId: String)
+
     suspend fun writeFeatureCommand(
         nodeId: String,
         featureCommand: FeatureCommand,

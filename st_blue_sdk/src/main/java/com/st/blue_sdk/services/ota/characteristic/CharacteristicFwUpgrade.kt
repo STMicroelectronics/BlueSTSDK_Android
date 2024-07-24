@@ -277,7 +277,7 @@ class CharacteristicFwUpgrade(
 
     private suspend fun writeOTAFile() {
         supervisorScope {
-            val isWBAProtocol = (otaNodeService.getNode().familyType == Boards.Family.WBA_FAMILY || otaNodeService.getNode().boardType == Boards.Model.NUCLEO_WB09KE)
+            val isWBAProtocol = (otaNodeService.getNode().familyType == Boards.Family.WBA_FAMILY || otaNodeService.getNode().boardType == Boards.Model.WB0X_NUCLEO_BOARD)
 
             val payloadSize =
                 otaNodeService.bleHal.requestPayloadSize(maxPayloadSize = MAX_PAYLOAD_SIZE)
@@ -455,7 +455,7 @@ class CharacteristicFwUpgrade(
 
         node.advertiseInfo ?: return false
 
-        if (node.advertiseInfo.getDeviceId() == OTA_NODE_ID || node.familyType == Boards.Family.WBA_FAMILY || node.boardType == Boards.Model.NUCLEO_WB09KE) {
+        if (node.advertiseInfo.getDeviceId() == OTA_NODE_ID || node.familyType == Boards.Family.WBA_FAMILY || node.boardType == Boards.Model.WB0X_NUCLEO_BOARD) {
             return true
         }
 

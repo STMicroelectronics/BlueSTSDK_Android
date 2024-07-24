@@ -104,6 +104,8 @@ class NodeService(
 
     fun getChunkProgressUpdates() = bleHal.getChunkProgressUpdates()
 
+    suspend fun resetChunkProgressUpdates()  { bleHal.resetChunkProgressUpdates() }
+
     fun getRssi() = bleHal.getRssi()
 
     fun isConnected(): Boolean = bleHal.isConnected()
@@ -312,7 +314,7 @@ class NodeService(
             if (feature.hasTimeStamp.not()) {
                 //if the Features is a Extended one, could not contain the TimeStamp
                 dataOffset = 0
-                timestamp = System.currentTimeMillis()
+                timestamp = System.currentTimeMillis()/10
             }
 
             val update: FeatureUpdate<out Loggable>

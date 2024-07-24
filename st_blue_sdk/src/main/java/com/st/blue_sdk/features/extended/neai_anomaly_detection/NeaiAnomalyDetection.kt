@@ -57,8 +57,8 @@ class NeaiAnomalyDetection(
             StateType.Init_Not_Called -> 0x7B
             StateType.Board_Error -> 0x7C
             StateType.Knowledge_Error -> 0x7D
-            StateType.Not_Enough_Learning -> 0x7F
-            StateType.Minimal_Learning_done -> TODO()
+            StateType.Not_Enough_Learning -> 0x7E
+            StateType.Minimal_Learning_done -> 0x7F
             StateType.Unknown_Error -> 0x80
             StateType.Null -> 0xFF
         }

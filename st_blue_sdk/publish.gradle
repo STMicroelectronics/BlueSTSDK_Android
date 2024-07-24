@@ -10,7 +10,12 @@ apply plugin: 'maven-publish'
 
 def LIB_GROUP_ID = 'com.st.blue.sdk'
 def LIB_ARTIFACT_ID = 'st-blue-sdk'
-def LIB_VERSION = '1.1.3'
+def LIB_VERSION = '1.2.0'
+
+tasks.register('sourceJar', Jar) {
+    from android.sourceSets.main.java.srcDirs
+    archiveClassifier.set('sources')
+}
 
 afterEvaluate {
     publishing {
@@ -34,6 +39,7 @@ afterEvaluate {
                 artifactId LIB_ARTIFACT_ID
                 version LIB_VERSION
                 artifact("$buildDir/outputs/aar/st_blue_sdk-release.aar")
+                artifact(sourceJar)
 
                 pom.withXml {
                     def dependenciesNode = asNode().appendNode('dependencies')

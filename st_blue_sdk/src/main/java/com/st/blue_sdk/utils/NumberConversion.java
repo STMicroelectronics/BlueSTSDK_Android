@@ -7,6 +7,7 @@
  */
 package com.st.blue_sdk.utils;
 
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
@@ -77,6 +78,33 @@ public class NumberConversion {
         }
 
         /**
+         * Returns the int 24 value for the specified bytes array in little endian format,
+         * from a specified index start in the array and 3 bytes length.
+         *
+         * @param arr   input bytes array that contains the value to convert
+         * @param start start index in the array of the value to convert
+         * @return the int value contained in the array
+         */
+        public static int bytesToInt24(byte[] arr, int start) {
+
+            return ((arr[start+2]<<16) // let Java handle sign-bit
+                    | ((arr[start+1] & 0xFF)<<8) // inhibit sign-bit handling
+                    | (arr[start] & 0xFF));
+        }
+
+        /**
+         * Returns the int 24 value for the specified bytes array in little endian format,
+         * from a specified index start in the array and 3 bytes length.
+         *
+         * @param arr   input bytes array that contains the value to convert
+         * @return the int value contained in the array
+         */
+        public static int bytesToInt24(byte[] arr) {
+
+            return bytesToInt24(arr,0);
+        }
+
+        /**
          * Returns the int value for the specified bytes array in little endian format,
          * from a specified index start in the array and 4 bytes length.
          *
@@ -120,6 +148,30 @@ public class NumberConversion {
          */
         public static int bytesToUInt16(byte[] arr) {
             return bytesToUInt16(arr, 0);
+        }
+
+        /**
+         * Returns the unsigned int 24 value for the specified bytes array in little endian format,
+         * from a specified index start in the array and 3 bytes length.
+         *
+         * @param arr   input bytes array that contains the value to convert
+         * @param start start index in the array of the value to convert
+         * @return the unsigned int value contained in the array
+         */
+        public static long bytesToUInt24(byte[] arr, int start) {
+            byte[] arrayOut = new byte[]{arr[start],arr[start+1],arr[start+2],0};
+            return (((long) ByteBuffer.wrap(arrayOut, 0, 4).order(ByteOrder.LITTLE_ENDIAN).getInt()) & 0xFFFFFFL);
+        }
+
+        /**
+         * Returns the unsigned int 24 value for the specified bytes array in little endian format,
+         * from a specified index start in the array and 3 bytes length.
+         *
+         * @param arr   input bytes array that contains the value to convert
+         * @return the unsigned int value contained in the array
+         */
+        public static long bytesToUInt24(byte[] arr) {
+            return bytesToUInt24(arr,0);
         }
 
         /**

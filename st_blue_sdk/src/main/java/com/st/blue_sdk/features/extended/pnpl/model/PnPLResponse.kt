@@ -22,6 +22,8 @@ data class PnPLDevice(
     val fwId: Int?,
     @SerialName("sn")
     val serialNumber: String?,
+    @SerialName("pnpl_ble_responses")
+    val pnplBleResponses: Boolean?,
     @SerialName("components")
     val components: List<JsonObject>
 )

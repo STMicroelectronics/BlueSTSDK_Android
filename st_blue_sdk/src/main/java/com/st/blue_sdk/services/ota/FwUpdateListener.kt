@@ -34,6 +34,11 @@ enum class FwUploadError {
 
     ERROR_WRONG_SDK_VERSION_OR_ERROR_TRANSMISSION,
 
+    /**
+     * error when the file is not downloaded
+     */
+    ERROR_DOWNLOADING_FILE,
+
     ERROR_UNKNOWN
 }
 

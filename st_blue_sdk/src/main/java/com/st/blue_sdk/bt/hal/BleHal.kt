@@ -97,6 +97,11 @@ interface BleHal {
     fun getChunkProgressUpdates(): Flow<ChunkProgress>
 
     /**
+     *  Reset the progression of a chunk transmission
+     */
+    suspend fun resetChunkProgressUpdates()
+
+    /**
      * @return true if current connection status is Connected, ServicesDiscovered or Ready
      */
     fun isConnected(): Boolean

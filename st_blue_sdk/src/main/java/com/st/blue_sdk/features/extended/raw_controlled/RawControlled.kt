@@ -5,28 +5,30 @@
  * the root directory of this software component.
  * If no LICENSE file comes with this software, it is provided AS-IS.
  */
-package com.st.blue_sdk.features.extended.raw_pnpl_controlled
+package com.st.blue_sdk.features.extended.raw_controlled
 
 import android.util.Log
 import com.st.blue_sdk.board_catalog.models.DtmiContent
 import com.st.blue_sdk.features.*
-import com.st.blue_sdk.features.extended.raw_pnpl_controlled.model.RawPnPLCustom
-import com.st.blue_sdk.features.extended.raw_pnpl_controlled.model.RawPnPLCustomEntry
-import com.st.blue_sdk.features.extended.raw_pnpl_controlled.model.RawPnPLEntry
-import com.st.blue_sdk.features.extended.raw_pnpl_controlled.model.RawPnPLEntryFormat
-import com.st.blue_sdk.features.extended.raw_pnpl_controlled.model.RawPnPLStreamIdEntry
+import com.st.blue_sdk.features.extended.raw_controlled.model.RawCustom
+import com.st.blue_sdk.features.extended.raw_controlled.model.RawCustomEntry
+import com.st.blue_sdk.features.extended.raw_controlled.model.RawPnPLEntry
+import com.st.blue_sdk.features.extended.raw_controlled.model.RawPnPLEntryEnumLabel
+import com.st.blue_sdk.features.extended.raw_controlled.model.RawPnPLEntryFormat
+import com.st.blue_sdk.features.extended.raw_controlled.model.RawStreamIdEntry
 import com.st.blue_sdk.utils.NumberConversion
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.decodeFromJsonElement
+import kotlinx.serialization.json.jsonPrimitive
 
-class RawPnPLControlled(
+class RawControlled(
     name: String = NAME,
     type: Type = Type.EXTENDED,
     isEnabled: Boolean,
     identifier: Int
-) : Feature<RawPnPLControlledInfo>(
+) : Feature<RawControlledInfo>(
     name = name,
     type = type,
     isEnabled = isEnabled,
@@ -35,7 +37,7 @@ class RawPnPLControlled(
 ) {
 
     companion object {
-        const val NAME = "Raw PnPL Controlled"
+        const val NAME = "Raw Controlled"
         const val PROPERTY_NAME_ST_BLE_STREAM = "st_ble_stream"
         val HIDE_PROPERTIES_NAME = arrayOf("min", "max", "unit", "format", "elements", "output")
         const val STREAM_ID_NOT_FOUND: Int = 0xFF
@@ -45,7 +47,7 @@ class RawPnPLControlled(
         timeStamp: Long,
         data: ByteArray,
         dataOffset: Int
-    ): FeatureUpdate<RawPnPLControlledInfo> {
+    ): FeatureUpdate<RawControlledInfo> {
 
         val rawValues = mutableListOf<FeatureField<Byte>>()
 
@@ -57,7 +59,7 @@ class RawPnPLControlled(
                 )
             )
         }
-        val rawPnPLControlled = RawPnPLControlledInfo(
+        val rawPnPLControlled = RawControlledInfo(
             data = rawValues
         )
         return FeatureUpdate(
@@ -110,7 +112,7 @@ fun searchPropertyDisplayName(
 }
 
 fun readRawPnPLFormat(
-    rawPnPLFormat: MutableList<RawPnPLStreamIdEntry>,
+    rawPnPLFormat: MutableList<RawStreamIdEntry>,
     json: List<JsonObject>,
     modelUpdates: List<Pair<DtmiContent.DtmiComponentContent, DtmiContent.DtmiInterfaceContent>>,
 ) {
@@ -121,14 +123,14 @@ fun readRawPnPLFormat(
                 if (entry.value is JsonObject) {
                     val entryKey = entry.key
                     val jsonEntry = entry.value as JsonObject
-                    if (jsonEntry.containsKey(RawPnPLControlled.PROPERTY_NAME_ST_BLE_STREAM)) {
+                    if (jsonEntry.containsKey(RawControlled.PROPERTY_NAME_ST_BLE_STREAM)) {
                         val configuration =
-                            jsonEntry[RawPnPLControlled.PROPERTY_NAME_ST_BLE_STREAM]
+                            jsonEntry[RawControlled.PROPERTY_NAME_ST_BLE_STREAM]
                         if (configuration is JsonObject) {
                             val componentName = entry.key
                             var streamId = 0
                             val formats = mutableListOf<RawPnPLEntry>()
-                            var customFormat: RawPnPLCustom? = null
+                            var customFormat: RawCustom? = null
 
                             configuration.entries.forEach { singleEntry ->
                                 if (singleEntry.value is JsonPrimitive) {
@@ -141,7 +143,7 @@ fun readRawPnPLFormat(
                                         val jsonDec = Json { encodeDefaults = true }
                                         customFormat =
                                             try {
-                                                jsonDec.decodeFromString<RawPnPLCustom>(customString)
+                                                jsonDec.decodeFromString<RawCustom>(customString)
                                             } catch (e: Exception) {
                                                 Log.d("readRawPnPLFormat", e.stackTraceToString())
                                                 null
@@ -153,26 +155,56 @@ fun readRawPnPLFormat(
                                     val displayName = searchPropertyDisplayName(
                                         modelUpdates = modelUpdates,
                                         compName = entryKey,
-                                        propertyName = RawPnPLControlled.PROPERTY_NAME_ST_BLE_STREAM,
+                                        propertyName = RawControlled.PROPERTY_NAME_ST_BLE_STREAM,
                                         fieldName = name
                                     )
                                     val format =
                                         Json.decodeFromJsonElement<RawPnPLEntryFormat>(
                                             singleEntry.value
                                         )
-                                    formats.add(
-                                        RawPnPLEntry(
-                                            displayName = displayName,
-                                            name = name,
-                                            format = format
+
+                                    //Try to decode the Enum Format
+                                    if (format.format == RawPnPLEntryFormat.RawPnPLEntryFormat.enum) {
+                                        try {
+                                            val customString =
+                                                (singleEntry.value as JsonObject)["labels"]?.jsonPrimitive?.content
+                                            customString?.let {
+                                                val jsonDec = Json { encodeDefaults = true }
+                                                val labelsParsed =
+                                                    //try {
+                                                    jsonDec.decodeFromString<List<RawPnPLEntryEnumLabel>>(
+                                                        customString
+                                                    )
+                                                format.labelsParsed = labelsParsed
+                                                formats.add(
+                                                    RawPnPLEntry(
+                                                        displayName = displayName,
+                                                        name = name,
+                                                        format = format
+                                                    )
+                                                )
+                                            }
+                                        } catch (e: Exception) {
+                                            Log.d(
+                                                "RawPnPLEntryFormat.enum",
+                                                e.stackTraceToString()
+                                            )
+                                        }
+                                    } else {
+                                        formats.add(
+                                            RawPnPLEntry(
+                                                displayName = displayName,
+                                                name = name,
+                                                format = format
+                                            )
                                         )
-                                    )
+                                    }
                                 }
 
                             }
 
                             rawPnPLFormat.add(
-                                RawPnPLStreamIdEntry(
+                                RawStreamIdEntry(
                                     componentName = componentName,
                                     streamId = streamId,
                                     formats = formats,
@@ -189,11 +221,11 @@ fun readRawPnPLFormat(
     }
 }
 
-fun decodeRawPnPLData(
+fun decodeRawData(
     data: List<FeatureField<Byte>>,
-    rawPnPLFormat: MutableList<RawPnPLStreamIdEntry>
+    rawFormat: MutableList<RawStreamIdEntry>
 ): Int {
-    var streamId = RawPnPLControlled.STREAM_ID_NOT_FOUND
+    var streamId = RawControlled.STREAM_ID_NOT_FOUND
     if (data.isNotEmpty()) {
         var counter = 0;
         val rawData = data.map { value -> value.value }.toByteArray()
@@ -201,104 +233,174 @@ fun decodeRawPnPLData(
         counter++
 
         //Search the right component
-        val foundStream = rawPnPLFormat.firstOrNull { it.streamId == streamId }
+        val foundStream = rawFormat.firstOrNull { it.streamId == streamId }
         foundStream?.let {
             foundStream.formats.forEach { formatRawPnpLEntry ->
 
                 if (formatRawPnpLEntry.format.enable) {
                     //Reset the list of values
                     formatRawPnpLEntry.format.values.clear()
+                    formatRawPnpLEntry.format.valuesFloat.clear()
 
                     when (formatRawPnpLEntry.format.format) {
-                        RawPnPLEntryFormat.RawPnPLEntryFormat.uint8_t -> {
-                            for (index in 0 until formatRawPnpLEntry.format.elements) {
+                        RawPnPLEntryFormat.RawPnPLEntryFormat.int8_t -> {
+                            for (index in 0 until (formatRawPnpLEntry.format.elements*formatRawPnpLEntry.format.channels)) {
                                 if (rawData.size > counter) {
-                                    formatRawPnpLEntry.format.values.add(rawData[counter])
+
+                                    val value = rawData[counter]
+                                    formatRawPnpLEntry.format.values.add(value)
+
+                                    var floatValue = value.toFloat()
+                                    formatRawPnpLEntry.format.multiplyFactor?.let {
+                                        floatValue *= it
+                                    }
+                                    formatRawPnpLEntry.format.valuesFloat.add(floatValue)
+
                                     counter++
                                 }
                             }
                         }
 
-                        RawPnPLEntryFormat.RawPnPLEntryFormat.int8_t -> {
-                            for (index in 0 until formatRawPnpLEntry.format.elements) {
+                        RawPnPLEntryFormat.RawPnPLEntryFormat.uint8_t -> {
+                            for (index in 0 until (formatRawPnpLEntry.format.elements*formatRawPnpLEntry.format.channels)) {
                                 if (rawData.size >= counter) {
-                                    formatRawPnpLEntry.format.values.add(
-                                        NumberConversion.byteToUInt8(
-                                            rawData,
-                                            counter
-                                        ).toInt()
+
+                                    val value = NumberConversion.byteToUInt8(
+                                        rawData,
+                                        counter
                                     )
+                                    formatRawPnpLEntry.format.values.add(value)
+
+                                    var floatValue = value.toFloat()
+                                    formatRawPnpLEntry.format.multiplyFactor?.let {
+                                        floatValue *= it
+                                    }
+                                    formatRawPnpLEntry.format.valuesFloat.add(floatValue)
+
                                     counter++
                                 }
                             }
                         }
 
                         RawPnPLEntryFormat.RawPnPLEntryFormat.uint16_t -> {
-                            for (index in 0 until formatRawPnpLEntry.format.elements) {
+                            for (index in 0 until (formatRawPnpLEntry.format.elements*formatRawPnpLEntry.format.channels)) {
                                 if (rawData.size >= (counter + 2)) {
-                                    formatRawPnpLEntry.format.values.add(
-                                        NumberConversion.LittleEndian.bytesToUInt16(
-                                            rawData,
-                                            counter
-                                        )
+
+                                    val value = NumberConversion.LittleEndian.bytesToUInt16(
+                                        rawData,
+                                        counter
                                     )
+                                    formatRawPnpLEntry.format.values.add(value)
+
+                                    var floatValue = value.toFloat()
+                                    formatRawPnpLEntry.format.multiplyFactor?.let {
+                                        floatValue *= it
+                                    }
+                                    formatRawPnpLEntry.format.valuesFloat.add(floatValue)
+
                                     counter += 2
                                 }
                             }
                         }
 
                         RawPnPLEntryFormat.RawPnPLEntryFormat.int16_t -> {
-                            for (index in 0 until formatRawPnpLEntry.format.elements) {
+                            for (index in 0 until (formatRawPnpLEntry.format.elements*formatRawPnpLEntry.format.channels)) {
                                 if (rawData.size >= (counter + 2)) {
-                                    formatRawPnpLEntry.format.values.add(
-                                        NumberConversion.LittleEndian.bytesToInt16(
-                                            rawData,
-                                            counter
-                                        )
+
+                                    val value = NumberConversion.LittleEndian.bytesToInt16(
+                                        rawData,
+                                        counter
                                     )
+                                    formatRawPnpLEntry.format.values.add(value)
+
+                                    var floatValue = value.toFloat()
+                                    formatRawPnpLEntry.format.multiplyFactor?.let {
+                                        floatValue *= it
+                                    }
+                                    formatRawPnpLEntry.format.valuesFloat.add(floatValue)
+
                                     counter += 2
                                 }
                             }
                         }
 
                         RawPnPLEntryFormat.RawPnPLEntryFormat.uint32_t -> {
-                            for (index in 0 until formatRawPnpLEntry.format.elements) {
+                            for (index in 0 until (formatRawPnpLEntry.format.elements*formatRawPnpLEntry.format.channels)) {
                                 if (rawData.size >= (counter + 4)) {
-                                    formatRawPnpLEntry.format.values.add(
-                                        NumberConversion.LittleEndian.bytesToUInt32(
-                                            rawData,
-                                            counter
-                                        )
+
+                                    val value = NumberConversion.LittleEndian.bytesToUInt32(
+                                        rawData,
+                                        counter
                                     )
+                                    formatRawPnpLEntry.format.values.add(value)
+
+                                    var floatValue = value.toFloat()
+                                    formatRawPnpLEntry.format.multiplyFactor?.let {
+                                        floatValue *= it
+                                    }
+                                    formatRawPnpLEntry.format.valuesFloat.add(floatValue)
+
                                     counter += 4
                                 }
                             }
                         }
 
                         RawPnPLEntryFormat.RawPnPLEntryFormat.int32_t -> {
-                            for (index in 0 until formatRawPnpLEntry.format.elements) {
+                            for (index in 0 until (formatRawPnpLEntry.format.elements*formatRawPnpLEntry.format.channels)) {
                                 if (rawData.size >= (counter + 4)) {
-                                    formatRawPnpLEntry.format.values.add(
-                                        NumberConversion.LittleEndian.bytesToInt32(
-                                            rawData,
-                                            counter
-                                        )
+
+                                    val value = NumberConversion.LittleEndian.bytesToInt32(
+                                        rawData,
+                                        counter
                                     )
+                                    formatRawPnpLEntry.format.values.add(value)
+
+                                    var floatValue = value.toFloat()
+                                    formatRawPnpLEntry.format.multiplyFactor?.let {
+                                        floatValue *= it
+                                    }
+                                    formatRawPnpLEntry.format.valuesFloat.add(floatValue)
+
                                     counter += 4
                                 }
                             }
                         }
 
                         RawPnPLEntryFormat.RawPnPLEntryFormat.float -> {
-                            for (index in 0 until formatRawPnpLEntry.format.elements) {
+                            for (index in 0 until (formatRawPnpLEntry.format.elements*formatRawPnpLEntry.format.channels)) {
                                 if (rawData.size >= (counter + 4)) {
-                                    formatRawPnpLEntry.format.values.add(
-                                        NumberConversion.LittleEndian.bytesToFloat(
-                                            rawData,
-                                            counter
-                                        )
+                                    var value = NumberConversion.LittleEndian.bytesToFloat(
+                                        rawData,
+                                        counter
                                     )
+                                    formatRawPnpLEntry.format.values.add(value)
+
+                                    formatRawPnpLEntry.format.multiplyFactor?.let {
+                                        value *= it
+                                    }
+                                    formatRawPnpLEntry.format.valuesFloat.add(value)
+
                                     counter += 4
+                                }
+                            }
+                        }
+
+                        RawPnPLEntryFormat.RawPnPLEntryFormat.enum -> {
+                            for (index in 0 until (formatRawPnpLEntry.format.elements*formatRawPnpLEntry.format.channels)) {
+                                if (rawData.size > counter) {
+                                    var value = NumberConversion.byteToUInt8(
+                                        rawData,
+                                        counter
+                                    ).toInt()
+
+                                    val outputString =
+                                        formatRawPnpLEntry.format.labelsParsed?.firstOrNull { entry ->
+                                            entry.value == value
+                                        }?.label ?: "NotRecognized"
+                                    formatRawPnpLEntry.format.values.add(outputString)
+
+                                    formatRawPnpLEntry.format.valuesFloat.add(value.toFloat())
+                                    counter++
                                 }
                             }
                         }
@@ -309,7 +411,7 @@ fun decodeRawPnPLData(
                 customFormat.output.forEach { output ->
                     output.values.clear()
                     when (output.type) {
-                        RawPnPLCustomEntry.RawPnPLCustomEntryFormat.uint8_t -> {
+                        RawCustomEntry.RawPnPLCustomEntryFormat.int8_t -> {
                             for (index in 0 until output.elements) {
                                 if (rawData.size > counter) {
                                     output.values.add(rawData[counter])
@@ -318,8 +420,8 @@ fun decodeRawPnPLData(
                             }
                         }
 
-                        RawPnPLCustomEntry.RawPnPLCustomEntryFormat.char,
-                        RawPnPLCustomEntry.RawPnPLCustomEntryFormat.int8_t -> {
+                        RawCustomEntry.RawPnPLCustomEntryFormat.char,
+                        RawCustomEntry.RawPnPLCustomEntryFormat.uint8_t -> {
                             for (index in 0 until output.elements) {
                                 if (rawData.size >= counter) {
                                     output.values.add(
@@ -333,7 +435,7 @@ fun decodeRawPnPLData(
                             }
                         }
 
-                        RawPnPLCustomEntry.RawPnPLCustomEntryFormat.uint16_t -> {
+                        RawCustomEntry.RawPnPLCustomEntryFormat.uint16_t -> {
                             for (index in 0 until output.elements) {
                                 if (rawData.size >= (counter + 2)) {
                                     output.values.add(
@@ -347,7 +449,7 @@ fun decodeRawPnPLData(
                             }
                         }
 
-                        RawPnPLCustomEntry.RawPnPLCustomEntryFormat.int16_t -> {
+                        RawCustomEntry.RawPnPLCustomEntryFormat.int16_t -> {
                             for (index in 0 until output.elements) {
                                 if (rawData.size >= (counter + 2)) {
                                     output.values.add(
@@ -361,7 +463,7 @@ fun decodeRawPnPLData(
                             }
                         }
 
-                        RawPnPLCustomEntry.RawPnPLCustomEntryFormat.uint32_t -> {
+                        RawCustomEntry.RawPnPLCustomEntryFormat.uint32_t -> {
                             for (index in 0 until output.elements) {
                                 if (rawData.size >= (counter + 4)) {
                                     output.values.add(
@@ -375,7 +477,7 @@ fun decodeRawPnPLData(
                             }
                         }
 
-                        RawPnPLCustomEntry.RawPnPLCustomEntryFormat.int32_t -> {
+                        RawCustomEntry.RawPnPLCustomEntryFormat.int32_t -> {
                             for (index in 0 until output.elements) {
                                 if (rawData.size >= (counter + 4)) {
                                     output.values.add(
@@ -389,7 +491,7 @@ fun decodeRawPnPLData(
                             }
                         }
 
-                        RawPnPLCustomEntry.RawPnPLCustomEntryFormat.float -> {
+                        RawCustomEntry.RawPnPLCustomEntryFormat.float -> {
                             for (index in 0 until output.elements) {
                                 if (rawData.size >= (counter + 4)) {
                                     output.values.add(

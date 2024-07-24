@@ -378,10 +378,19 @@ class BlueManagerImpl @Inject constructor(
     override suspend fun disableFeatures(
         nodeId: String, features: List<Feature<*>>
     ): Boolean {
-        val service = nodeServiceConsumer.getNodeService(nodeId)
-            ?: throw IllegalStateException("Unable to find NodeService for $nodeId")
+        var result = false
+        try {
 
-        return service.setFeaturesNotifications(features = features, false)
+            val service = nodeServiceConsumer.getNodeService(nodeId)
+                //?: throw IllegalStateException("Unable to find NodeService for $nodeId")
+
+            service?.let {
+                result = service.setFeaturesNotifications(features = features, false)
+            }
+        } catch (e: Exception) {
+            Log.d(TAG, e.stackTraceToString())
+        }
+        return result
     }
 
     override fun getFeatureUpdates(
@@ -435,6 +444,12 @@ class BlueManagerImpl @Inject constructor(
         val service = nodeServiceConsumer.getNodeService(nodeId)
             ?: throw IllegalStateException("Unable to find NodeService for $nodeId")
         return service.getChunkProgressUpdates()
+    }
+
+    override suspend fun resetChunkProgressUpdates(nodeId: String) {
+        val service = nodeServiceConsumer.getNodeService(nodeId)
+            ?: throw IllegalStateException("Unable to find NodeService for $nodeId")
+        service.resetChunkProgressUpdates()
     }
 
     override suspend fun writeFeatureCommand(

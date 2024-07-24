@@ -11,7 +11,6 @@ import android.util.Log
 import com.st.blue_sdk.features.*
 import com.st.blue_sdk.features.acceleration_event.request.EnableDetectionAccelerationEvent
 import com.st.blue_sdk.features.acceleration_event.response.EnableAccelerationEventResponse
-import com.st.blue_sdk.features.extended.ext_configuration.ExtConfiguration
 import com.st.blue_sdk.utils.NumberConversion
 
 class AccelerationEvent(
@@ -31,19 +30,15 @@ class AccelerationEvent(
         const val NAME = "Acceleration Event"
     }
 
-    private var mIsPedometerEnabled = false
-
     override fun extractData(
         timeStamp: Long,
         data: ByteArray,
         dataOffset: Int
     ): FeatureUpdate<AccelerationEventInfo> {
-        require(data.size - dataOffset > 0) { "There are no bytes available to read for $name feature" }
+        require(data.size - dataOffset > 2) { "There are not enough bytes available to read for $name feature" }
 
-        val numBytes = minOf(data.size - dataOffset, 3)
-
-        val accEvent = if (numBytes >= 3) {
-            //Extract Event&Pedometer data
+        //Extract Event&Pedometer data
+        val accEvent =
             AccelerationEventInfo(
                 accEvent = getListAccelerationType(
                     NumberConversion.byteToUInt8(
@@ -60,32 +55,10 @@ class AccelerationEvent(
                     name = "Steps"
                 ),
             )
-        } else if ((numBytes >= 2) && mIsPedometerEnabled) {
-            //Extract Pedometer data
-            //if we have only pedometer data... we had also a pedometer event
-            AccelerationEventInfo(
-                numSteps = FeatureField(
-                    value = NumberConversion.LittleEndian.bytesToUInt16(data, dataOffset)
-                        .toShort(),
-                    name = "Steps"
-                ),
-                accEvent = getListAccelerationType(retAccelerationTypeCode(AccelerationType.Pedometer))
-            )
-        } else {
-            //Extract Event
-            AccelerationEventInfo(
-                numSteps = FeatureField(name = "numSteps", value = null),
-                accEvent = getListAccelerationType(
-                    NumberConversion.byteToUInt8(
-                        data,
-                        dataOffset
-                    ).toInt()
-                )
-            )
-        }
+
         return FeatureUpdate(
             featureName = name,
-            timeStamp = timeStamp, rawData = data, readByte = numBytes, data = accEvent
+            timeStamp = timeStamp, rawData = data, readByte = 3, data = accEvent
         )
     }
 
@@ -102,8 +75,8 @@ class AccelerationEvent(
             )
         }
 
-        //Add All other Events
-        for (count in 3..8) {
+        //Add All other Events (except pedometer... that it's done looking the steps number)
+        for (count in 3..7) {
             val singleEvent = accEvent and (1.shl(count))
             if (singleEvent != 0) {
                 accEventList.add(
@@ -122,18 +95,12 @@ class AccelerationEvent(
     override fun packCommandData(featureBit: Int?, command: FeatureCommand): ByteArray? {
         if (command is EnableDetectionAccelerationEvent) {
             return if (command.enable) {
-                if (command.event == DetectableEventType.Pedometer) {
-                    mIsPedometerEnabled = true
-                }
                 packCommandRequest(
                     featureBit,
                     command.event.byte,
                     byteArrayOf(1)
                 )
             } else {
-                if (command.event == DetectableEventType.Pedometer) {
-                    mIsPedometerEnabled = false
-                }
                 packCommandRequest(
                     featureBit,
                     command.event.byte,
