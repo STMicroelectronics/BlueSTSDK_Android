@@ -20,7 +20,7 @@ data class FotaDetails(
     @SerialName("max_divisor_constraint")
     var maxDivisorConstraint: Int? = 0,
     @SerialName("fw_url")
-    val fwUrl: String? = null,
+    var fwUrl: String? = null,
     @SerialName("bootloader_type")
     val bootloaderType: BootLoaderType? = BootLoaderType.NONE,
     @SerialName("mandatory")

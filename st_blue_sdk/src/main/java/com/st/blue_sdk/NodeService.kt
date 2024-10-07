@@ -141,7 +141,9 @@ class NodeService(
             if(enabled) {
                 it.numberEnables++
             } else {
-                it.numberEnables--
+                if(it.numberEnables>0) {
+                    it.numberEnables--
+                }
             }
             //For Avoiding to do this operation when it's not necessary
             if(it.hasEnabledNotifications!=enabled) {

@@ -40,7 +40,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import java.nio.charset.StandardCharsets
-import java.util.*
+import java.util.Date
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -65,7 +65,10 @@ class BoardCatalogRepoImpl @Inject constructor(
 
     private var catalogRequestOnGoing = false
 
+    private var url: String?=null
+
     init {
+        url = null
         coroutineScope.launch {
             //getBoardCatalog()
             fillCachesFromDB()
@@ -153,8 +156,8 @@ class BoardCatalogRepoImpl @Inject constructor(
         }
     }
 
-    private suspend fun sync(url: String? = null) {
-        Log.i("DB", "sync()")
+    private suspend fun sync() {
+        Log.i("DB", "sync(}")
         catalogRequestOnGoing = true
         mutex.withLock {
             try {
@@ -164,10 +167,26 @@ class BoardCatalogRepoImpl @Inject constructor(
                 cacheBoardsDescription.clear()
                 cacheSensorAdapters.clear()
                 cacheBleCharacteristics.clear()
-                val firmwares = if (url != null)
+                val firmwares = if (url != null) {
                     api.getFirmwaresFromUrl(url + "catalog.json")
+                }
                 else
                     api.getFirmwares()
+
+                if(url != null) {
+                    //We need to change the fw_url... for pointing to Pre-Production
+                    firmwares.bleListBoardFirmwareV1?.forEach { firmware ->
+                        if(firmware.fota.fwUrl!=null) {
+                            firmware.fota.fwUrl = firmware.fota.fwUrl!!.replace("STMicroelectronics","SW-Platforms")
+                        }
+                    }
+
+                    firmwares.bleListBoardFirmwareV2?.forEach { firmware ->
+                        if(firmware.fota.fwUrl!=null) {
+                            firmware.fota.fwUrl = firmware.fota.fwUrl!!.replace("STMicroelectronics","SW-Platforms")
+                        }
+                    }
+                }
 
                 catalogRequestOnGoing = false
                 firmwares.bleListBoardFirmwareV1?.let {
@@ -228,7 +247,8 @@ class BoardCatalogRepoImpl @Inject constructor(
 
     override suspend fun reset(url: String?) {
         Log.i("DB", "reset()")
-        sync(url)
+        this.url = url
+        sync()
     }
 
     override suspend fun getBoardCatalog(): List<BoardFirmware> {
@@ -419,7 +439,9 @@ class BoardCatalogRepoImpl @Inject constructor(
             val inStream = contentResolver.openInputStream(fileUri)
             if (inStream != null) {
                 val text = inStream.bufferedReader(StandardCharsets.ISO_8859_1).readText()
-                inStream.close()
+                withContext(Dispatchers.IO) {
+                    inStream.close()
+                }
                 result =
                     json.decodeFromString<JsonArray>(text).mapNotNull { it.toDtmiContent() }.let {
                         val index =
@@ -453,15 +475,20 @@ class BoardCatalogRepoImpl @Inject constructor(
     override suspend fun setBoardCatalog(
         fileUri: Uri,
         contentResolver: ContentResolver
-    ): List<BoardFirmware> {
+    ): Pair<List<BoardFirmware>,String?> {
 
 //        Log.i("DB","setBoardCatalog()")
+        var outputStringResult: String?=null
+
         try {
             val inStream = contentResolver.openInputStream(fileUri)
             if (inStream != null) {
                 val text = inStream.bufferedReader(StandardCharsets.ISO_8859_1).readText()
-                inStream.close()
-                val result = json.decodeFromString<BoardCatalog>(text).let { boardCatalog ->
+                withContext(Dispatchers.IO) {
+                    inStream.close()
+                }
+                outputStringResult= ""
+                json.decodeFromString<BoardCatalog>(text).let { boardCatalog ->
                     cache.clear()
                     boardCatalog.bleListBoardFirmwareV1?.let { listFw ->
                         listFw.forEach { firmware ->
@@ -469,6 +496,7 @@ class BoardCatalogRepoImpl @Inject constructor(
                                 FirmwareMaturity.CUSTOM
                         }
                         db.add(listFw)
+                        outputStringResult +="Added ${listFw.size} custom board models (V1) "
                         //it.forEach { it2 -> cache.add(it2) }
                     }
                     boardCatalog.bleListBoardFirmwareV2?.let { listFw ->
@@ -477,6 +505,7 @@ class BoardCatalogRepoImpl @Inject constructor(
                                 firmware.maturity = FirmwareMaturity.CUSTOM
                         }
                         db.add(listFw)
+                        outputStringResult +="Added ${listFw.size} custom board models"
                         //it.forEach { it2 -> cache.add(it2) }
                     }
                     cache.addAll(db.getDeviceFirmwares())
@@ -484,12 +513,16 @@ class BoardCatalogRepoImpl @Inject constructor(
                     //Save the custom added board models
                     pref.edit(commit = true) { putString(CUSTOM_BOARDS_MODEL, text) }
                 }
+                if(outputStringResult.isNullOrEmpty())  {
+                    outputStringResult += "No custom board models added"
+                }
             }
         } catch (ex: Exception) {
+           outputStringResult = ex.localizedMessage
             Log.w(TAG, ex.localizedMessage, ex)
         }
 
-        return cache.toList()
+        return Pair(cache.toList(),outputStringResult)
     }
 
     companion object {

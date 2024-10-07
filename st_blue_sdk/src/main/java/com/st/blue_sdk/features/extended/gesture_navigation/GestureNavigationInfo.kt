@@ -39,6 +39,10 @@ enum class GestureNavigationGestureType(val value: Short) {
     companion object {
         fun fromShort(value: Short) = entries.first { it.value == value }
     }
+
+    fun isPressEvent(): Boolean {
+        return this == SinglePress || this == DoublePress || this == TriplePress || this == LongPress
+    }
 }
 
 enum class GestureNavigationButton(val value: Short) {
@@ -50,6 +54,6 @@ enum class GestureNavigationButton(val value: Short) {
     Error(5);
 
     companion object {
-        fun fromShort(value: Short) = values().first { it.value == value }
+        fun fromShort(value: Short) = entries.first { it.value == value }
     }
 }

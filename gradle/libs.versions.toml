@@ -7,27 +7,27 @@
 #
 [versions]
 # @pin https://github.com/google/accompanist#compose-versions
-accompanist = "0.34.0"
-androidGradlePlugin = "8.5.1"
+accompanist = "0.36.0"
+androidGradlePlugin = "8.5.2"
 # @pin https://developer.android.com/jetpack/androidx/releases/compose#versions
-androidxComposeBom = "2024.06.00"
+androidxComposeBom = "2024.09.01"
 androidxEspresso = "3.6.0-rc01"
 androidxHiltNavigationCompose = "1.2.0"
 # https://issuetracker.google.com/issues/336842920
 # @pin
-androidxLifecycle = "2.8.3"
-androidxNavigation = "2.7.7"
+androidxLifecycle = "2.8.5"
+androidxNavigation = "2.8.0"
 androidxRoom = "2.6.1"
 apacheCommons = "3.11.1"
 appauth = "0.11.1"
 benManes = "0.51.0"
-hilt = "2.51.1"
+hilt = "2.52"
 jwt = "2.0.2"
 # @pin https://developer.android.com/jetpack/androidx/releases/compose-kotlin
-kotlin = "2.0.0"
-kotlinxSerializationJson = "1.7.1"
+kotlin = "2.0.10"
+kotlinxSerializationJson = "1.7.2"
 # @pin
-ksp = "2.0.0-1.0.22"
+ksp = "2.0.10-1.0.24"
 littlerobots = "0.8.4"
 material2 = "1.12.0"
 okhttp = "4.12.0"

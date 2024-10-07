@@ -5,6 +5,21 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 enum class SensorType(val value: String = "") {
+    @SerialName("TOF")
+    TimeOfFlight("tof"),
+
+    @SerialName("ALS")
+    AmbientLightSensor("als"),
+
+    @SerialName("TMOS")
+    TmosInfrared("tmos"),
+
+    @SerialName("POW")
+    PowerMeter("pow"),
+
+    @SerialName("ISPU")
+    ISPU("ispu"),
+
     @SerialName("ACC")
     Accelerometer("acc"),
 
@@ -40,6 +55,6 @@ enum class SensorType(val value: String = "") {
 
     companion object {
         fun fromName(name: String) =
-            values().find { it.value == name.split("_").last() } ?: Unknown
+            entries.find { it.value == name.split("_").last() } ?: Unknown
     }
 }

@@ -34,9 +34,12 @@ data class BoardDescription(
     @ColumnInfo(name = "brd_name")
     @SerialName(value = "brd_name")
     val boardName: String,
+    @ColumnInfo(name = "brd_part")
+    @SerialName(value = "brd_part")
+    val boardPart: String,
     @ColumnInfo(name = "brd_variant")
     @SerialName(value = "brd_variant")
-    val boardVariant: String?=null,
+    val boardVariant: String,
     @ColumnInfo(name = "friendly_name")
     @SerialName(value = "friendly_name")
     val friendlyName: String,

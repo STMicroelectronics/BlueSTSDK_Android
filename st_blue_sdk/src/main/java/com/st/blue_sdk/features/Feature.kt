@@ -38,6 +38,7 @@ import com.st.blue_sdk.features.extended.medical_signal.MedicalSignal16BitFeatur
 import com.st.blue_sdk.features.extended.medical_signal.MedicalSignal24BitFeature
 import com.st.blue_sdk.features.extended.motion_algorithm.MotionAlgorithm
 import com.st.blue_sdk.features.extended.motor_time_param.MotorTimeParameter
+import com.st.blue_sdk.features.extended.navigation_control.NavigationControl
 import com.st.blue_sdk.features.extended.neai_anomaly_detection.NeaiAnomalyDetection
 import com.st.blue_sdk.features.extended.neai_class_classification.NeaiClassClassification
 import com.st.blue_sdk.features.extended.neai_extrapolation.NeaiExtrapolation
@@ -82,6 +83,7 @@ import com.st.blue_sdk.features.pressure.Pressure
 import com.st.blue_sdk.features.proximity.Proximity
 import com.st.blue_sdk.features.proximity_gesture.ProximityGesture
 import com.st.blue_sdk.features.extended.raw_controlled.RawControlled
+import com.st.blue_sdk.features.extended.scene_description.SceneDescription
 import com.st.blue_sdk.features.remote.humidity.RemoteHumidity
 import com.st.blue_sdk.features.remote.pressure.RemotePressure
 import com.st.blue_sdk.features.remote.switch.RemoteSwitch
@@ -562,6 +564,8 @@ abstract class Feature<T>(
                     isEnabled = isEnabled,
                     identifier = identifier
                 )
+                0x28 -> NavigationControl(isEnabled = isEnabled, identifier = identifier)
+                0x29 -> SceneDescription(isEnabled = isEnabled, identifier = identifier)
 
                 else -> throw UnsupportedOperationException("$type unknown")
 

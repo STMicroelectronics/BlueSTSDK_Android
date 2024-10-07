@@ -100,6 +100,22 @@ enum class AlgorithmType {
             VerticalContext -> 0x03.toByte()
             Unknown -> 0x00.toByte()
         }
+
+        @JvmStatic
+        fun fromString(name: String): AlgorithmType = when (name) {
+            "Pose Estimation" -> PoseEstimation
+            "Desktop Type" -> DesktopTypeDetection
+            "Vertical Context" -> VerticalContext
+            "None" -> Unknown
+            else -> Unknown
+        }
+    }
+
+    override fun toString(): String = when (this) {
+        Unknown -> "None"
+        PoseEstimation -> "Pose Estimation"
+        DesktopTypeDetection -> "Desktop Type"
+        VerticalContext -> "Vertical Context"
     }
 }
 

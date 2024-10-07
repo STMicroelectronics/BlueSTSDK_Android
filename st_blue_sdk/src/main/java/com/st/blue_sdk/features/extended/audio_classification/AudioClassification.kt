@@ -45,7 +45,7 @@ class AudioClassification(
                     ),
                     algorithm = FeatureField(
                         value = ALGORITHM_NOT_DEFINED,
-                        name = "AudioClassification"
+                        name = "Algorithm"
                     )
                 )
             } else {
@@ -56,7 +56,7 @@ class AudioClassification(
                     ),
                     algorithm = FeatureField(
                         value = NumberConversion.byteToUInt8(data, dataOffset + 1),
-                        name = "AudioClassification"
+                        name = "Algorithm"
                     )
                 )
             }

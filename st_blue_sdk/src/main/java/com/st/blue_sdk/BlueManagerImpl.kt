@@ -486,7 +486,8 @@ class BlueManagerImpl @Inject constructor(
 
     override suspend fun setBoardCatalog(
         fileUri: Uri, contentResolver: ContentResolver
-    ): List<BoardFirmware> = catalog.setBoardCatalog(fileUri, contentResolver)
+    ): Pair<List<BoardFirmware>,String?> = catalog.setBoardCatalog(fileUri, contentResolver)
+
 
     override suspend fun setDtmiModel(
         nodeId: String, fileUri: Uri, contentResolver: ContentResolver

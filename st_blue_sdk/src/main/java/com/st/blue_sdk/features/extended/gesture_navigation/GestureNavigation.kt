@@ -16,7 +16,7 @@ class GestureNavigation(
 ) {
     companion object {
 
-        const val NAME = "Navigation"
+        const val NAME = "Gesture Navigation"
         const val NUMBER_BYTES = 2
     }
 

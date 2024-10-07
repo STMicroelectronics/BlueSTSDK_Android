@@ -54,6 +54,7 @@ class DebugServiceImpl(
     }
 
     override suspend fun write(message: String): Int {
+       // Log.i("DebugDebugConsole","write on Debug <$message>")
         return write(message.toByteArray(CHARSET))
     }
 
@@ -81,6 +82,7 @@ class DebugServiceImpl(
                 it.characteristic.uuid == errorDebugCharacteristic?.uuid
             ) {
                 val isError = it.characteristic.uuid == errorDebugCharacteristic?.uuid
+                //Log.i("DebugDebugConsole","Get getDebugMessages <${String(it.data, CHARSET)}>")
                 emit(DebugMessage(String(it.data, CHARSET), isError))
             }
         }
@@ -89,6 +91,7 @@ class DebugServiceImpl(
     override suspend fun read(timeout: Long): DebugMessage? {
         return rwDebugCharacteristic?.let { recipient ->
             val data = bleHAL.readCharacteristic(recipient, timeout)
+            //data?.let { payload -> Log.i("Pezz","Read on Debug <${String(payload, CHARSET)}>") }
             return data?.let { payload -> DebugMessage(String(payload, CHARSET), false) }
         }
     }

@@ -36,7 +36,8 @@ interface BoardCatalogRepo {
 
     suspend fun getDtmiModel(deviceId: String, bleFwId: String,isBeta: Boolean): DtmiModel?
 
-    suspend fun setBoardCatalog(fileUri: Uri, contentResolver: ContentResolver): List<BoardFirmware>
+    suspend fun setBoardCatalog(fileUri: Uri, contentResolver: ContentResolver): Pair<List<BoardFirmware>,String?>
+
 
     suspend fun setDtmiModel(
         deviceId: String,

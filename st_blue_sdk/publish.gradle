@@ -10,7 +10,7 @@ apply plugin: 'maven-publish'
 
 def LIB_GROUP_ID = 'com.st.blue.sdk'
 def LIB_ARTIFACT_ID = 'st-blue-sdk'
-def LIB_VERSION = '1.2.0'
+def LIB_VERSION = '1.2.4'
 
 tasks.register('sourceJar', Jar) {
     from android.sourceSets.main.java.srcDirs

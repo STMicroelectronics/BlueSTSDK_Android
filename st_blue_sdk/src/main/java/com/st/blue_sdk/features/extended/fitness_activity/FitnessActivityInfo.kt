@@ -37,7 +37,26 @@ enum class FitnessActivityType {
     BicepCurl,
     Squat,
     PushUp,
-    Error
+    Error;
+
+    override fun toString(): String = when (this) {
+        NoActivity -> "None"
+        BicepCurl -> "Biceps curl"
+        Squat -> "Squat"
+        PushUp -> "Push up"
+        Error -> "Error"
+    }
+
+    companion object {
+        @JvmStatic
+        fun fromString(name: String): FitnessActivityType = when (name) {
+            "None" -> NoActivity
+            "Biceps curl" -> BicepCurl
+            "Squat" -> Squat
+            "Push up" -> PushUp
+            else -> Error
+        }
+    }
 }
 
 fun getFitnessActivityType(activity: Short) = when ((activity and 0x0F).toInt()) {
