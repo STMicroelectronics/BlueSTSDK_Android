@@ -8,7 +8,7 @@
 package com.st.blue_sdk.models
 
 data class OTAMemoryLayout(
-    val fistSector: Short,
+    val firstSector: Short,
     val nSector: Short,
     val sectorSize: Short
 )

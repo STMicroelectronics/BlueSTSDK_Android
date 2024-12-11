@@ -23,14 +23,14 @@ private val LightColorScheme = lightColorScheme(
 
 @Composable
 fun StDemoTheme(content: @Composable () -> Unit) {
-    val view = LocalView.current
+//    val view = LocalView.current
 
-    if (!view.isInEditMode) {
-        SideEffect {
-            (view.context as Activity).window.statusBarColor = LightColorScheme.primary.toArgb()
-            ViewCompat.getWindowInsetsController(view)?.isAppearanceLightStatusBars = false
-        }
-    }
+//    if (!view.isInEditMode) {
+//        SideEffect {
+//            (view.context as Activity).window.statusBarColor = LightColorScheme.primary.toArgb()
+//            ViewCompat.getWindowInsetsController(view)?.isAppearanceLightStatusBars = false
+//        }
+//    }
 
     MaterialTheme(
         colorScheme = LightColorScheme,

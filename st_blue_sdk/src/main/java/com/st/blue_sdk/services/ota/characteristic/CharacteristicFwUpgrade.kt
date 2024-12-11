@@ -323,6 +323,9 @@ class CharacteristicFwUpgrade(
                     maxPacketLength = 244
                 }
 
+                Log.d(TAG, "maxPacketLength = $maxPacketLength")
+
+
                 while (uploadedData < fileSize) {
 
                     val writtenDataCount = transferFwFile(

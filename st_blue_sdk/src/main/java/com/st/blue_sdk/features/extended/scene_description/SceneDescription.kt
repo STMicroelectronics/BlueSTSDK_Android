@@ -18,7 +18,7 @@ class SceneDescription(
 ) {
     companion object {
 
-        const val NAME = "Navigation Control"
+        const val NAME = "Scene Description"
         const val NUMBER_BYTES = 2
     }
 

@@ -140,7 +140,10 @@ fun readRawPnPLFormat(
                                     } else {
                                         val customString =
                                             (singleEntry.value as JsonPrimitive).content
-                                        val jsonDec = Json { encodeDefaults = true }
+                                        val jsonDec = Json {
+                                            encodeDefaults = true
+                                            ignoreUnknownKeys = true
+                                        }
                                         customFormat =
                                             try {
                                                 jsonDec.decodeFromString<RawCustom>(customString)
@@ -158,8 +161,14 @@ fun readRawPnPLFormat(
                                         propertyName = RawControlled.PROPERTY_NAME_ST_BLE_STREAM,
                                         fieldName = name
                                     )
+
+                                    val jsonDec = Json {
+                                        encodeDefaults = true
+                                        ignoreUnknownKeys = true
+                                    }
+
                                     val format =
-                                        Json.decodeFromJsonElement<RawPnPLEntryFormat>(
+                                        jsonDec.decodeFromJsonElement<RawPnPLEntryFormat>(
                                             singleEntry.value
                                         )
 
@@ -169,7 +178,10 @@ fun readRawPnPLFormat(
                                             val customString =
                                                 (singleEntry.value as JsonObject)["labels"]?.jsonPrimitive?.content
                                             customString?.let {
-                                                val jsonDec = Json { encodeDefaults = true }
+                                                val jsonDec = Json {
+                                                    encodeDefaults = true
+                                                    ignoreUnknownKeys = true
+                                                }
                                                 val labelsParsed =
                                                     //try {
                                                     jsonDec.decodeFromString<List<RawPnPLEntryEnumLabel>>(

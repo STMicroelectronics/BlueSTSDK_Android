@@ -91,6 +91,8 @@ interface BlueManager {
         timeout: Long = 2000
     ): List<FeatureUpdate<*>>
 
+    fun hasBleDebugService(nodeId: String) : Boolean
+
     suspend fun writeDebugMessage(nodeId: String, msg: String): Boolean
 
     fun getConfigControlUpdates(nodeId: String): Flow<FeatureResponse>

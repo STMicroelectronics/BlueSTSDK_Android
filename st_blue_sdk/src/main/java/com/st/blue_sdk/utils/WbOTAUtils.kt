@@ -21,37 +21,42 @@ object WbOTAUtils {
         data class Custom(val firstSectorAddress: String? = null, val sectorCount: String? = null) :
             WBBoardType()
 
-        object WB5xOrWB3x : WBBoardType()
+        data object WB5xOrWB3x : WBBoardType()
 
-        object WB1x : WBBoardType()
+        data object WB1x : WBBoardType()
 
-        object WBA : WBBoardType()
+        data object WBA : WBBoardType()
 
-        object WB09 : WBBoardType()
+        data object WB09 : WBBoardType()
+
+        data object WBA6 : WBBoardType()
     }
 
     private val APPLICATION_MEMORY_LAYOUTS = listOf(
         OTAMemoryLayout(0x00.toShort(), 0x00.toShort(), 0x0000.toShort()), //Undef
-        OTAMemoryLayout(0x07.toShort(), 0x7F.toShort(), 0x1000.toShort() /* 4k*/), //WB55
-        OTAMemoryLayout(0x0E.toShort(), 0x24.toShort(), 0x800.toShort() /* 2k*/), //WB15
-        OTAMemoryLayout(0x3E.toShort(), 0x3F.toShort(), 0x2000.toShort() /* 8k*/), //WBA
-        OTAMemoryLayout(0x7F.toShort(), 0x100.toShort(), 0x800.toShort() /* 2k*/) //WB09
+        OTAMemoryLayout(0x07.toShort(), 0xD0.toShort(), 0x1000.toShort() /* 4k*/), //WB55
+        OTAMemoryLayout(0x0E.toShort(), 0x44.toShort(), 0x800.toShort() /* 2k*/), //WB15
+        OTAMemoryLayout(0x3E.toShort(), 0x3D.toShort(), 0x2000.toShort() /* 8k*/), //WBA
+        OTAMemoryLayout(0x7F.toShort(), 0x100.toShort(), 0x800.toShort() /* 2k*/), //WB09
+        OTAMemoryLayout((0x3E*2).toShort(), 0x7A.toShort(), 0x2000.toShort() /* 8k*/), //WBA6 ???
     )
 
     private val BLE_MEMORY_LAYOUTS = listOf(
         OTAMemoryLayout(0x000.toShort(), 0x00.toShort(), 0x0000.toShort()), //Undef
-        OTAMemoryLayout(0x0F.toShort(), 0x7F.toShort(), 0x1000.toShort() /* 4k*/), //WB55
-        OTAMemoryLayout(0x0E.toShort(), 0x3C.toShort(), 0x800.toShort() /* 2k*/), //WB15
-        OTAMemoryLayout(0x7B.toShort(), 0x3F.toShort(), 0x2000.toShort() /* 8k*/), //WBA
+        OTAMemoryLayout(0x0F.toShort(), 0xD0.toShort(), 0x1000.toShort() /* 4k*/), //WB55
+        OTAMemoryLayout(0x0E.toShort(), 0x44.toShort(), 0x800.toShort() /* 2k*/), //WB15
+        OTAMemoryLayout(0x3E.toShort(), 0x3D.toShort(), 0x2000.toShort() /* 8k*/), //WBA Not Used App&BLE Stack on same binary
         OTAMemoryLayout(0xFC.toShort(), 0x100.toShort(), 0x800.toShort() /* 2k*/), //WB09
+        OTAMemoryLayout(0x3E.toShort(), 0x7A.toShort(), 0x2000.toShort() /* 8k*/), //WBA6 Not Used App&BLE Stack on same binary
     )
 
     private val MEMORY_ADDRESSES = listOf(
         OTAMemoryAddress(0x00, 0x00, 0x00), // undef
-        OTAMemoryAddress(0x7000, 0x0D7000, 0x1000), // wb
+        OTAMemoryAddress(0x7000, 0x0D7000, 0x1000), // WB55
         OTAMemoryAddress(0x7000, 0x029000, 0x800), // wb15
-        OTAMemoryAddress(0x28000, Long.MAX_VALUE, 0x2000), // wba // default address is 0x7C000 // previously 0xCA000 as max but problem for User Conf (default value higher than max address)
-        OTAMemoryAddress(0x00000, 0x7FFFF, 0x800), //wb09 // default address is 0x3F800
+        OTAMemoryAddress(0x00000, 0x100000-1, 0x2000), // WBA // default address is 0x7C000 // previously 0xCA000 as max but problem for User Conf (default value higher than max address)
+        OTAMemoryAddress(0x00000, 0x7FFFF, 0x800), //WB09 // default address is 0x3F800
+        OTAMemoryAddress(0x00000, 0x200000-1, 0x2000), // WBA6
     )
 
     fun checkAddressAndNbSectorsInRange(boardType: WBBoardType, firmwareType: FirmwareType, address: String?, nbSectorsToErase: String?): Int { //returns a code corresponding to the error
@@ -157,6 +162,7 @@ object WbOTAUtils {
             is WBBoardType.WB1x -> 2
             is WBBoardType.WBA -> 3
             is WBBoardType.WB09 -> 4
+            is WBBoardType.WBA6 -> 5
         }
     }
 }

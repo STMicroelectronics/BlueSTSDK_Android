@@ -75,9 +75,10 @@ object Boards {
         WB1M_DISCOVERY_BOARD, //0x85
         WBA5X_NUCLEO_BOARD, //0x8B
         WBA_DISCOVERY_BOARD, //0x8C
+        WBA6_NUCLEO_BOARD, //0x8E
 
         /** Nucleo with STM32WB0X */
-        WB0X_NUCLEO_BOARD,
+        WB0X_NUCLEO_BOARD, //0x8D
 
         /** NUCLEO boards  */
         NUCLEO, NUCLEO_F401RE, NUCLEO_L476RG, NUCLEO_L053R8, NUCLEO_F446RE,NUCLEO_U575ZIQ,NUCLEO_U5A5ZJQ
@@ -136,6 +137,7 @@ object Boards {
 
             Model.WBA5X_NUCLEO_BOARD,
             Model.WBA_DISCOVERY_BOARD,
+            Model.WBA6_NUCLEO_BOARD,
                 -> Family.WBA_FAMILY
 
             Model.WB0X_NUCLEO_BOARD,
@@ -176,6 +178,7 @@ object Boards {
                     0x7B -> Model.NUCLEO_U575ZIQ
                     0x7A -> Model.NUCLEO_U5A5ZJQ
                     0x8D -> Model.WB0X_NUCLEO_BOARD
+                    0x8E -> Model.WBA6_NUCLEO_BOARD
                     else -> {
                         if (temp in 0x81..0x8A) {
                             Model.WB55_NUCLEO_BOARD
@@ -224,9 +227,8 @@ object Boards {
                     0x85 -> Model.WB1M_DISCOVERY_BOARD
                     0x8B -> Model.WBA5X_NUCLEO_BOARD
                     0x8C -> Model.WBA_DISCOVERY_BOARD
-
                     0x8D -> Model.WB0X_NUCLEO_BOARD
-
+                    0x8E -> Model.WBA6_NUCLEO_BOARD
 
                     else -> Model.GENERIC
                 }

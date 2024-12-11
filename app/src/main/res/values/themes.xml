@@ -7,14 +7,14 @@
   -->
 <resources>
     <!-- Base application theme. -->
-    <style name="Theme.StDemo" parent="Theme.MaterialComponents.DayNight.DarkActionBar"/>
+    <style name="Theme.StDemo" parent="Theme.Material3.Light"/>
 
     <style name="Theme.StDemo.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
     </style>
 
-    <style name="Theme.StDemo.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+    <style name="Theme.StDemo.AppBarOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
     <style name="Theme.StDemo.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 </resources>

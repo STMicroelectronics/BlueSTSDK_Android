@@ -17,18 +17,18 @@ plugins {
 
 android {
     namespace = "com.st.demo"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.st.demo"
         minSdk = 26
-        targetSdk = 34
-        versionCode = 7
-        versionName = "5.2.5"
+        targetSdk = 35
+        versionCode = 8
+        versionName = "5.2.6"
 
         vectorDrawables { useSupportLibrary = true }
 
-        manifestPlaceholders["appAuthRedirectScheme"] = "stdemo"
+        manifestPlaceholders["appAuthRedirectScheme"] = "com.st.demo"
     }
 
     hilt {
@@ -47,8 +47,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
 
     buildFeatures {

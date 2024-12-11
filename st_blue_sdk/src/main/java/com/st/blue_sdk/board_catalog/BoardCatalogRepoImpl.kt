@@ -173,7 +173,7 @@ class BoardCatalogRepoImpl @Inject constructor(
                 else
                     api.getFirmwares()
 
-                if(url != null) {
+                if (url != null && url?.contains("SW-Platforms") == true) {
                     //We need to change the fw_url... for pointing to Pre-Production
                     firmwares.bleListBoardFirmwareV1?.forEach { firmware ->
                         if(firmware.fota.fwUrl!=null) {

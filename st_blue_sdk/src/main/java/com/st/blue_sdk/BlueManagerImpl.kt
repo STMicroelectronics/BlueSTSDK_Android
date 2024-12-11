@@ -426,6 +426,12 @@ class BlueManagerImpl @Inject constructor(
         return service.writeDebugMessage(msg)
     }
 
+    override fun hasBleDebugService(nodeId: String): Boolean {
+        val service = nodeServiceConsumer.getNodeService(nodeId)
+            ?: throw IllegalStateException("Unable to find NodeService for $nodeId")
+        return service.debugService.hasBleDebugService()
+    }
+
     override fun getConfigControlUpdates(nodeId: String): Flow<FeatureResponse> {
 
         val service = nodeServiceConsumer.getNodeService(nodeId)

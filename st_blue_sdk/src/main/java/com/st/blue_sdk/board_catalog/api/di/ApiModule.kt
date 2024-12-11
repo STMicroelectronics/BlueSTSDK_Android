@@ -52,7 +52,7 @@ object ApiModule {
                 applicationContext.packageName,
                 0
             )
-        }.versionName.replaceAfterLast('.',"0")
+        }.versionName?.replaceAfterLast('.',"0") ?: "1.0.0"
 
     @RetrofitBasePath
     @Provides
