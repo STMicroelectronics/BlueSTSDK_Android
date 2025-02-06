@@ -14,7 +14,7 @@ GPR_API_KEY=XXXXXXXXXXXXXXXXXXXXXXXX
 
 ## Sample app
 
-This package provides a sample application with some basic functionalites:
+This package provides a sample application with some basic functionalities:
 - boards discovery and connection
 - subscribe to each exported bluetooth SDK features and display the sensors' values in textual way
 
