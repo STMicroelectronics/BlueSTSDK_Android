@@ -8,24 +8,25 @@
 [versions]
 # @pin https://github.com/google/accompanist#compose-versions
 accompanist = "0.36.0"
-androidGradlePlugin = "8.7.3"
+accompanistPermission = "0.37.0"
+androidGradlePlugin = "8.8.0"
 # @pin https://developer.android.com/jetpack/androidx/releases/compose#versions
-androidxComposeBom = "2024.11.00"
+androidxComposeBom = "2025.01.00"
 androidxEspresso = "3.6.0-rc01"
 androidxHiltNavigationCompose = "1.2.0"
 # https://issuetracker.google.com/issues/336842920
 # @pin
 androidxLifecycle = "2.8.7"
-androidxNavigation = "2.8.4"
+androidxNavigation = "2.8.5"
 androidxRoom = "2.6.1"
 apacheCommons = "3.11.1"
 appauth = "0.11.1"
 benManes = "0.51.0"
-hilt = "2.53"
+hilt = "2.55"
 jwt = "2.0.2"
 # @pin https://developer.android.com/jetpack/androidx/releases/compose-kotlin
 kotlin = "2.0.20"
-kotlinxSerializationJson = "1.7.3"
+kotlinxSerializationJson = "1.8.0"
 # @pin
 ksp = "2.0.20-1.0.25"
 littlerobots = "0.8.4"
@@ -33,10 +34,11 @@ material2 = "1.12.0"
 okhttp = "4.12.0"
 retrofit = "2.11.0"
 retrofitKotlinxSerializationJson = "1.0.0"
+jaredsburrowsLicense = "0.9.8"
 
 [libraries]
 accompanist-flowlayout = { module = "com.google.accompanist:accompanist-flowlayout", version.ref = "accompanist" }
-accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanist" }
+accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermission" }
 accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanist" }
 androidx-compose-bom = { module = "androidx.compose:compose-bom", version.ref = "androidxComposeBom" }
 androidx-compose-foundation = { module = "androidx.compose.foundation:foundation" }
@@ -116,3 +118,4 @@ kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 littlerobots = { id = "nl.littlerobots.version-catalog-update", version.ref = "littlerobots" }
+jaredsburrowsLicense =  { id = "com.jaredsburrows.license", version.ref = "jaredsburrowsLicense" }

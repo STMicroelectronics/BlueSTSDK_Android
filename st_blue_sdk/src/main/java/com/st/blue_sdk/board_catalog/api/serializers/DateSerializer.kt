@@ -20,7 +20,7 @@ import java.util.*
 class DateSerializer : KSerializer<Date> {
 
     private var formatStrings = listOf(
-        "yyyy-MM-dd'T'HH:mm:ss.SSSSSS",
+        "yyyy-MM-dd' 'HH:mm:ss",
         "yyyy-MM-dd'T'HH:mm:ssZ",
         "yyyy-MM-dd'T'HH:mm:ss",
         "yyyy-MM-dd'T'HH:mm",

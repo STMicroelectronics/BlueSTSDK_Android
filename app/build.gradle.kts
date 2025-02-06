@@ -13,6 +13,7 @@ plugins {
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.jaredsburrowsLicense)
 }
 
 android {
@@ -24,7 +25,7 @@ android {
         minSdk = 26
         targetSdk = 35
         versionCode = 8
-        versionName = "5.2.6"
+        versionName = "5.2.7"
 
         vectorDrawables { useSupportLibrary = true }
 
@@ -71,6 +72,27 @@ android {
     }
 
     packaging { resources { excludes += "/META-INF/{AL2.0,LGPL2.1}" } }
+}
+
+licenseReport {
+    // Generate reports
+    generateCsvReport = false
+    generateHtmlReport = true
+    generateJsonReport = false
+    generateTextReport = false
+
+    // Copy reports - These options are ignored for Java projects
+    copyCsvReportToAssets = false
+    copyHtmlReportToAssets = true
+    copyJsonReportToAssets = false
+    copyTextReportToAssets = false
+    useVariantSpecificAssetDirs = false
+
+    // Ignore licenses for certain artifact patterns
+    //ignoredPatterns = []
+
+    // Show versions in the report - default is false
+    showVersions = true
 }
 
 dependencies {

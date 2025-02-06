@@ -7,7 +7,6 @@
  */
 package com.st.blue_sdk.utils
 
-import android.util.Log
 import com.st.blue_sdk.models.OTAMemoryAddress
 import com.st.blue_sdk.models.OTAMemoryLayout
 import com.st.blue_sdk.services.ota.FirmwareType
@@ -36,18 +35,18 @@ object WbOTAUtils {
         OTAMemoryLayout(0x00.toShort(), 0x00.toShort(), 0x0000.toShort()), //Undef
         OTAMemoryLayout(0x07.toShort(), 0xD0.toShort(), 0x1000.toShort() /* 4k*/), //WB55
         OTAMemoryLayout(0x0E.toShort(), 0x44.toShort(), 0x800.toShort() /* 2k*/), //WB15
-        OTAMemoryLayout(0x3E.toShort(), 0x3D.toShort(), 0x2000.toShort() /* 8k*/), //WBA
+        OTAMemoryLayout(0x40.toShort(), 0x3D.toShort(), 0x2000.toShort() /* 8k*/), //WBA
         OTAMemoryLayout(0x7F.toShort(), 0x100.toShort(), 0x800.toShort() /* 2k*/), //WB09
-        OTAMemoryLayout((0x3E*2).toShort(), 0x7A.toShort(), 0x2000.toShort() /* 8k*/), //WBA6 ???
+        OTAMemoryLayout(0x80.toShort(), 0x7A.toShort(), 0x2000.toShort() /* 8k*/), //WBA6 ???
     )
 
     private val BLE_MEMORY_LAYOUTS = listOf(
         OTAMemoryLayout(0x000.toShort(), 0x00.toShort(), 0x0000.toShort()), //Undef
-        OTAMemoryLayout(0x0F.toShort(), 0xD0.toShort(), 0x1000.toShort() /* 4k*/), //WB55
+        OTAMemoryLayout(0x11.toShort(), 0xD0.toShort(), 0x1000.toShort() /* 4k*/), //WB55
         OTAMemoryLayout(0x0E.toShort(), 0x44.toShort(), 0x800.toShort() /* 2k*/), //WB15
-        OTAMemoryLayout(0x3E.toShort(), 0x3D.toShort(), 0x2000.toShort() /* 8k*/), //WBA Not Used App&BLE Stack on same binary
+        OTAMemoryLayout(0x7D.toShort(), 0x3D.toShort(), 0x2000.toShort() /* 8k*/), //WBA Not Used App&BLE Stack on same binary
         OTAMemoryLayout(0xFC.toShort(), 0x100.toShort(), 0x800.toShort() /* 2k*/), //WB09
-        OTAMemoryLayout(0x3E.toShort(), 0x7A.toShort(), 0x2000.toShort() /* 8k*/), //WBA6 Not Used App&BLE Stack on same binary
+        OTAMemoryLayout(0xFA.toShort(), 0x7A.toShort(), 0x2000.toShort() /* 8k*/), //WBA6 Not Used App&BLE Stack on same binary
     )
 
     private val MEMORY_ADDRESSES = listOf(
@@ -55,7 +54,7 @@ object WbOTAUtils {
         OTAMemoryAddress(0x7000, 0x0D7000, 0x1000), // WB55
         OTAMemoryAddress(0x7000, 0x029000, 0x800), // wb15
         OTAMemoryAddress(0x00000, 0x100000-1, 0x2000), // WBA // default address is 0x7C000 // previously 0xCA000 as max but problem for User Conf (default value higher than max address)
-        OTAMemoryAddress(0x00000, 0x7FFFF, 0x800), //WB09 // default address is 0x3F800
+        OTAMemoryAddress(0x00000, 0x80000-1, 0x800), //WB09 // default address is 0x3F800
         OTAMemoryAddress(0x00000, 0x200000-1, 0x2000), // WBA6
     )
 
