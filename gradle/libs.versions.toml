@@ -8,16 +8,16 @@
 [versions]
 # @pin https://github.com/google/accompanist#compose-versions
 accompanist = "0.36.0"
-accompanistPermission = "0.37.0"
-androidGradlePlugin = "8.8.0"
+accompanistPermission = "0.37.2"
+androidGradlePlugin = "8.9.0"
 # @pin https://developer.android.com/jetpack/androidx/releases/compose#versions
-androidxComposeBom = "2025.01.00"
+androidxComposeBom = "2025.02.00"
 androidxEspresso = "3.6.0-rc01"
 androidxHiltNavigationCompose = "1.2.0"
 # https://issuetracker.google.com/issues/336842920
 # @pin
 androidxLifecycle = "2.8.7"
-androidxNavigation = "2.8.5"
+androidxNavigation = "2.8.8"
 androidxRoom = "2.6.1"
 apacheCommons = "3.11.1"
 appauth = "0.11.1"

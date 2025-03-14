@@ -79,6 +79,7 @@ object Boards {
 
         /** Nucleo with STM32WB0X */
         WB0X_NUCLEO_BOARD, //0x8D
+        WB05_NUCLEO_BOARD, //0x8F
 
         /** NUCLEO boards  */
         NUCLEO, NUCLEO_F401RE, NUCLEO_L476RG, NUCLEO_L053R8, NUCLEO_F446RE,NUCLEO_U575ZIQ,NUCLEO_U5A5ZJQ
@@ -110,7 +111,8 @@ object Boards {
             Model.SENSOR_TILE_BOX_PRO,
             Model.SENSOR_TILE_BOX_PROB,
             Model.STWIN_BOX,
-            Model.STWIN_BOXB -> Family.BLUENRG_FAMILY
+            Model.STWIN_BOXB,
+            Model.WB05_NUCLEO_BOARD-> Family.BLUENRG_FAMILY
 
             Model.DISCOVERY_IOT01A,
             Model.B_L475E_IOT01A,
@@ -179,6 +181,7 @@ object Boards {
                     0x7A -> Model.NUCLEO_U5A5ZJQ
                     0x8D -> Model.WB0X_NUCLEO_BOARD
                     0x8E -> Model.WBA6_NUCLEO_BOARD
+                    0x8F -> Model.WB05_NUCLEO_BOARD
                     else -> {
                         if (temp in 0x81..0x8A) {
                             Model.WB55_NUCLEO_BOARD
@@ -229,6 +232,7 @@ object Boards {
                     0x8C -> Model.WBA_DISCOVERY_BOARD
                     0x8D -> Model.WB0X_NUCLEO_BOARD
                     0x8E -> Model.WBA6_NUCLEO_BOARD
+                    0x8F -> Model.WB05_NUCLEO_BOARD
 
                     else -> Model.GENERIC
                 }

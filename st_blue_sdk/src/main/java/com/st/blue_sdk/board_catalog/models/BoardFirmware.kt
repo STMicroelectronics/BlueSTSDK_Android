@@ -64,6 +64,9 @@ data class BoardFirmware(
     @ColumnInfo(name = "compatible_sensor_adapters")
     @SerialName("compatible_sensor_adapters")
     var compatibleSensorAdapters: List<Int>?=null,
+    @ColumnInfo(name = "extra_examples_flow")
+    @SerialName("extra_examples_flow")
+    var extraExamplesFlow: List<ExtraExamplesFlow>?=null,
     @SerialName("demo_decorator")
     var demoDecorator: DemoDecorator?=null,
     @SerialName("maturity")

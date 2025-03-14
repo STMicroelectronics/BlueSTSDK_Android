@@ -17,6 +17,7 @@ import com.st.blue_sdk.board_catalog.db.converters.CloudAppDataConverter
 import com.st.blue_sdk.board_catalog.db.converters.CompatibleSensorAdapterDataConverter
 import com.st.blue_sdk.board_catalog.db.converters.ComponentsDataConverter
 import com.st.blue_sdk.board_catalog.db.converters.DemoDecoratorDataConverter
+import com.st.blue_sdk.board_catalog.db.converters.ExtraExamplesFlowConverter
 import com.st.blue_sdk.board_catalog.db.converters.FotaDetailsConverter
 import com.st.blue_sdk.board_catalog.db.converters.OptionByteDataConverter
 import com.st.blue_sdk.board_catalog.db.converters.PowerModeDataConverter
@@ -27,7 +28,7 @@ import com.st.blue_sdk.board_catalog.models.BoardFirmware
 import com.st.blue_sdk.board_catalog.models.Sensor
 
 @Database(
-    version = 21,
+    version = 22,
     exportSchema = true,
     entities = [
         BoardFirmware::class,
@@ -47,7 +48,8 @@ import com.st.blue_sdk.board_catalog.models.Sensor
     Board_compatibilityDataConverter::class,
     SensorConfigurationConverter::class,
     DemoDecoratorDataConverter::class,
-    BleCharacteristicFormatDataConverter::class
+    BleCharacteristicFormatDataConverter::class,
+    ExtraExamplesFlowConverter::class
 )
 abstract class BoardCatalogDB : RoomDatabase() {
     abstract fun boardCatalogDao(): BoardCatalogDao

@@ -256,7 +256,7 @@ fun decodeRawData(
 
                     when (formatRawPnpLEntry.format.format) {
                         RawPnPLEntryFormat.RawPnPLEntryFormat.int8_t -> {
-                            for (index in 0 until (formatRawPnpLEntry.format.elements*formatRawPnpLEntry.format.channels)) {
+                            for (index in 0 until (formatRawPnpLEntry.format.elements * formatRawPnpLEntry.format.channels)) {
                                 if (rawData.size > counter) {
 
                                     val value = rawData[counter]
@@ -274,7 +274,7 @@ fun decodeRawData(
                         }
 
                         RawPnPLEntryFormat.RawPnPLEntryFormat.uint8_t -> {
-                            for (index in 0 until (formatRawPnpLEntry.format.elements*formatRawPnpLEntry.format.channels)) {
+                            for (index in 0 until (formatRawPnpLEntry.format.elements * formatRawPnpLEntry.format.channels)) {
                                 if (rawData.size >= counter) {
 
                                     val value = NumberConversion.byteToUInt8(
@@ -295,7 +295,7 @@ fun decodeRawData(
                         }
 
                         RawPnPLEntryFormat.RawPnPLEntryFormat.uint16_t -> {
-                            for (index in 0 until (formatRawPnpLEntry.format.elements*formatRawPnpLEntry.format.channels)) {
+                            for (index in 0 until (formatRawPnpLEntry.format.elements * formatRawPnpLEntry.format.channels)) {
                                 if (rawData.size >= (counter + 2)) {
 
                                     val value = NumberConversion.LittleEndian.bytesToUInt16(
@@ -316,7 +316,7 @@ fun decodeRawData(
                         }
 
                         RawPnPLEntryFormat.RawPnPLEntryFormat.int16_t -> {
-                            for (index in 0 until (formatRawPnpLEntry.format.elements*formatRawPnpLEntry.format.channels)) {
+                            for (index in 0 until (formatRawPnpLEntry.format.elements * formatRawPnpLEntry.format.channels)) {
                                 if (rawData.size >= (counter + 2)) {
 
                                     val value = NumberConversion.LittleEndian.bytesToInt16(
@@ -337,7 +337,7 @@ fun decodeRawData(
                         }
 
                         RawPnPLEntryFormat.RawPnPLEntryFormat.uint32_t -> {
-                            for (index in 0 until (formatRawPnpLEntry.format.elements*formatRawPnpLEntry.format.channels)) {
+                            for (index in 0 until (formatRawPnpLEntry.format.elements * formatRawPnpLEntry.format.channels)) {
                                 if (rawData.size >= (counter + 4)) {
 
                                     val value = NumberConversion.LittleEndian.bytesToUInt32(
@@ -358,7 +358,7 @@ fun decodeRawData(
                         }
 
                         RawPnPLEntryFormat.RawPnPLEntryFormat.int32_t -> {
-                            for (index in 0 until (formatRawPnpLEntry.format.elements*formatRawPnpLEntry.format.channels)) {
+                            for (index in 0 until (formatRawPnpLEntry.format.elements * formatRawPnpLEntry.format.channels)) {
                                 if (rawData.size >= (counter + 4)) {
 
                                     val value = NumberConversion.LittleEndian.bytesToInt32(
@@ -379,7 +379,7 @@ fun decodeRawData(
                         }
 
                         RawPnPLEntryFormat.RawPnPLEntryFormat.float -> {
-                            for (index in 0 until (formatRawPnpLEntry.format.elements*formatRawPnpLEntry.format.channels)) {
+                            for (index in 0 until (formatRawPnpLEntry.format.elements * formatRawPnpLEntry.format.channels)) {
                                 if (rawData.size >= (counter + 4)) {
                                     var value = NumberConversion.LittleEndian.bytesToFloat(
                                         rawData,
@@ -398,7 +398,7 @@ fun decodeRawData(
                         }
 
                         RawPnPLEntryFormat.RawPnPLEntryFormat.enum -> {
-                            for (index in 0 until (formatRawPnpLEntry.format.elements*formatRawPnpLEntry.format.channels)) {
+                            for (index in 0 until (formatRawPnpLEntry.format.elements * formatRawPnpLEntry.format.channels)) {
                                 if (rawData.size > counter) {
                                     var value = NumberConversion.byteToUInt8(
                                         rawData,

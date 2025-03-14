@@ -54,6 +54,7 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOn
 import java.util.*
 import javax.inject.Inject
@@ -72,7 +73,7 @@ class BlueManagerImpl @Inject constructor(
     private val otaService: OtaService
 ) : BlueManager {
 
-    private var serverWasEnable=true
+    private var serverWasEnable = true
 
     companion object {
         private val TAG = BlueManager::class.java.simpleName
@@ -82,7 +83,9 @@ class BlueManagerImpl @Inject constructor(
 
     init {
         EXPORTED_MAP[UUID.fromString(EXPORTED_SERVICE)] = listOf(
-            ExportedAudioOpusVoiceFeature(), ExportedAudioOpusConfFeature(), ExportedAudioOpusMusicFeature()
+            ExportedAudioOpusVoiceFeature(),
+            ExportedAudioOpusConfFeature(),
+            ExportedAudioOpusMusicFeature()
         )
     }
 
@@ -94,27 +97,29 @@ class BlueManagerImpl @Inject constructor(
 
     override fun getAllLoggers(nodeId: String): List<Logger> {
         val service = nodeServiceConsumer.getNodeService(nodeId)
-            ?: throw IllegalStateException("Unable to find NodeService for $nodeId")
-
-        return service.getAllLoggers()
+        //?: throw IllegalStateException("Unable to find NodeService for $nodeId")
+        return service?.getAllLoggers() ?: listOf()
     }
 
     override fun anyFeatures(nodeId: String, features: List<String>): Boolean {
         val service = nodeServiceConsumer.getNodeService(nodeId)
-            ?: throw IllegalStateException("Unable to find NodeService for $nodeId")
-
-        return service.getNodeFeatures().any {
+        //?: throw IllegalStateException("Unable to find NodeService for $nodeId")
+        return service?.getNodeFeatures()?.any {
             features.contains(it.name)
-        }
+        } ?: false
     }
 
     override fun allFeatures(nodeId: String, features: List<String>): Boolean {
         val service = nodeServiceConsumer.getNodeService(nodeId)
-            ?: throw IllegalStateException("Unable to find NodeService for $nodeId")
+        // ?: throw IllegalStateException("Unable to find NodeService for $nodeId")
 
-        return service.getNodeFeatures().filter {
-            features.contains(it.name)
-        }.distinctBy { it.name }.size == features.distinct().size
+        return if (service == null) {
+            false
+        } else {
+            service.getNodeFeatures().filter {
+                features.contains(it.name)
+            }.distinctBy { it.name }.size == features.distinct().size
+        }
     }
 
     override fun addAllLoggers(loggers: List<Logger>) {
@@ -125,9 +130,7 @@ class BlueManagerImpl @Inject constructor(
         if (nodeId == null) {
             nodeServiceConsumer.getNodeServices().forEach { it.disableAllLoggers(loggerTags) }
         } else {
-            nodeServiceConsumer.getNodeService(nodeId)?.let { service ->
-                service.disableAllLoggers(loggerTags)
-            }
+            nodeServiceConsumer.getNodeService(nodeId)?.disableAllLoggers(loggerTags)
         }
     }
 
@@ -135,9 +138,7 @@ class BlueManagerImpl @Inject constructor(
         if (nodeId == null) {
             nodeServiceConsumer.getNodeServices().forEach { it.clearAllLoggers(loggerTags) }
         } else {
-            nodeServiceConsumer.getNodeService(nodeId)?.let { service ->
-                service.clearAllLoggers(loggerTags)
-            }
+            nodeServiceConsumer.getNodeService(nodeId)?.clearAllLoggers(loggerTags)
         }
     }
 
@@ -145,9 +146,7 @@ class BlueManagerImpl @Inject constructor(
         if (nodeId == null) {
             nodeServiceConsumer.getNodeServices().forEach { it.enableAllLoggers(loggerTags) }
         } else {
-            nodeServiceConsumer.getNodeService(nodeId)?.let { service ->
-                service.enableAllLoggers(loggerTags)
-            }
+            nodeServiceConsumer.getNodeService(nodeId)?.enableAllLoggers(loggerTags)
         }
     }
 
@@ -238,10 +237,11 @@ class BlueManagerImpl @Inject constructor(
             //List of fws update ordered by fw version
             val listOfFwUpdate = catalog.getFw(
                 deviceId = catalogInfo.bleDevId, fwName = catalogInfo.fwName
-            ).filter { it.fota.fwUrl != null }.filter { it.fwVersion > catalogInfo.fwVersion }.sortedBy { it.fwVersion }
+            ).filter { it.fota.fwUrl != null }.filter { it.fwVersion > catalogInfo.fwVersion }
+                .sortedBy { it.fwVersion }
 
             //Search if there is a mandatory update
-            val fwMandatory = listOfFwUpdate.firstOrNull { it.fota.mandatory==true }
+            val fwMandatory = listOfFwUpdate.firstOrNull { it.fota.mandatory == true }
 
             //the update will be the mandatory one, or the latest available
             val fwUpdate = fwMandatory ?: listOfFwUpdate.maxByOrNull { it.fwVersion }
@@ -312,7 +312,11 @@ class BlueManagerImpl @Inject constructor(
         nodeServiceConsumer.getNodeService(deviceAddress) != null
 
     @SuppressLint("MissingPermission")
-    override fun connectToNode(nodeId: String, maxPayloadSize: Int, enableServer: Boolean): Flow<Node> {
+    override fun connectToNode(
+        nodeId: String,
+        maxPayloadSize: Int,
+        enableServer: Boolean
+    ): Flow<Node> {
         val nodeService = nodeServiceConsumer.getNodeService(nodeId) ?: throw IllegalStateException(
             "Unable to find NodeService for $nodeId"
         )
@@ -328,14 +332,22 @@ class BlueManagerImpl @Inject constructor(
 
     override fun getNode(nodeId: String) = nodeServiceConsumer.getNodeService(nodeId)?.getNode()
 
-    override fun getNodeStatus(nodeId: String) =
-        (nodeServiceConsumer.getNodeService(nodeId)?.getDeviceStatus()
-            ?: throw IllegalStateException("Unable to find NodeService for $nodeId"))
+    override fun getNodeStatus(nodeId: String): Flow<Node> {
+        val nodeService = nodeServiceConsumer.getNodeService(nodeId)
+        if (nodeService == null) {
+            return emptyFlow<Node>()
+        } else {
+            return  nodeService.getDeviceStatus()
+        }
+//        (nodeServiceConsumer.getNodeService(nodeId)?.getDeviceStatus()
+//            ?: throw IllegalStateException("Unable to find NodeService for $nodeId"))
+    }
 
     override fun getRssi(nodeId: String) {
-        (nodeServiceConsumer.getNodeService(nodeId)?.getRssi()
-            ?: throw IllegalStateException("Unable to find NodeService for $nodeId"))
+        (nodeServiceConsumer.getNodeService(nodeId)?.getRssi())
+            //?: throw IllegalStateException("Unable to find NodeService for $nodeId"))
     }
+
     override fun isConnected(nodeId: String): Boolean =
         nodeServiceConsumer.getNodeService(nodeId)?.isConnected()
             ?: throw IllegalStateException("Unable to find NodeService for $nodeId")
@@ -360,9 +372,8 @@ class BlueManagerImpl @Inject constructor(
 
     override fun nodeFeatures(nodeId: String): List<Feature<*>> {
         val service = nodeServiceConsumer.getNodeService(nodeId)
-            ?: throw IllegalStateException("Unable to find NodeService for $nodeId")
-
-        return service.getNodeFeatures()
+        //?: throw IllegalStateException("Unable to find NodeService for $nodeId")
+        return service?.getNodeFeatures() ?: listOf()
     }
 
     override suspend fun enableFeatures(
@@ -370,9 +381,10 @@ class BlueManagerImpl @Inject constructor(
         onFeaturesEnabled: CoroutineScope.() -> Unit
     ): Boolean {
         val service = nodeServiceConsumer.getNodeService(nodeId)
-            ?: throw IllegalStateException("Unable to find NodeService for $nodeId")
+        //?: throw IllegalStateException("Unable to find NodeService for $nodeId")
 
-        return service.setFeaturesNotifications(features = features, true,onFeaturesEnabled)
+        return service?.setFeaturesNotifications(features = features, true, onFeaturesEnabled)
+            ?: false
     }
 
     override suspend fun disableFeatures(
@@ -382,7 +394,7 @@ class BlueManagerImpl @Inject constructor(
         try {
 
             val service = nodeServiceConsumer.getNodeService(nodeId)
-                //?: throw IllegalStateException("Unable to find NodeService for $nodeId")
+            //?: throw IllegalStateException("Unable to find NodeService for $nodeId")
 
             service?.let {
                 result = service.setFeaturesNotifications(features = features, false)
@@ -400,9 +412,8 @@ class BlueManagerImpl @Inject constructor(
         onFeaturesEnabled: CoroutineScope.() -> Unit
     ): Flow<FeatureUpdate<*>> {
         val service = nodeServiceConsumer.getNodeService(nodeId)
-            ?: throw IllegalStateException("Unable to find NodeService for $nodeId")
-
-        return service.getFeatureUpdates(features, autoEnable, onFeaturesEnabled)
+            //?: throw IllegalStateException("Unable to find NodeService for $nodeId")
+        return service?.getFeatureUpdates(features, autoEnable, onFeaturesEnabled) ?: emptyFlow()
     }
 
     override suspend fun readFeature(
@@ -411,51 +422,51 @@ class BlueManagerImpl @Inject constructor(
         timeout: Long
     ): List<FeatureUpdate<*>> {
         val service = nodeServiceConsumer.getNodeService(nodeId)
-            ?: throw IllegalStateException("Unable to find NodeService for $nodeId")
+        //?: throw IllegalStateException("Unable to find NodeService for $nodeId")
 
-        return service.readFeature(
+        return service?.readFeature(
             feature = feature,
             responseTimeout = timeout
         )
+            ?: listOf()
     }
 
     override suspend fun writeDebugMessage(nodeId: String, msg: String): Boolean {
         val service = nodeServiceConsumer.getNodeService(nodeId)
-            ?: throw IllegalStateException("Unable to find NodeService for $nodeId")
-
-        return service.writeDebugMessage(msg)
+        //?: throw IllegalStateException("Unable to find NodeService for $nodeId")
+        return service?.writeDebugMessage(msg) ?: false
     }
 
     override fun hasBleDebugService(nodeId: String): Boolean {
         val service = nodeServiceConsumer.getNodeService(nodeId)
-            ?: throw IllegalStateException("Unable to find NodeService for $nodeId")
-        return service.debugService.hasBleDebugService()
+        return service?.debugService?.hasBleDebugService() ?: false
     }
 
     override fun getConfigControlUpdates(nodeId: String): Flow<FeatureResponse> {
 
         val service = nodeServiceConsumer.getNodeService(nodeId)
-            ?: throw IllegalStateException("Unable to find NodeService for $nodeId")
-
-        return service.getConfigControlUpdates()
+            //?: throw IllegalStateException("Unable to find NodeService for $nodeId")
+        return service?.getConfigControlUpdates() ?: emptyFlow()
     }
 
     override fun getDebugMessages(nodeId: String): Flow<DebugMessage> {
         val service = nodeServiceConsumer.getNodeService(nodeId)
-            ?: throw IllegalStateException("Unable to find NodeService for $nodeId")
-        return service.getDebugMessages()
+           // ?: throw IllegalStateException("Unable to find NodeService for $nodeId")
+        return service?.getDebugMessages() ?: emptyFlow()
     }
 
     override fun getChunkProgressUpdates(nodeId: String): Flow<ChunkProgress> {
         val service = nodeServiceConsumer.getNodeService(nodeId)
-            ?: throw IllegalStateException("Unable to find NodeService for $nodeId")
-        return service.getChunkProgressUpdates()
+            //?: throw IllegalStateException("Unable to find NodeService for $nodeId")
+        return service?.getChunkProgressUpdates() ?: emptyFlow()
     }
 
     override suspend fun resetChunkProgressUpdates(nodeId: String) {
         val service = nodeServiceConsumer.getNodeService(nodeId)
-            ?: throw IllegalStateException("Unable to find NodeService for $nodeId")
-        service.resetChunkProgressUpdates()
+        //?: throw IllegalStateException("Unable to find NodeService for $nodeId")
+        service?.let {
+            service.resetChunkProgressUpdates()
+        }
     }
 
     override suspend fun writeFeatureCommand(
@@ -465,10 +476,9 @@ class BlueManagerImpl @Inject constructor(
         retry: Int,
         retryDelay: Long
     ): FeatureResponse? {
-        val service = nodeServiceConsumer.getNodeService(nodeId)
-            ?: throw IllegalStateException("Unable to find NodeService for $nodeId")
+        // ?: throw IllegalStateException("Unable to find NodeService for $nodeId")
 
-        return service.writeFeatureCommand(
+        return nodeServiceConsumer.getNodeService(nodeId)?.writeFeatureCommand(
             featureCommand = featureCommand,
             responseTimeout = responseTimeout,
             retry = retry,
@@ -476,23 +486,26 @@ class BlueManagerImpl @Inject constructor(
         )
     }
 
-    override suspend fun getDtmiModel(nodeId: String,isBeta: Boolean): DtmiModel? {
+    override suspend fun getDtmiModel(nodeId: String, isBeta: Boolean): DtmiModel? {
         val nodeService = nodeServiceConsumer.getNodeService(nodeId) ?: return null
         val advInfo = nodeService.getNode().advertiseInfo ?: return null
         return advInfo.getFwInfo()?.let {
-            catalog.getDtmiModel(it.deviceId, it.fwId,isBeta)
+            catalog.getDtmiModel(it.deviceId, it.fwId, isBeta)
         }
     }
 
     override suspend fun getBoardCatalog(): List<BoardFirmware> = catalog.getBoardCatalog()
 
-    override suspend fun getBoardsDescription(): List<BoardDescription>  = catalog.getBoardsDescription()
+    override suspend fun getBoardsDescription(): List<BoardDescription> =
+        catalog.getBoardsDescription()
 
-    override suspend fun reset(url: String?) {catalog.reset(url)}
+    override suspend fun reset(url: String?) {
+        catalog.reset(url)
+    }
 
     override suspend fun setBoardCatalog(
         fileUri: Uri, contentResolver: ContentResolver
-    ): Pair<List<BoardFirmware>,String?> = catalog.setBoardCatalog(fileUri, contentResolver)
+    ): Pair<List<BoardFirmware>, String?> = catalog.setBoardCatalog(fileUri, contentResolver)
 
 
     override suspend fun setDtmiModel(
@@ -521,10 +534,10 @@ class BlueManagerImpl @Inject constructor(
     }
 
     override suspend fun getSensorAdapter(uniqueId: Int): Sensor? {
-       return catalog.getSensorAdapter(uniqueId=uniqueId)
+        return catalog.getSensorAdapter(uniqueId = uniqueId)
     }
 
-    override suspend fun getBleCharacteristics() : List<BleCharacteristic> {
+    override suspend fun getBleCharacteristics(): List<BleCharacteristic> {
         return catalog.getBleCharacteristics()
     }
 
@@ -544,7 +557,7 @@ class BlueManagerImpl @Inject constructor(
     private fun connectFromNode(node: Node): Boolean {
         val server = nodeServerConsumer.getNodeServer(node.device.address)
             ?: nodeServerProducer.createServer(node, EXPORTED_MAP)
-        return if(serverWasEnable) {
+        return if (serverWasEnable) {
             server.connectToPeripheral()
         } else {
             false
@@ -554,7 +567,7 @@ class BlueManagerImpl @Inject constructor(
     private fun disconnectFromNode(nodeId: String? = null): Boolean {
         if (nodeId == null) {
             nodeServerConsumer.getNodeServers().forEach {
-                if(serverWasEnable) {
+                if (serverWasEnable) {
                     it.disconnectFromPeripheral()
                 }
             }
@@ -564,7 +577,7 @@ class BlueManagerImpl @Inject constructor(
             return true
         } else {
             nodeServerConsumer.getNodeServer(nodeId)?.let { server ->
-                if(serverWasEnable) {
+                if (serverWasEnable) {
                     server.disconnectFromPeripheral()
                 }
 

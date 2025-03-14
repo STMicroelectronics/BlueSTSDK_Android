@@ -47,10 +47,10 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             Box(Modifier.safeDrawingPadding()) {
-            MainScreen()
+                MainScreen()
+            }
         }
     }
-}
 }
 
 @Composable
