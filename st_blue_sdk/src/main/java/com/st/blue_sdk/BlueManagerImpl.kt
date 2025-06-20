@@ -257,12 +257,17 @@ class BlueManagerImpl @Inject constructor(
         } ?: node
     }
 
-    override suspend fun getNodeWithFirmwareInfo(nodeId: String): Node {
-        val nodeService = nodeServiceConsumer.getNodeService(nodeId) ?: throw IllegalStateException(
-            "Unable to find NodeService for $nodeId"
-        )
+    override suspend fun getNodeWithFirmwareInfo(nodeId: String): Node? {
+        val nodeService = nodeServiceConsumer.getNodeService(nodeId)
+        if (nodeService == null) {
+            Log.i(TAG, "Unable to find NodeService for $nodeId")
+        }
 
-        return getFirmwareInfo(nodeService)
+        return if (nodeService != null)
+            getFirmwareInfo(nodeService)
+        else {
+            null
+        }
     }
 
     override fun stopScan() {
@@ -317,16 +322,20 @@ class BlueManagerImpl @Inject constructor(
         maxPayloadSize: Int,
         enableServer: Boolean
     ): Flow<Node> {
-        val nodeService = nodeServiceConsumer.getNodeService(nodeId) ?: throw IllegalStateException(
-            "Unable to find NodeService for $nodeId"
-        )
-
+        val nodeService = nodeServiceConsumer.getNodeService(nodeId)
+        if (nodeService == null) {
+            Log.i(TAG, "Unable to find NodeService for $nodeId")
+        }
         stopScan()
 
+        if (nodeService != null) {
         serverWasEnable = enableServer
         connectFromNode(node = nodeService.bleHal.getDevice())
 
         return nodeService.connectToNode(autoConnect = false, maxPayloadSize = maxPayloadSize)
+        } else {
+            return emptyFlow()
+        }
     }
 
 
@@ -339,22 +348,27 @@ class BlueManagerImpl @Inject constructor(
         } else {
             return  nodeService.getDeviceStatus()
         }
-//        (nodeServiceConsumer.getNodeService(nodeId)?.getDeviceStatus()
-//            ?: throw IllegalStateException("Unable to find NodeService for $nodeId"))
     }
 
     override fun getRssi(nodeId: String) {
         (nodeServiceConsumer.getNodeService(nodeId)?.getRssi())
-            //?: throw IllegalStateException("Unable to find NodeService for $nodeId"))
     }
 
-    override fun isConnected(nodeId: String): Boolean =
-        nodeServiceConsumer.getNodeService(nodeId)?.isConnected()
-            ?: throw IllegalStateException("Unable to find NodeService for $nodeId")
+    override fun isConnected(nodeId: String): Boolean {
+        val nodeService = nodeServiceConsumer.getNodeService(nodeId)
+        if (nodeService == null) {
+            Log.i(TAG, "Unable to find NodeService for $nodeId")
+        }
+        return nodeService?.isConnected() == true
+    }
 
-    override fun isReady(nodeId: String): Boolean =
-        nodeServiceConsumer.getNodeService(nodeId)?.isReady()
-            ?: throw IllegalStateException("Unable to find NodeService for $nodeId")
+    override fun isReady(nodeId: String): Boolean {
+        val nodeService = nodeServiceConsumer.getNodeService(nodeId)
+        if (nodeService == null) {
+            Log.i(TAG, "Unable to find NodeService for $nodeId")
+        }
+        return nodeService?.isReady() == true
+    }
 
     @SuppressLint("MissingPermission")
     override fun disconnect(nodeId: String?) {

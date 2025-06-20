@@ -87,7 +87,7 @@ way:
     - 0x86 is reserved for the [WB] board in FOTA mode
     - 0x8B to 0x8F is reserved for ST boards
 
-You should use a value between 0x90 and 0xFF for your custom board.
+You should use a value between 0xF0 and 0xFF for your custom board.
 
 - The **Firmware ID** is a byte that uniquely identifies the firmware that runs on a specific board.
   Since the values 0x00 and 0xFF are reserved, up to 254 different firmware types can be supported

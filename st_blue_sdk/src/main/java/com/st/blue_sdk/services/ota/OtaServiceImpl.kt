@@ -172,14 +172,15 @@ class OtaServiceImpl @Inject constructor(
             if (hasOTACharacteristics(nodeId)) {
                 return when(nodeService.getNode().boardType) {
                     Boards.Model.WB55_NUCLEO_BOARD,
-                    Boards.Model.WB5M_DISCOVERY_BOARD,
+                    Boards.Model.STM32WB5MM_DK,
                     Boards.Model.WB55_USB_DONGLE_BOARD,
-                    Boards.Model.WB15_NUCLEO_BOARD,
-                    Boards.Model.WB1M_DISCOVERY_BOARD -> STM32WB_NEW_FW_UPGRADE_PROTOCOL
+                    Boards.Model.WB15CC_NUCLEO_BOARD,
+                    Boards.Model.B_WB1M_WPAN1 -> STM32WB_NEW_FW_UPGRADE_PROTOCOL
 
-                    Boards.Model.WBA5X_NUCLEO_BOARD,
-                    Boards.Model.WBA_DISCOVERY_BOARD,
-                    Boards.Model.WBA6_NUCLEO_BOARD-> STM32WBA_NEW_FW_UPGRADE_PROTOCOL
+                    Boards.Model.WB55CG_NUCLEO_BOARD,
+                    Boards.Model.STM32WBA55G_DK1,
+                    Boards.Model.STM32WBA65I_DK1,
+                    Boards.Model.WBA65RI_NUCLEO_BOARD-> STM32WBA_NEW_FW_UPGRADE_PROTOCOL
 
                     Boards.Model.WB0X_NUCLEO_BOARD -> STM32WB0X_NEW_FW_UPGRADE_PROTOCOL
 

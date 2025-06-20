@@ -69,7 +69,7 @@ interface BlueManager {
 
     fun nodeFeatures(nodeId: String): List<Feature<*>>
 
-    suspend fun getNodeWithFirmwareInfo(nodeId: String): Node
+    suspend fun getNodeWithFirmwareInfo(nodeId: String): Node?
 
     suspend fun enableFeatures(
         nodeId: String, features: List<Feature<*>>,

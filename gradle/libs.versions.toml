@@ -8,31 +8,31 @@
 [versions]
 # @pin https://github.com/google/accompanist#compose-versions
 accompanist = "0.36.0"
-accompanistPermission = "0.37.2"
-androidGradlePlugin = "8.9.0"
+accompanistPermission = "0.37.3"
+androidGradlePlugin = "8.10.1"
 # @pin https://developer.android.com/jetpack/androidx/releases/compose#versions
-androidxComposeBom = "2025.02.00"
+androidxComposeBom = "2025.06.00"
 androidxEspresso = "3.6.0-rc01"
 androidxHiltNavigationCompose = "1.2.0"
 # https://issuetracker.google.com/issues/336842920
 # @pin
-androidxLifecycle = "2.8.7"
-androidxNavigation = "2.8.8"
-androidxRoom = "2.6.1"
+androidxLifecycle = "2.9.1"
+androidxNavigation = "2.9.0"
+androidxRoom = "2.7.1"
 apacheCommons = "3.11.1"
 appauth = "0.11.1"
 benManes = "0.51.0"
-hilt = "2.55"
+hilt = "2.56.2"
 jwt = "2.0.2"
 # @pin https://developer.android.com/jetpack/androidx/releases/compose-kotlin
 kotlin = "2.0.20"
-kotlinxSerializationJson = "1.8.0"
+kotlinxSerializationJson = "1.8.1"
 # @pin
 ksp = "2.0.20-1.0.25"
 littlerobots = "0.8.4"
 material2 = "1.12.0"
 okhttp = "4.12.0"
-retrofit = "2.11.0"
+retrofit = "3.0.0"
 retrofitKotlinxSerializationJson = "1.0.0"
 jaredsburrowsLicense = "0.9.8"
 

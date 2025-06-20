@@ -21,6 +21,7 @@ import com.st.blue_sdk.features.compass.Compass
 import com.st.blue_sdk.features.direction_of_arrival.DirectionOfArrival
 import com.st.blue_sdk.features.event_counter.EventCounter
 import com.st.blue_sdk.features.extended.ai_logging.AiLogging
+import com.st.blue_sdk.features.extended.asset_tracking_event.AssetTrackingEvent
 import com.st.blue_sdk.features.extended.audio.opus.AudioOpusConfFeature
 import com.st.blue_sdk.features.extended.audio.opus.AudioOpusFeature
 import com.st.blue_sdk.features.extended.audio_classification.AudioClassification
@@ -38,7 +39,6 @@ import com.st.blue_sdk.features.extended.medical_signal.MedicalSignal16BitFeatur
 import com.st.blue_sdk.features.extended.medical_signal.MedicalSignal24BitFeature
 import com.st.blue_sdk.features.extended.motion_algorithm.MotionAlgorithm
 import com.st.blue_sdk.features.extended.motor_time_param.MotorTimeParameter
-import com.st.blue_sdk.features.extended.navigation_control.NavigationControl
 import com.st.blue_sdk.features.extended.neai_anomaly_detection.NeaiAnomalyDetection
 import com.st.blue_sdk.features.extended.neai_class_classification.NeaiClassClassification
 import com.st.blue_sdk.features.extended.neai_extrapolation.NeaiExtrapolation
@@ -83,6 +83,7 @@ import com.st.blue_sdk.features.pressure.Pressure
 import com.st.blue_sdk.features.proximity.Proximity
 import com.st.blue_sdk.features.proximity_gesture.ProximityGesture
 import com.st.blue_sdk.features.extended.raw_controlled.RawControlled
+import com.st.blue_sdk.features.extended.robotics_movement.RoboticsMovement
 import com.st.blue_sdk.features.extended.scene_description.SceneDescription
 import com.st.blue_sdk.features.remote.humidity.RemoteHumidity
 import com.st.blue_sdk.features.remote.pressure.RemotePressure
@@ -564,8 +565,9 @@ abstract class Feature<T>(
                     isEnabled = isEnabled,
                     identifier = identifier
                 )
-                0x28 -> NavigationControl(isEnabled = isEnabled, identifier = identifier)
+                0x28 -> RoboticsMovement(isEnabled = isEnabled, identifier = identifier)
                 0x29 -> SceneDescription(isEnabled = isEnabled, identifier = identifier)
+                0x30 -> AssetTrackingEvent(isEnabled = isEnabled, identifier = identifier)
 
                 else -> throw UnsupportedOperationException("$type unknown")
 

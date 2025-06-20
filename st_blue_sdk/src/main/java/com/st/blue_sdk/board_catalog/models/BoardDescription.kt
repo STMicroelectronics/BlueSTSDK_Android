@@ -55,6 +55,9 @@ data class BoardDescription(
     @ColumnInfo(name = "order_url")
     @SerialName(value = "order_url")
     val orderURL: String? = null,
+    @ColumnInfo(name = "wiki_url")
+    @SerialName(value = "wiki_url")
+    val wikiURL: String? = null,
     @ColumnInfo(name = "video_url")
     @SerialName(value = "video_url")
     val videoURL: String? = null,
