@@ -173,7 +173,7 @@ fun readRawPnPLFormat(
                                         )
 
                                     //Try to decode the Enum Format
-                                    if (format.format == RawPnPLEntryFormat.RawPnPLEntryFormat.enum) {
+                                    if ((format.format == RawPnPLEntryFormat.RawPnPLEntryFormat.enum)  || (format.format == RawPnPLEntryFormat.RawPnPLEntryFormat.enum_t)){
                                         try {
                                             val customString =
                                                 (singleEntry.value as JsonObject)["labels"]?.jsonPrimitive?.content
@@ -378,7 +378,8 @@ fun decodeRawData(
                             }
                         }
 
-                        RawPnPLEntryFormat.RawPnPLEntryFormat.float -> {
+                        RawPnPLEntryFormat.RawPnPLEntryFormat.float,
+                        RawPnPLEntryFormat.RawPnPLEntryFormat.float_t-> {
                             for (index in 0 until (formatRawPnpLEntry.format.elements * formatRawPnpLEntry.format.channels)) {
                                 if (rawData.size >= (counter + 4)) {
                                     var value = NumberConversion.LittleEndian.bytesToFloat(
@@ -397,7 +398,8 @@ fun decodeRawData(
                             }
                         }
 
-                        RawPnPLEntryFormat.RawPnPLEntryFormat.enum -> {
+                        RawPnPLEntryFormat.RawPnPLEntryFormat.enum,
+                        RawPnPLEntryFormat.RawPnPLEntryFormat.enum_t-> {
                             for (index in 0 until (formatRawPnpLEntry.format.elements * formatRawPnpLEntry.format.channels)) {
                                 if (rawData.size > counter) {
                                     var value = NumberConversion.byteToUInt8(

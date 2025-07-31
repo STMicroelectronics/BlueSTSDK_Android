@@ -17,10 +17,25 @@ apply {
 
 android {
     namespace = "com.st.BlueSTSDK.Features.Audio.Opus"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         minSdk = 26
+        ndk {
+            abiFilters.addAll(listOf("arm64-v8a", "armeabi-v7a","x86", "x86_64")) // Add what you need
+        }
+    }
+
+    defaultConfig {
+        // This block is different from the one you use to link Gradle
+        // to your CMake or ndk-build script.
+        externalNativeBuild {
+            // For ndk-build, instead use the ndkBuild block.
+            cmake {
+                // Passes optional arguments to CMake.
+                arguments += listOf("-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON")
+            }
+        }
     }
 
     buildTypes {
@@ -41,6 +56,13 @@ android {
     sourceSets {
         getByName("main") {
             jniLibs.srcDir("src/main/jniLibs")
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path = file("src/main/cpp/CMakeLists.txt")
+            version = "3.22.1"
         }
     }
 

@@ -13,7 +13,7 @@ package com.st.BlueSTSDK.Features.Audio.Opus
 class OpusManager {
 
     init {
-        System.loadLibrary("opusUser")
+        System.loadLibrary("opusinterface")
     }
 
     fun decoderInit(sampFreq: Int, channels: Int): Int = OpusDecInit(sampFreq, channels)
@@ -50,7 +50,7 @@ class OpusManager {
         channels: Int
     ) = OpusEncode(input, encodedFrameSize, frameSizePcm, channels)
 
-    private external fun OpusEncode(
+    external fun OpusEncode(
         input: ShortArray,
         encodedFrameSize: Int,
         frameSizePcm: Int,

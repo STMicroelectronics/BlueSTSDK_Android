@@ -29,7 +29,7 @@ object ApiModule {
             context,
             BoardCatalogDB::class.java,
             "blue_st_sdk_db"
-        ).fallbackToDestructiveMigration().build()
+            ).fallbackToDestructiveMigration(true).build()
 
     @Provides
     @Singleton

@@ -50,7 +50,9 @@ data class RawPnPLEntryFormat(
         uint32_t,
         int32_t,
         float,
-        enum
+        float_t,
+        enum,
+        enum_t
     }
 }
 

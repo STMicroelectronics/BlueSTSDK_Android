@@ -82,7 +82,7 @@ class AudioScreenViewModel @Inject constructor(
                 }
         }
 
-        return audioService.startDecondingIncomingAudioStream(nodeId).transform {
+        return audioService.startDecodingIncomingAudioStream(nodeId).transform {
             emit(it.toByteArray())
         }
     }

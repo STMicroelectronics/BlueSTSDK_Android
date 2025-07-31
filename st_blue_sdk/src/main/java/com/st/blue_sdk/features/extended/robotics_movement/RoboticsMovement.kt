@@ -63,7 +63,7 @@ class RoboticsMovement(
             RobotDirection.RIGHT -> 82 // 'R'
             RobotDirection.STOP -> 83 // 'S'
 
-            else -> throw IllegalArgumentException("Unknown command type: $direction")
+            //else -> throw IllegalArgumentException("Unknown command type: $direction")
         }
 
         fun byteArrayToUInt32(data: ByteArray, dataOffset: Int): UInt {

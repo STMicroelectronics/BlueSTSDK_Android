@@ -4,7 +4,7 @@ Module for creating the BlueST-SDK library
 
 ## For using it
 
-Code compiled using gradle 8.11.1
+Code compiled using gradle 8.14.3
 
 set on Gradle properties the Github Login name and SSO authentication
 Example:

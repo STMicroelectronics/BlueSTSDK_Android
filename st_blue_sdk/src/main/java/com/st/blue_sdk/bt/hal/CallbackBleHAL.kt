@@ -34,6 +34,7 @@ import com.st.blue_sdk.models.RssiData
 import com.st.blue_sdk.utils.hasBluetoothPermission
 import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.channels.BufferOverflow
@@ -580,6 +581,7 @@ class CallbackBleHAL(
         }
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     private fun attachGattBridgeListeners() {
 
         gattBridge.setConnectionListener { connected ->

@@ -40,9 +40,7 @@ class AudioCodecManagerProviderImpl @Inject constructor(
 
     override fun removeAudioCodecManager(nodeId: String): Boolean {
 
-        getAudioCodecManager(nodeId)?.let {
-            it.destroy()
-        }
+        getAudioCodecManager(nodeId)?.destroy()
 
         return mapManager.remove(nodeId) != null
     }

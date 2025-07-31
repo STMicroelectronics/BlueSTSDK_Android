@@ -20,7 +20,7 @@ apply {
 
 android {
     namespace = "com.st.blue_sdk"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         minSdk = 26

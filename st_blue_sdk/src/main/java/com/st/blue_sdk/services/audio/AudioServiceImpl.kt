@@ -182,7 +182,7 @@ class AudioServiceImpl @Inject constructor(
         ) == true
     }
 
-    override fun startDecondingIncomingAudioStream(nodeId: String): Flow<ShortArray> {
+    override fun startDecodingIncomingAudioStream(nodeId: String): Flow<ShortArray> {
 
         val nodeService = nodeServiceConsumer.getNodeService(nodeId = nodeId)
         if (nodeService == null) {
@@ -228,7 +228,9 @@ class AudioServiceImpl @Inject constructor(
         }
 
         if ((nodeServer != null) && (audioCodecManager != null)) {
+//            Log.i("sendAudioStream","sending = ${data.toList()}")
         val codedData = audioCodecManager.encode(data = data)
+//            Log.i("sendAudioStream","sending2= ${codedData.toList()}")
         val pack = BlueVoiceOpusTransportProtocol.packData(codedData, nodeServer.maxPayloadSize)
         var result = true
         pack.forEach {
@@ -295,7 +297,7 @@ class AudioServiceImpl @Inject constructor(
 
         val features = nodeService?.getNodeFeatures()?.filter {
             featuresNames.contains(it.name)
-        } ?: listOf<Feature<*>>()
+        } ?: listOf()
 
         coroutineScope.launch { nodeService?.setFeaturesNotifications(features, false) }
 

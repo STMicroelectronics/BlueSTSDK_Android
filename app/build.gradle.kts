@@ -18,14 +18,14 @@ plugins {
 
 android {
     namespace = "com.st.demo"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.st.demo"
         minSdk = 26
-        targetSdk = 35
-        versionCode = 10
-        versionName = "5.2.10"
+        targetSdk = 36
+        versionCode = 12
+        versionName = "5.2.12"
 
         vectorDrawables { useSupportLibrary = true }
 
@@ -57,9 +57,6 @@ android {
         compose = true
     }
 
-    composeCompiler {
-        enableStrongSkippingMode = true
-    }
 
     ksp {
         arg("room.schemaLocation", "$projectDir/schemas")

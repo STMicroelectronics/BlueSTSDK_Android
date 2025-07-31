@@ -68,6 +68,7 @@ data class SubSensorStatusParam private constructor(
     }
 }
 
+@ConsistentCopyVisibility
 @Serializable
 data class HSDCmd private constructor(
     @SerialName("command")

@@ -29,7 +29,7 @@ object ApiModule {
             context,
             LoggerDB::class.java,
             "logger_db"
-        ).fallbackToDestructiveMigration().build()
+        ).fallbackToDestructiveMigration(true).build()
 
     @Provides
     @Singleton

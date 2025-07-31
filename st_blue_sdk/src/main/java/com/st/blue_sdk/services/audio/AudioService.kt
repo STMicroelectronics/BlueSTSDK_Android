@@ -23,7 +23,7 @@ interface AudioService {
     fun enableAudio(nodeId: String): Boolean
 
     fun disableAudio(nodeId: String): Boolean
-    fun startDecondingIncomingAudioStream(nodeId: String): Flow<ShortArray>
+    fun startDecodingIncomingAudioStream(nodeId: String): Flow<ShortArray>
 
     fun setEncodeParams(nodeId: String, params: EncodeParams)
 
