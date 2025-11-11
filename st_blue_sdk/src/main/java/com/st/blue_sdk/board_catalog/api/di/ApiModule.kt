@@ -41,18 +41,19 @@ object ApiModule {
     @Provides
     @StAppVersion
     fun provideStAppVersion(@ApplicationContext applicationContext: Context): String =
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            applicationContext.packageManager.getPackageInfo(
-                applicationContext.packageName,
-                PackageManager.PackageInfoFlags.of(0)
-            )
-        } else {
-            @Suppress("DEPRECATION")
-            applicationContext.packageManager.getPackageInfo(
-                applicationContext.packageName,
-                0
-            )
-        }.versionName?.replaceAfterLast('.',"0") ?: "1.0.0"
+        BuildConfig.PROD_CATALOG_VERSION
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+//            applicationContext.packageManager.getPackageInfo(
+//                applicationContext.packageName,
+//                PackageManager.PackageInfoFlags.of(0)
+//            )
+//        } else {
+//            @Suppress("DEPRECATION")
+//            applicationContext.packageManager.getPackageInfo(
+//                applicationContext.packageName,
+//                0
+//            )
+//        }.versionName?.replaceAfterLast('.',"0") ?: "1.0.0"
 
     @RetrofitBasePath
     @Provides

@@ -71,7 +71,7 @@ fun retAccelerationTypeCode(accEvent: AccelerationType) = when (accEvent) {
     AccelerationType.SingleTap -> 1.shl(5)
     AccelerationType.DoubleTap -> 1.shl(6)
     AccelerationType.WakeUp -> 1.shl(7)
-    AccelerationType.Pedometer -> 1.shl(8)
+    //AccelerationType.Pedometer -> 1.shl(8)
     else -> 0
 }
 
@@ -87,6 +87,6 @@ fun getAccelerationType(accCode: Int) = when (accCode) {
     1.shl(5) -> AccelerationType.SingleTap
     1.shl(6) -> AccelerationType.DoubleTap
     1.shl(7) -> AccelerationType.WakeUp
-    1.shl(8) -> AccelerationType.Pedometer
+    //1.shl(8) -> AccelerationType.Pedometer
     else -> AccelerationType.NoEvent
 }

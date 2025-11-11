@@ -22,6 +22,7 @@ import com.st.blue_sdk.features.FeatureUpdate
 import com.st.blue_sdk.logger.Logger
 import com.st.blue_sdk.models.ChunkProgress
 import com.st.blue_sdk.models.Node
+import com.st.blue_sdk.models.LeNode
 import com.st.blue_sdk.services.debug.DebugMessage
 import com.st.blue_sdk.services.fw_version.FwVersionBoard
 import com.st.blue_sdk.services.ota.FwConsole
@@ -46,6 +47,8 @@ interface BlueManager {
     fun clearAllLoggers(nodeId: String? = null, loggerTags: List<String>)
 
     suspend fun scanNodes(): Flow<Resource<List<Node>>>
+
+    suspend fun scanLeNodes(): Flow<Resource<List<LeNode>>>
 
     fun stopScan()
 
@@ -115,7 +118,9 @@ interface BlueManager {
 
     suspend fun getBoardsDescription(): List<BoardDescription>
 
-    suspend fun reset(url: String? = null)
+    suspend fun reset(url: String? = null,hideNotReleaseFwMaturity: Boolean?=null)
+
+    suspend fun setHideNotReleaseFwMaturity(hideNotReleaseFwMaturity: Boolean)
 
     suspend fun getDtmiModel(nodeId: String, isBeta: Boolean): DtmiModel?
 

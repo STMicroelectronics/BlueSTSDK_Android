@@ -38,20 +38,22 @@ class AccelerationEvent(
         require(data.size - dataOffset > 2) { "There are not enough bytes available to read for $name feature" }
 
         //Extract Event&Pedometer data
+        val numSteps = NumberConversion.LittleEndian.bytesToUInt16(
+            data,
+            dataOffset + 1
+        )
+
         val accEvent =
             AccelerationEventInfo(
                 accEvent = getListAccelerationType(
                     NumberConversion.byteToUInt8(
                         data,
                         dataOffset
-                    ).toInt()
+                    ).toInt(),
+                    numSteps!=0
                 ),
                 numSteps = FeatureField(
-                    value = NumberConversion.LittleEndian.bytesToUInt16(
-                        data,
-                        dataOffset + 1
-                    )
-                        .toShort(),
+                    value = numSteps.toShort(),
                     name = "Steps"
                 ),
             )
@@ -62,7 +64,7 @@ class AccelerationEvent(
         )
     }
 
-    private fun getListAccelerationType(accEvent: Int): List<FeatureField<AccelerationType>> {
+    private fun getListAccelerationType(accEvent: Int, addPedometer: Boolean): List<FeatureField<AccelerationType>> {
         val accEventList: MutableList<FeatureField<AccelerationType>> = mutableListOf()
 
         //Add Orientation Event
@@ -86,6 +88,15 @@ class AccelerationEvent(
                     )
                 )
             }
+        }
+
+        if(addPedometer) {
+            accEventList.add(
+                FeatureField(
+                    value = AccelerationType.Pedometer,
+                    name = "Acc Event"
+                )
+            )
         }
 
         return accEventList.toList()

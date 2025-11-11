@@ -22,6 +22,8 @@ data class BoardCatalog(
     val date: Date? = null,
     @SerialName(value = "version")
     val version: String? = null,
+    @SerialName(value = "stable_release")
+    val stableRelease: Boolean? = true,
     @SerialName(value = "checksum")
     val checksum: String? = null,
     @SerialName(value = "bluestsdk_v2")

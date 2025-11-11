@@ -28,7 +28,7 @@ import com.st.blue_sdk.board_catalog.models.BoardFirmware
 import com.st.blue_sdk.board_catalog.models.Sensor
 
 @Database(
-    version = 23,
+    version = 24,
     exportSchema = true,
     entities = [
         BoardFirmware::class,

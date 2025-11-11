@@ -25,6 +25,8 @@ import com.st.blue_sdk.board_catalog.models.Sensor
 import com.st.blue_sdk.bt.advertise.AdvertiseFilter
 import com.st.blue_sdk.bt.advertise.BlueNRGAdvertiseFilter
 import com.st.blue_sdk.bt.advertise.BlueSTSDKAdvertiseFilter
+import com.st.blue_sdk.bt.advertise.LeAdvertiseFilter
+import com.st.blue_sdk.bt.advertise.LeBlueSTSDKAdvertiseFilter
 import com.st.blue_sdk.bt.advertise.getFwInfo
 import com.st.blue_sdk.common.Resource
 import com.st.blue_sdk.features.Feature
@@ -37,6 +39,7 @@ import com.st.blue_sdk.features.exported.ExportedAudioOpusVoiceFeature
 import com.st.blue_sdk.features.exported.ExportedFeature
 import com.st.blue_sdk.logger.Logger
 import com.st.blue_sdk.models.ChunkProgress
+import com.st.blue_sdk.models.LeNode
 import com.st.blue_sdk.models.Node
 import com.st.blue_sdk.services.NodeServerConsumer
 import com.st.blue_sdk.services.NodeServerProducer
@@ -63,7 +66,7 @@ import javax.inject.Singleton
 
 @Singleton
 class BlueManagerImpl @Inject constructor(
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context,
     private val bleManager: BluetoothManager,
     private val catalog: BoardCatalogRepo,
     private val nodeServiceConsumer: NodeServiceConsumer,
@@ -222,6 +225,77 @@ class BlueManagerImpl @Inject constructor(
         emit(Resource.error(R.string.blue_st_sdk_error_ble_scan_failed, data = null))
     }
 
+    val leList = mutableListOf<LeNode>()
+
+    @SuppressLint("MissingPermission")
+    override suspend fun scanLeNodes(): Flow<Resource<List<LeNode>>> = callbackFlow {
+
+        if (context.hasBluetoothPermission().not()) {
+            throw IllegalStateException("Missing BlueTooth Permissions")
+        }
+
+        stopDeviceScan = false
+        leList.clear()
+
+        val bleScanner = bleManager.adapter.bluetoothLeScanner
+
+        trySend(Resource.loading())
+
+        val scanCallback = object : ScanCallback() {
+            override fun onScanFailed(errorCode: Int) {
+                super.onScanFailed(errorCode)
+                bleScanner.stopScan(this)
+                trySend(
+                    Resource.error(
+                        R.string.blue_st_sdk_error_ble_scan_failed, errorCode, null
+                    )
+                )
+                close()
+            }
+
+            override fun onScanResult(callbackType: Int, result: ScanResult?) {
+                super.onScanResult(callbackType, result)
+                result?.let {
+                    if (stopDeviceScan.not()) {
+                        if (createOrUpdateLeDeviceToCollection(listOf(LeBlueSTSDKAdvertiseFilter()), it)) {
+                            launch {
+                                trySend(
+                                    Resource.loading(leList)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        val scanSettings =
+            ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).build()
+
+        bleScanner.startScan(listOf(), scanSettings, scanCallback)
+
+        launch {
+            withTimeoutOrNull(scanPeriod) {
+                while (stopDeviceScan.not()) {
+                    delay(200)
+                }
+            }
+
+            trySend(
+                Resource.success(leList)
+            )
+            close()
+        }
+
+        awaitClose {
+            bleScanner.stopScan(scanCallback)
+        }
+
+    }.flowOn(Dispatchers.IO).catch { e ->
+        Log.e(TAG, "scan exception", e)
+        emit(Resource.error(R.string.blue_st_sdk_error_ble_scan_failed, data = null))
+    }
+
     private suspend fun getNodes(services: List<NodeService>): List<Node> =
         services.map { service -> getFirmwareInfo(service) }
 
@@ -313,6 +387,38 @@ class BlueManagerImpl @Inject constructor(
         return false
     }
 
+    @Synchronized
+    private fun createOrUpdateLeDeviceToCollection(
+        filters: List<LeAdvertiseFilter>, scanResult: ScanResult
+    ): Boolean {
+
+        val advertisingData = scanResult.scanRecord ?: return false
+
+        if (filters.isNotEmpty()) {
+            val nodeId = scanResult.device.address
+            val advertiseInfo =
+                filters.asSequence().map { it.decodeAdvertiseData( nodeId,advertisingData.bytes) }
+                    .filter { advInfo -> advInfo != null }.firstOrNull() ?: return false
+
+            //check if there is already one device
+            val address = leList.indexOfFirst {it -> it.device.address == scanResult.device.address}
+
+            if(address != -1){
+                //Update the device
+                leList[address] = LeNode(scanResult.device, advertiseInfo)
+            } else {
+                //Add new device
+                leList.add(LeNode(scanResult.device, advertiseInfo))
+            }
+
+            //leList.add(LeNode(scanResult.device, advertiseInfo))
+
+            return true
+        }
+
+        return false
+    }
+
     private fun hasService(deviceAddress: String) =
         nodeServiceConsumer.getNodeService(deviceAddress) != null
 
@@ -329,10 +435,10 @@ class BlueManagerImpl @Inject constructor(
         stopScan()
 
         if (nodeService != null) {
-        serverWasEnable = enableServer
-        connectFromNode(node = nodeService.bleHal.getDevice())
+            serverWasEnable = enableServer
+            connectFromNode(node = nodeService.bleHal.getDevice())
 
-        return nodeService.connectToNode(autoConnect = false, maxPayloadSize = maxPayloadSize)
+            return nodeService.connectToNode(autoConnect = false, maxPayloadSize = maxPayloadSize)
         } else {
             return emptyFlow()
         }
@@ -346,7 +452,7 @@ class BlueManagerImpl @Inject constructor(
         if (nodeService == null) {
             return emptyFlow<Node>()
         } else {
-            return  nodeService.getDeviceStatus()
+            return nodeService.getDeviceStatus()
         }
     }
 
@@ -426,7 +532,7 @@ class BlueManagerImpl @Inject constructor(
         onFeaturesEnabled: CoroutineScope.() -> Unit
     ): Flow<FeatureUpdate<*>> {
         val service = nodeServiceConsumer.getNodeService(nodeId)
-            //?: throw IllegalStateException("Unable to find NodeService for $nodeId")
+        //?: throw IllegalStateException("Unable to find NodeService for $nodeId")
         return service?.getFeatureUpdates(features, autoEnable, onFeaturesEnabled) ?: emptyFlow()
     }
 
@@ -459,19 +565,19 @@ class BlueManagerImpl @Inject constructor(
     override fun getConfigControlUpdates(nodeId: String): Flow<FeatureResponse> {
 
         val service = nodeServiceConsumer.getNodeService(nodeId)
-            //?: throw IllegalStateException("Unable to find NodeService for $nodeId")
+        //?: throw IllegalStateException("Unable to find NodeService for $nodeId")
         return service?.getConfigControlUpdates() ?: emptyFlow()
     }
 
     override fun getDebugMessages(nodeId: String): Flow<DebugMessage> {
         val service = nodeServiceConsumer.getNodeService(nodeId)
-           // ?: throw IllegalStateException("Unable to find NodeService for $nodeId")
+        // ?: throw IllegalStateException("Unable to find NodeService for $nodeId")
         return service?.getDebugMessages() ?: emptyFlow()
     }
 
     override fun getChunkProgressUpdates(nodeId: String): Flow<ChunkProgress> {
         val service = nodeServiceConsumer.getNodeService(nodeId)
-            //?: throw IllegalStateException("Unable to find NodeService for $nodeId")
+        //?: throw IllegalStateException("Unable to find NodeService for $nodeId")
         return service?.getChunkProgressUpdates() ?: emptyFlow()
     }
 
@@ -513,8 +619,12 @@ class BlueManagerImpl @Inject constructor(
     override suspend fun getBoardsDescription(): List<BoardDescription> =
         catalog.getBoardsDescription()
 
-    override suspend fun reset(url: String?) {
-        catalog.reset(url)
+    override suspend fun reset(url: String?, hideNotReleaseFwMaturity: Boolean?) {
+        catalog.reset(url = url, hideNotReleaseFwMaturity = hideNotReleaseFwMaturity)
+    }
+
+    override suspend fun setHideNotReleaseFwMaturity(hideNotReleaseFwMaturity: Boolean) {
+        catalog.setHideNotReleaseFwMaturity(hideNotReleaseFwMaturity)
     }
 
     override suspend fun setBoardCatalog(

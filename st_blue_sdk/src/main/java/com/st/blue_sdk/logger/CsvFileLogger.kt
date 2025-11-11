@@ -19,7 +19,7 @@ import javax.inject.Singleton
 
 @Singleton
 class CsvFileLogger @Inject constructor(
-    @LogDirectoryPath private val logDirectoryPath: String,
+    @param:LogDirectoryPath private val logDirectoryPath: String,
 ) : Logger {
     companion object {
         const val TAG = "CsvFileLogger"

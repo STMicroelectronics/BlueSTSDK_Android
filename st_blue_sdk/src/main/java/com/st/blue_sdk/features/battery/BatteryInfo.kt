@@ -7,6 +7,7 @@
  */
 package com.st.blue_sdk.features.battery
 
+import androidx.room.util.getColumnIndex
 import com.st.blue_sdk.features.FeatureField
 import com.st.blue_sdk.logger.Loggable
 import kotlinx.serialization.Serializable

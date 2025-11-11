@@ -9,6 +9,7 @@ package com.st.blue_sdk.services.fw_version
 
 import kotlinx.serialization.Serializable
 import java.util.regex.Pattern
+import kotlin.math.min
 
 @Serializable
 class FwVersionBoard : FwVersion, Comparable<FwVersion> {
@@ -20,11 +21,29 @@ class FwVersionBoard : FwVersion, Comparable<FwVersion> {
     constructor(version: String) {
         val matcher = PARSE_FW_VERSION.matcher(version)
         if (!matcher.matches()) throw IllegalArgumentException()
-        mcuType = matcher.group(1)
-        boardName = matcher.group(2)
-        super.majorVersion = Integer.decode(matcher.group(3))
-        super.minorVersion = Integer.decode(matcher.group(4))
-        super.patchVersion = Integer.decode(matcher.group(5))
+
+
+        val type = matcher.group(1)
+        val name = matcher.group(2)
+
+        if((type!=null) && (name!= null)) {
+            mcuType = type
+            boardName = name
+        } else {
+            throw IllegalArgumentException()
+        }
+
+        val majorVersion =  matcher.group(3)
+        val minorVersion =  matcher.group(4)
+        val patchVersion =  matcher.group(5)
+
+        if((majorVersion!=null) && (minorVersion!= null) && (patchVersion!= null)) {
+            super.majorVersion = Integer.decode(majorVersion)
+            super.minorVersion = Integer.decode(minorVersion)
+            super.patchVersion = Integer.decode(patchVersion)
+        } else {
+            throw IllegalArgumentException()
+        }
     }
 
     constructor(

@@ -8,7 +8,9 @@
 <resources>
     <string name="app_name">STBleSDK</string>
 
-    <string name="st_deviceList_title">Ble Device List:</string>
+    <string name="st_deviceList_title">BLE Device List:</string>
+
+    <string name="st_le_deviceList_title">BLE LE Device List:</string>
 
     <string name="st_audioScreenTitle">Audio Screen</string>
     <string name="st_testAudio">Test\nAudio</string>

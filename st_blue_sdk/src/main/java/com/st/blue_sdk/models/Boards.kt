@@ -83,13 +83,13 @@ object Boards {
         STM32WBA55G_DK1, //0x8C
         WBA65RI_NUCLEO_BOARD, //0x8E
         STM32WBA65I_DK1, //0x92
-
-        /** WBA Boards Not yet supported */
         WBA2_NUCLEO_BOARD, //0x90
-        B_WBA5M_WPAN, //0x91
+        /** ST67W6X WBA+Wi-Fi board*/
+        ST67W6X, //0x9A
 
-        /** X_NUCLEO_67W61M WBA+Wi-Fi board Not yet supported */
-        X_NUCLEO_67W61M, //0x9A
+
+        /** WB Boards Not yet supported */
+        B_WBA5M_WPAN, //0x91
 
         /** Nucleo with STM32WB0X */
         WB0X_NUCLEO_BOARD, //0x8D
@@ -145,7 +145,7 @@ object Boards {
             Model.NUCLEO_L053R8,
             Model.NUCLEO_F446RE,
             Model.NUCLEO_U575ZIQ,
-            Model.NUCLEO_U5A5ZJQ-> Family.NUCLEO_FAMILY
+            Model.NUCLEO_U5A5ZJQ -> Family.NUCLEO_FAMILY
 
             Model.WB55_NUCLEO_BOARD,
             Model.STM32WB5MM_DK,
@@ -156,11 +156,11 @@ object Boards {
             Model.WB55CG_NUCLEO_BOARD,
             Model.STM32WBA55G_DK1,
             Model.STM32WBA65I_DK1,
-            Model.WBA65RI_NUCLEO_BOARD -> Family.WBA_FAMILY
-
+            Model.WBA65RI_NUCLEO_BOARD,
             Model.WBA2_NUCLEO_BOARD,
-            Model.B_WBA5M_WPAN,
-            Model.X_NUCLEO_67W61M -> Family.WB_NOT_YET_SUPPORTED
+            Model.ST67W6X -> Family.WBA_FAMILY
+
+            Model.B_WBA5M_WPAN -> Family.WB_NOT_YET_SUPPORTED
 
             Model.WB0X_NUCLEO_BOARD,
             Model.GENERIC,
@@ -207,7 +207,7 @@ object Boards {
                     0x90 -> Model.WBA2_NUCLEO_BOARD
                     0x91 -> Model.B_WBA5M_WPAN
                     0x92 -> Model.STM32WBA65I_DK1
-                    0x9A -> Model.X_NUCLEO_67W61M
+                    0x9A -> Model.ST67W6X
                     else -> {
                         if (temp in 0x81..0x8A) {
                             Model.WB55_NUCLEO_BOARD
@@ -265,7 +265,7 @@ object Boards {
                     0x90 -> Model.WBA2_NUCLEO_BOARD
                     0x91 -> Model.B_WBA5M_WPAN
                     0x92 -> Model.STM32WBA65I_DK1
-                    0x9A -> Model.X_NUCLEO_67W61M
+                    0x9A -> Model.ST67W6X
 
 
                     else -> Model.GENERIC

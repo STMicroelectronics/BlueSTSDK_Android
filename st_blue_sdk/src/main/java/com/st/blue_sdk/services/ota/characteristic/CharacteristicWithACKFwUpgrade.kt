@@ -518,10 +518,21 @@ class CharacteristicWithACKFwUpgrade(
             // checksum:1 byte + payload:fw_image_packet_size byte +  needsAck:1 byte + SeqNum:2 byte
             val payload = ByteArray(fwImagePacketSize)
             val writtenDataCount = localSeqNumber * fwImagePacketSize
+
+
             val copyLength =
                 min(fwImagePacketSize, (fileDescriptor.length - writtenDataCount).toInt())
 
-            System.arraycopy(fileData, writtenDataCount, payload, 0, copyLength)
+            if(copyLength<=0) {
+                //for fixing crash like
+                //console.firebase.google.com/project/bluems-b07aa/crashlytics/app/android:com.st.bluems/issues/7c82eeb8884dd7aba4a19938dd0fa481?time=7d&types=crash&sessionEventKey=68E507E6025E00011AA02FEF12BA17DC_2136901913591678020
+                startAckTimeout()
+                break
+            }
+
+            fileData?.let { data ->
+                System.arraycopy(data, writtenDataCount, payload, 0, copyLength)
+            }
 
             val needsAck: Byte = if (i == endIndex - 1) 1 else 0
             val seqNumber = NumberConversion.LittleEndian.uint16ToBytes(localSeqNumber)
@@ -532,7 +543,7 @@ class CharacteristicWithACKFwUpgrade(
             val message = byteArrayOf(checksum) + temp
 
             //Log.i("BlueNRGFota","SeqNum=${localSeqNumber}Message = ${message.contentToString()}")
-            val writeCommand = ImageTUUpload(feature as NewImageTUContentFeature, message)
+            val writeCommand = ImageTUUpload(feature, message)
             nodeService.writeFeatureCommand(featureCommand = writeCommand, responseTimeout = 5)
             if (needsAck == 0.toByte()) {
                 localSeqNumber++

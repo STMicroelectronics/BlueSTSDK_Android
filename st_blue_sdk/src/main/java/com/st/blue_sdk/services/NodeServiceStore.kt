@@ -24,7 +24,7 @@ import javax.inject.Singleton
 
 @Singleton
 class NodeServiceStore @Inject constructor(
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context,
     private val coroutineScope: CoroutineScope,
     private val catalog: BoardCatalogRepo,
     private val loggers: Set<@JvmSuppressWildcards Logger>

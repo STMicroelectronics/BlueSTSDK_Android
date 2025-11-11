@@ -11,11 +11,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.st.blue_sdk.BlueManager
 import com.st.blue_sdk.common.Status
+import com.st.blue_sdk.models.LeNode
 import com.st.blue_sdk.models.Node
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -25,19 +28,43 @@ class BleDeviceListViewModel @Inject constructor(
 ) : ViewModel() {
 
     val scanBleDevices = MutableStateFlow<List<Node>>(emptyList())
+    val scanBleLeDevices = MutableStateFlow<Pair<Long,List<LeNode>>>(Pair(0L,emptyList()))
     val isLoading = MutableStateFlow(false)
+
+    private val _isLEScanning = MutableStateFlow(false)
+    val isLEScanning = _isLEScanning.asStateFlow()
+
+    fun scanSelectedDevicesType() {
+        startScan(_isLEScanning.value)
+    }
 
     private var scanPeripheralJob: Job? = null
 
-    fun startScan() {
-        scanPeripheralJob?.cancel()
-        scanPeripheralJob = viewModelScope.launch {
-            blueManager.scanNodes().map {
-                isLoading.tryEmit(it.status == Status.LOADING)
+    fun startScan(leDevices: Boolean) {
+        _isLEScanning.update { leDevices }
 
-                it.data ?: emptyList()
-            }.collect {
-                scanBleDevices.tryEmit(it)
+        if(!leDevices) {
+            scanPeripheralJob?.cancel()
+            scanBleLeDevices.tryEmit(Pair(System.currentTimeMillis(),emptyList()))
+            scanPeripheralJob = viewModelScope.launch {
+                blueManager.scanNodes().map {
+                    isLoading.tryEmit(it.status == Status.LOADING)
+
+                    it.data ?: emptyList()
+                }.collect {
+                    scanBleDevices.tryEmit(it)
+                }
+            }
+        } else {
+            scanPeripheralJob?.cancel()
+            scanBleDevices.tryEmit(emptyList())
+            scanPeripheralJob = viewModelScope.launch {
+                blueManager.scanLeNodes().map {
+                    isLoading.tryEmit(it.status == Status.LOADING)
+                    it.data ?: emptyList()
+                }.collect {
+                    scanBleLeDevices.tryEmit(Pair(System.currentTimeMillis(),it))
+                }
             }
         }
     }

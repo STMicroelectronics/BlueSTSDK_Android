@@ -19,7 +19,7 @@ import javax.inject.Singleton
 
 @Singleton
 class NodeServerStore @Inject constructor(
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context,
     private val bleManager: BluetoothManager
 ) : NodeServerConsumer, NodeServerProducer {
 

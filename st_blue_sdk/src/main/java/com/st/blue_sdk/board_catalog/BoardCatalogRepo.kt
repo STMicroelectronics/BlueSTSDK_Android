@@ -16,7 +16,9 @@ import com.st.blue_sdk.board_catalog.models.DtmiModel
 import com.st.blue_sdk.board_catalog.models.Sensor
 
 interface BoardCatalogRepo {
-    suspend fun reset(url: String?=null)
+    suspend fun reset(url: String?=null,hideNotReleaseFwMaturity: Boolean?=null)
+
+    suspend fun setHideNotReleaseFwMaturity(hideNotReleaseFwMaturity: Boolean)
 
     suspend fun getBoardCatalog(): List<BoardFirmware>
 

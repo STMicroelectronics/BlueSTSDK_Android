@@ -10,7 +10,7 @@ apply plugin: 'maven-publish'
 
 def LIB_GROUP_ID = 'com.st.blue.sdk'
 def LIB_ARTIFACT_ID = 'st-opus'
-def LIB_VERSION = '1.2.0'
+def LIB_VERSION = '1.2.2'
 
 tasks.register('sourceJar', Jar) {
     from android.sourceSets.main.java.srcDirs
@@ -22,7 +22,10 @@ afterEvaluate {
         repositories {
             maven {
                 name = "GithubPackages"
+                //Prod
                 url = uri("https://maven.pkg.github.com/STMicroelectronics/BlueSTSDK_Android")
+                //Pred-Prod
+                //url = uri("https://maven.pkg.github.com/PRG-SWP/Android_Module_BlueSTSDK")
                 credentials {
                     username = System.getenv('GPR_USER') ?: project.properties['GPR_USER']
                     password = System.getenv('GPR_API_KEY') ?: project.properties['GPR_API_KEY']

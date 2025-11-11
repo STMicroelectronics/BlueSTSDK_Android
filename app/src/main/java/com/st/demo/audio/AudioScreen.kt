@@ -83,8 +83,8 @@ private fun initAudioTrack(decodeParams: DecodeParams) {
 }
 
 fun playAudio(sample: ByteArray) {
-        audioTrack?.write(
-            sample, 0, sample.size,
-            AudioTrack.WRITE_NON_BLOCKING
-        )
-    }
+    audioTrack?.write(
+        sample, 0, sample.size,
+        AudioTrack.WRITE_NON_BLOCKING
+    )
+}

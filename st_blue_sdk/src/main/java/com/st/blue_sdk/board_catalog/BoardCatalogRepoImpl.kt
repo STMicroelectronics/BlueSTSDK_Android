@@ -50,9 +50,9 @@ class BoardCatalogRepoImpl @Inject constructor(
     private val db: BoardCatalogDao,
     private val json: Json,
     private val coroutineScope: CoroutineScope,
-    @StAppVersion private val stAppVersion: String,
-    @Preferences private val pref: SharedPreferences,
-    @ApplicationContext private val context: Context
+    @param:StAppVersion private val stAppVersion: String,
+    @param:Preferences private val pref: SharedPreferences,
+    @param:ApplicationContext private val context: Context
 ) : BoardCatalogRepo {
 
     private var dtmiModelCache: MutableList<DtmiModel> = mutableListOf()
@@ -66,12 +66,14 @@ class BoardCatalogRepoImpl @Inject constructor(
     private var catalogRequestOnGoing = false
 
     private var url: String?=null
+    private var hideNotReleaseFwMaturity = true
 
     init {
         url = null
+        hideNotReleaseFwMaturity = true
         coroutineScope.launch {
-            //getBoardCatalog()
-            fillCachesFromDB()
+            getBoardCatalog()
+            //fillCachesFromDB()
         }
     }
 
@@ -189,13 +191,27 @@ class BoardCatalogRepoImpl @Inject constructor(
                 }
 
                 catalogRequestOnGoing = false
-                firmwares.bleListBoardFirmwareV1?.let {
-                    cache.addAll(it)
-                    db.add(it)
-                }
-                firmwares.bleListBoardFirmwareV2?.let {
-                    cache.addAll(it)
-                    db.add(it)
+
+                if((firmwares.stableRelease==true) && hideNotReleaseFwMaturity){
+                    firmwares.bleListBoardFirmwareV1?.let {
+                        val filterRelease = it.filter {fw -> fw.maturity == FirmwareMaturity.RELEASE }
+                        cache.addAll(filterRelease)
+                        db.add(filterRelease)
+                    }
+                    firmwares.bleListBoardFirmwareV2?.let {
+                        val filterRelease = it.filter {fw -> fw.maturity == FirmwareMaturity.RELEASE }
+                        cache.addAll(filterRelease)
+                        db.add(filterRelease)
+                    }
+                } else {
+                    firmwares.bleListBoardFirmwareV1?.let {
+                        cache.addAll(it)
+                        db.add(it)
+                    }
+                    firmwares.bleListBoardFirmwareV2?.let {
+                        cache.addAll(it)
+                        db.add(it)
+                    }
                 }
 
                 firmwares.boards?.let {
@@ -245,9 +261,19 @@ class BoardCatalogRepoImpl @Inject constructor(
     }
 
 
-    override suspend fun reset(url: String?) {
+    override suspend fun reset(url: String?,hideNotReleaseFwMaturity: Boolean?) {
         Log.i("DB", "reset()")
+        if(hideNotReleaseFwMaturity!=null) {
+            this.hideNotReleaseFwMaturity = hideNotReleaseFwMaturity
+        } else {
+            this.hideNotReleaseFwMaturity = true
+        }
         this.url = url
+        sync()
+    }
+
+    override suspend fun setHideNotReleaseFwMaturity(hideNotReleaseFwMaturity: Boolean) {
+        this.hideNotReleaseFwMaturity = hideNotReleaseFwMaturity
         sync()
     }
 
@@ -266,22 +292,22 @@ class BoardCatalogRepoImpl @Inject constructor(
         return cache.toList()
     }
 
-    private suspend fun fillCachesFromDB() {
+//    private suspend fun fillCachesFromDB() {
 //        Log.i("DB","fillCachesFromDB()")
 //        Log.i("DB","caches ${cache.size} ${cacheBoardsDescription.size}")
-        cache.clear()
-        cache.addAll(db.getDeviceFirmwares())
-        cacheBoardsDescription.clear()
-        cacheSensorAdapters.clear()
-        cacheBleCharacteristics.clear()
-        val descr = db.getBoardsDescription()
-        cacheBoardsDescription.addAll(descr)
-        val sensors = db.getSensorsDescription()
-        cacheSensorAdapters.addAll(sensors)
-        val bleChars = db.getBleCharacteristics()
-        cacheBleCharacteristics.addAll(bleChars)
+//        cache.clear()
+//        cache.addAll(db.getDeviceFirmwares())
+//        cacheBoardsDescription.clear()
+//        cacheSensorAdapters.clear()
+//        cacheBleCharacteristics.clear()
+//        val descr = db.getBoardsDescription()
+//        cacheBoardsDescription.addAll(descr)
+//        val sensors = db.getSensorsDescription()
+//        cacheSensorAdapters.addAll(sensors)
+//        val bleChars = db.getBleCharacteristics()
+//        cacheBleCharacteristics.addAll(bleChars)
 //        Log.i("DB","caches2 ${cache.size} ${cacheBoardsDescription.size}")
-    }
+//    }
 
     override suspend fun getBoardsDescription(): List<BoardDescription> {
 //        Log.i("DB","getBoardsDescription()")

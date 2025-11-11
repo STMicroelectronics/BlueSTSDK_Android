@@ -37,6 +37,13 @@ android {
                 name = "DB_BASE_URL",
                 value = "\"https://s3.amazonaws.com/st_test/STBLESensor/\""
             )
+
+            buildConfigField(
+                type = "String",
+                name = "PROD_CATALOG_VERSION",
+                value = "\"5.3.0\""
+            )
+
             buildConfigField(
                 type = "String",
                 name = "BLUESTSDK_DB_BASE_URL",
@@ -57,6 +64,12 @@ android {
                 name = "DTMI_AZURE_DB_BASE_URL",
                 value = "\"https://devicemodels.azure.com/%s.expanded.json\""
             )
+
+            buildConfigField(
+                type = "String",
+                name = "PROD_CATALOG_VERSION",
+                value = "\"5.3.0\""
+            )
         }
 
         release {
@@ -65,6 +78,13 @@ android {
                 name = "DB_BASE_URL",
                 value = "\"https://s3.amazonaws.com/st_test/STBLESensor/\""
             )
+
+            buildConfigField(
+                type = "String",
+                name = "PROD_CATALOG_VERSION",
+                value = "\"5.3.0\""
+            )
+            
             buildConfigField(
                 type = "String",
                 name = "BLUESTSDK_DB_BASE_URL",

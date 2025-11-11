@@ -149,6 +149,7 @@ class OtaServiceImpl @Inject constructor(
                         )
                     }
                 }
+
                 else -> DebugFwUpgrade(
                     coroutineScope,
                     nodeService.debugService,
@@ -170,7 +171,7 @@ class OtaServiceImpl @Inject constructor(
         nodeServiceConsumer.getNodeService(nodeId)?.let { nodeService ->
 
             if (hasOTACharacteristics(nodeId)) {
-                return when(nodeService.getNode().boardType) {
+                return when (nodeService.getNode().boardType) {
                     Boards.Model.WB55_NUCLEO_BOARD,
                     Boards.Model.STM32WB5MM_DK,
                     Boards.Model.WB55_USB_DONGLE_BOARD,
@@ -180,7 +181,9 @@ class OtaServiceImpl @Inject constructor(
                     Boards.Model.WB55CG_NUCLEO_BOARD,
                     Boards.Model.STM32WBA55G_DK1,
                     Boards.Model.STM32WBA65I_DK1,
-                    Boards.Model.WBA65RI_NUCLEO_BOARD-> STM32WBA_NEW_FW_UPGRADE_PROTOCOL
+                    Boards.Model.WBA65RI_NUCLEO_BOARD,
+                    Boards.Model.WBA2_NUCLEO_BOARD,
+                    Boards.Model.ST67W6X -> STM32WBA_NEW_FW_UPGRADE_PROTOCOL
 
                     Boards.Model.WB0X_NUCLEO_BOARD -> STM32WB0X_NEW_FW_UPGRADE_PROTOCOL
 

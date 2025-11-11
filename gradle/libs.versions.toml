@@ -9,29 +9,28 @@
 # @pin https://github.com/google/accompanist#compose-versions
 accompanist = "0.36.0"
 accompanistPermission = "0.37.3"
-androidGradlePlugin = "8.11.1"
+androidGradlePlugin = "8.13.1"
 # @pin https://developer.android.com/jetpack/androidx/releases/compose#versions
-androidxComposeBom = "2025.07.00"
-androidxEspresso = "3.6.0-rc01"
-androidxHiltNavigationCompose = "1.2.0"
+androidxComposeBom = "2025.11.00"
+androidxHiltNavigationCompose = "1.3.0"
 # https://issuetracker.google.com/issues/336842920
 # @pin
-androidxLifecycle = "2.9.2"
-androidxNavigation = "2.9.2"
-androidxRoom = "2.7.2"
-apacheCommons = "3.11.1"
+androidxLifecycle = "2.9.4"
+androidxNavigation = "2.9.6"
+androidxRoom = "2.8.3"
+apacheCommons = "3.12.0"
 appauth = "0.11.1"
-benManes = "0.52.0"
-hilt = "2.57"
+benManes = "0.53.0"
+hilt = "2.57.2"
 jwt = "2.0.2"
 # @pin https://developer.android.com/jetpack/androidx/releases/compose-kotlin
-kotlin = "2.2.0"
+kotlin = "2.2.21"
 kotlinxSerializationJson = "1.9.0"
 # @pin
-ksp = "2.2.0-2.0.2"
-littlerobots = "1.0.0"
-material2 = "1.12.0"
-okhttp = "5.1.0"
+devtoolsKsp = "2.2.21-2.0.4"
+littlerobots = "1.0.1"
+material2 = "1.13.0"
+okhttp = "5.3.0"
 retrofit = "3.0.0"
 retrofitKotlinxSerializationJson = "1.0.0"
 jaredsburrowsLicense = "0.9.8"
@@ -116,6 +115,6 @@ composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "k
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "devtoolsKsp" }
 littlerobots = { id = "nl.littlerobots.version-catalog-update", version.ref = "littlerobots" }
 jaredsburrowsLicense =  { id = "com.jaredsburrows.license", version.ref = "jaredsburrowsLicense" }

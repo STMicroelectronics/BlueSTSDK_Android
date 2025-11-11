@@ -72,7 +72,7 @@ class AudioServiceImpl @Inject constructor(
             isOpus = nodeService.getNodeFeatures().map { it.name }
                 .containsAll(requiredOpusFeatures.toList())
             isADPCM = nodeService.getNodeFeatures().map { it.name }
-            .containsAll(requiredADPCMFeatures.toList())
+                .containsAll(requiredADPCMFeatures.toList())
         } else {
             isOpus = false
             isADPCM = false
@@ -195,20 +195,20 @@ class AudioServiceImpl @Inject constructor(
         }
 
         if ((nodeService != null) && (audioCodecManager != null)) {
-        val audioFeatureName = when (audioCodecManager.type) {
-            CodecType.OPUS -> AudioOpusFeature.NAME
-            CodecType.ADPCM -> AudioADPCMFeature.NAME
-        }
-
-        val audioFeatures = nodeService.getNodeFeatures().filter { it.name == audioFeatureName }
-
-        return nodeService.getFeatureUpdates(audioFeatures)
-            .transform { featureUpdate ->
-                if (featureUpdate.data is RawAudio) {
-                    val decodedData = audioCodecManager.decode(featureUpdate.data.data.value)
-                    emit(decodedData)
-                }
+            val audioFeatureName = when (audioCodecManager.type) {
+                CodecType.OPUS -> AudioOpusFeature.NAME
+                CodecType.ADPCM -> AudioADPCMFeature.NAME
             }
+
+            val audioFeatures = nodeService.getNodeFeatures().filter { it.name == audioFeatureName }
+
+            return nodeService.getFeatureUpdates(audioFeatures)
+                .transform { featureUpdate ->
+                    if (featureUpdate.data is RawAudio) {
+                        val decodedData = audioCodecManager.decode(featureUpdate.data.data.value)
+                        emit(decodedData)
+                    }
+                }
         } else {
             return emptyFlow()
         }
@@ -229,14 +229,14 @@ class AudioServiceImpl @Inject constructor(
 
         if ((nodeServer != null) && (audioCodecManager != null)) {
 //            Log.i("sendAudioStream","sending = ${data.toList()}")
-        val codedData = audioCodecManager.encode(data = data)
+            val codedData = audioCodecManager.encode(data = data)
 //            Log.i("sendAudioStream","sending2= ${codedData.toList()}")
-        val pack = BlueVoiceOpusTransportProtocol.packData(codedData, nodeServer.maxPayloadSize)
-        var result = true
-        pack.forEach {
-            result = result && nodeServer.notifyData(featureName, it)
-        }
-        return result
+            val pack = BlueVoiceOpusTransportProtocol.packData(codedData, nodeServer.maxPayloadSize)
+            var result = true
+            pack.forEach {
+                result = result && nodeServer.notifyData(featureName, it)
+            }
+            return result
         } else {
             return false
         }
