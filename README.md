@@ -23,6 +23,10 @@ This package provides a sample application with some basic functionalities:
 
 This package provides 2 libraries that could be included on the other STMicroelectronics' applications
 
+They are released [like maven packages](https://github.com/orgs/STMicroelectronics/packages)
+
+
+
 For compiling these 2 libraries is necessary to enable all the gradle tasks
 So:
 1) Android Studio -> Settings -> Experimental 
