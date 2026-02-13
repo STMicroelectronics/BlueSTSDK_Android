@@ -23,7 +23,6 @@ plugins {
     alias(libs.plugins.kotlinAndroid) apply false
     alias(libs.plugins.kotlinSerialization) apply false
     alias(libs.plugins.ksp) apply false
-    alias(libs.plugins.littlerobots) apply true
 }
 
 fun isNonStable(version: String): Boolean {
@@ -37,4 +36,59 @@ tasks.withType<DependencyUpdatesTask> {
     rejectVersionIf {
         isNonStable(candidate.version)
     }
+}
+
+// Extend the DefaultTask class to create a CustomSTmTask class
+abstract class CustomSTmTask : DefaultTask() {
+    @TaskAction
+    fun assembleLibraries() {
+        println("All specified libraries have been assembled.")
+    }
+
+    @TaskAction
+    fun publishLibrariesOnLocalMaven() {
+        println("All specified libraries have been published on Local Maven.")
+    }
+
+    @TaskAction
+    fun publishLibrariesToGithubPackagesRepository() {
+        println("All specified libraries have been published on Github package repository.")
+    }
+}
+
+// Register the Tasks with type CustomSTmTask
+tasks.register<CustomSTmTask>("assembleLibraries") {
+    group = "Custom STM Task"
+    description = "Compiles the st_blue_sdk and st_opus libraries."
+
+    val sdkTask = tasks.getByPath(":st_blue_sdk:assemble")
+    val opusTask = tasks.getByPath(":st_opus:assemble")
+
+    opusTask.mustRunAfter(sdkTask)
+
+    dependsOn(sdkTask, opusTask)
+}
+
+tasks.register<CustomSTmTask>("publishLibrariesOnLocalMaven") {
+    group = "Custom STM Task"
+    description = "publish on local Maven the st_blue_sdk and st_opus libraries."
+
+    val sdkTask = tasks.getByPath(":st_blue_sdk:publishToMavenLocal")
+    val opusTask = tasks.getByPath(":st_opus:publishToMavenLocal")
+
+    opusTask.mustRunAfter(sdkTask)
+
+    dependsOn(sdkTask, opusTask)
+}
+
+tasks.register<CustomSTmTask>("publishLibrariesToGithubPackagesRepository") {
+    group = "Custom STM Task"
+    description = "publish on Github package the st_blue_sdk and st_opus libraries."
+
+    val sdkTask = tasks.getByPath(":st_blue_sdk:publishBlueStSdkPublicationToGithubPackagesRepository")
+    val opusTask = tasks.getByPath(":st_opus:publishBlueStSdkPublicationToGithubPackagesRepository")
+
+    opusTask.mustRunAfter(sdkTask)
+
+    dependsOn(sdkTask, opusTask)
 }

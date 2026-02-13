@@ -25,9 +25,6 @@ data class Field(
         UInt8,
         Int8,
         ByteArray,
-
-
         RawData,
-        Unit16 // TODO: Remove this
     }
 }

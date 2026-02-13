@@ -42,6 +42,7 @@ import com.st.blue_sdk.features.extended.motor_time_param.MotorTimeParameter
 import com.st.blue_sdk.features.extended.neai_anomaly_detection.NeaiAnomalyDetection
 import com.st.blue_sdk.features.extended.neai_class_classification.NeaiClassClassification
 import com.st.blue_sdk.features.extended.neai_extrapolation.NeaiExtrapolation
+import com.st.blue_sdk.features.extended.odometry.Odometry
 import com.st.blue_sdk.features.extended.piano.Piano
 import com.st.blue_sdk.features.extended.pnpl.PnPL
 import com.st.blue_sdk.features.extended.predictive.PredictiveAccelerationStatus
@@ -568,6 +569,7 @@ abstract class Feature<T>(
                 0x28 -> RoboticsMovement(isEnabled = isEnabled, identifier = identifier)
                 0x29 -> SceneDescription(isEnabled = isEnabled, identifier = identifier)
                 0x30 -> AssetTrackingEvent(isEnabled = isEnabled, identifier = identifier)
+                0x31 -> Odometry(isEnabled = isEnabled, identifier = identifier)
 
                 else -> throw UnsupportedOperationException("$type unknown")
 

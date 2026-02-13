@@ -15,13 +15,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
+import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.NavKey
 import com.st.demo.R
 
 @SuppressLint("MissingPermission")
 @Composable
 fun FeatureDetail(
-    navController: NavHostController,
+    backStack: NavBackStack<NavKey>,
     viewModel: FeatureDetailViewModel,
     deviceId: String,
     featureName: String
@@ -35,7 +36,7 @@ fun FeatureDetail(
     BackHandler(enabled = backHandlingEnabled) {
         viewModel.disconnectFeature(deviceId = deviceId, featureName = featureName)
 
-        navController.popBackStack()
+        backStack.removeLastOrNull()
     }
 
     val features = viewModel.featureUpdates

@@ -89,7 +89,7 @@ class CharacteristicFwUpgrade(
             val firstSectorToDelete = WbOTAUtils.getFirstSectorToDelete(boardType, address2)
 
             return FwUpgradeParams.Stm32WbParams(
-                offset = firstSectorToDelete.toLong(),
+                offset = firstSectorToDelete,
                 sectorCount = sectorCount.toByte(),
                 address = address2
             )

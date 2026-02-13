@@ -71,7 +71,7 @@ object Boards {
         STDES_CBMLORABLE,
 
         /** STEAVL-ROBKIT1 */
-        ROBKIT1,
+        STEVALROBKIT,
 
         /** WB Boards  */
         WB55_NUCLEO_BOARD, //0x81
@@ -128,7 +128,7 @@ object Boards {
             Model.SENSOR_TILE_BOX_PROC,
             Model.STWIN_BOX,
             Model.STWIN_BOXB,
-            Model.ROBKIT1,
+            Model.STEVALROBKIT,
             Model.WB05_NUCLEO_BOARD-> Family.BLUENRG_FAMILY
 
             Model.DISCOVERY_IOT01A,
@@ -193,7 +193,7 @@ object Boards {
                     0x11 -> Model.SENSOR_TILE_BOX_PROB
                     0x12 -> Model.STWIN_BOXB
                     0x13 -> Model.SENSOR_TILE_BOX_PROC
-                    0xC3 -> Model.ROBKIT1
+                    0xC3 -> Model.STEVALROBKIT
                     0x80 -> Model.NUCLEO
                     0x7F -> Model.NUCLEO_F401RE
                     0x7E -> Model.NUCLEO_L476RG
@@ -241,7 +241,7 @@ object Boards {
                     0x11 -> Model.SENSOR_TILE_BOX_PROB
                     0x12 -> Model.STWIN_BOXB
                     0x13 -> Model.SENSOR_TILE_BOX_PROC
-                    0xC3 -> Model.ROBKIT1
+                    0xC3 -> Model.STEVALROBKIT
                     0x80 -> Model.NUCLEO
                     0x7F -> Model.NUCLEO_F401RE
                     0x7E -> Model.NUCLEO_L476RG

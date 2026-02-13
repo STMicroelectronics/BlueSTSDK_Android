@@ -19,7 +19,7 @@ internal class BlueVoiceOpusTransportProtocol(private val frameSize: Int) {
     private var partialData: ByteArray = byteArrayOf()
 
     /**
-     * extract the data from the dataPacakge, return null if the frame is not completed or an array
+     * extract the data from the dataPackage, return null if the frame is not completed or an array
      * of frameSize bytes
      */
     fun unpackData(dataPacket: ByteArray): ByteArray? {

@@ -40,6 +40,11 @@ class BleDeviceListViewModel @Inject constructor(
 
     private var scanPeripheralJob: Job? = null
 
+    fun cleanListOfDevices() {
+        scanBleDevices.tryEmit(emptyList())
+        scanBleLeDevices.tryEmit(Pair(0L,emptyList()))
+    }
+
     fun startScan(leDevices: Boolean) {
         _isLEScanning.update { leDevices }
 

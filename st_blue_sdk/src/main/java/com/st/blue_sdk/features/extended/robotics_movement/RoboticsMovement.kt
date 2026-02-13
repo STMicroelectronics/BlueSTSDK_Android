@@ -15,8 +15,10 @@ import com.st.blue_sdk.features.FeatureUpdate
 import com.st.blue_sdk.features.extended.robotics_movement.request.CoordinateOrigin
 import com.st.blue_sdk.features.extended.robotics_movement.request.CurrentCoordinate
 import com.st.blue_sdk.features.extended.robotics_movement.request.GetRobotTopology
+import com.st.blue_sdk.features.extended.robotics_movement.request.MoveCommandDifferentialDriveArticulatingMove
 import com.st.blue_sdk.features.extended.robotics_movement.request.MoveCommandDifferentialDrivePWMSpeed
 import com.st.blue_sdk.features.extended.robotics_movement.request.MoveCommandDifferentialDriveSimpleMove
+import com.st.blue_sdk.features.extended.robotics_movement.request.NavigationMode
 import com.st.blue_sdk.features.extended.robotics_movement.request.RobotDirection
 import com.st.blue_sdk.features.extended.robotics_movement.request.RoboticsActionBits
 import com.st.blue_sdk.features.extended.robotics_movement.request.SetNavigationMode
@@ -44,6 +46,7 @@ class RoboticsMovement(
         const val CURRENT_COORDINATE : Byte = 0x23
         const val MOVE_COMMAND_DIFFERENTIAL_DRIVE_PWM_SPEED : Byte = 0x24
         const val MOVE_COMMAND_DIFFERENTIAL_DRIVE_SIMPLE_MOVE : Byte = 0x25
+        const val MOVE_COMMAND_DIFFERENTIAL_DRIVE_ARTICULATING_MOVE : Byte = 0x26
 
         fun getCommandType(commandCode: Short) = when (commandCode) {
             0X10.toShort() -> GET_ROBOT_TOPOLOGY
@@ -52,6 +55,7 @@ class RoboticsMovement(
             0X23.toShort() -> CURRENT_COORDINATE
             0X24.toShort() -> MOVE_COMMAND_DIFFERENTIAL_DRIVE_PWM_SPEED
             0x25.toShort() -> MOVE_COMMAND_DIFFERENTIAL_DRIVE_SIMPLE_MOVE
+            0x26.toShort() -> MOVE_COMMAND_DIFFERENTIAL_DRIVE_ARTICULATING_MOVE
 
             else -> throw IllegalArgumentException("Unknown command type: $commandCode")
         }
@@ -64,6 +68,14 @@ class RoboticsMovement(
             RobotDirection.STOP -> 83 // 'S'
 
             //else -> throw IllegalArgumentException("Unknown command type: $direction")
+        }
+
+        fun getNavigationByte(navigationMode: NavigationMode) = when(navigationMode){
+            NavigationMode.LOCK -> 0x00u
+            NavigationMode.DRIVE -> 0x01u
+            NavigationMode.AUTOPILOT -> 0x02u
+            NavigationMode.FOLLOW_ME -> 0x03u
+            NavigationMode.RFU -> 0x04u
         }
 
         fun byteArrayToUInt32(data: ByteArray, dataOffset: Int): UInt {
@@ -164,28 +176,32 @@ class RoboticsMovement(
             return functionalities
         }
 
-        fun getNavigationMode(navigation: UByte) : List<FeatureField<TopologyBit>> {
-            val navigationModes = mutableListOf<FeatureField<TopologyBit>>()
+        fun getNavigationMode(navigation: UByte) : List<FeatureField<NavigationMode>> {
+            val navigationModes = mutableListOf<FeatureField<NavigationMode>>()
 
             val navigationMode =  when(navigation){
+                0x00.toUByte() -> FeatureField(
+                    name = "Navigation Mode",
+                    value = NavigationMode.LOCK
+                )
                 0x01.toUByte() -> FeatureField(
                     name = "Navigation Mode",
-                    value = TopologyBit.REMOTE_CONTROL
+                    value = NavigationMode.DRIVE
                 )
 
                 0x02.toUByte() -> FeatureField(
                     name =  "Navigation Mode",
-                    value = TopologyBit.FREE_NAVIGATION
+                    value = NavigationMode.AUTOPILOT
                 )
 
                 0x03.toUByte() -> FeatureField(
                     name = "Navigation Mode",
-                    value = TopologyBit.FOLLOW_ME
+                    value = NavigationMode.FOLLOW_ME
                 )
 
                 else -> FeatureField(
                     name = "Navigation Mode",
-                    value = TopologyBit.RFU
+                    value = NavigationMode.RFU
                 )
             }
 
@@ -276,7 +292,7 @@ class RoboticsMovement(
                 SET_NAVIGATION_MODE,
                 byteArrayOf(
                     RoboticsActionBits.packActions(command.action),
-                    command.navigationMode.toByte(),
+                    getNavigationByte(command.navigationMode).toByte(),
                     command.armed.toByte(),
                     command.res.toByte()
                 )
@@ -327,7 +343,18 @@ class RoboticsMovement(
                     RoboticsActionBits.packActions(command.action),
                     getDirectionCharacter(command.direction).toByte(),
                     command.speed.toByte(),
-                    command.angle.toByte(),
+                    command.angle,
+                ) + command.res
+            )
+
+            is MoveCommandDifferentialDriveArticulatingMove -> packCommandRequest(
+                featureBit,
+                MOVE_COMMAND_DIFFERENTIAL_DRIVE_ARTICULATING_MOVE,
+                data = byteArrayOf(
+                    RoboticsActionBits.packActions(command.action),
+                    command.speed,
+                    command.rotationAngle,
+                    command.linearAngle,
                 ) + command.res
             )
 

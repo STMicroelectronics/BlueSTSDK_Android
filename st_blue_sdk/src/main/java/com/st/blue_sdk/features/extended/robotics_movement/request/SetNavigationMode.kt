@@ -13,7 +13,7 @@ import com.st.blue_sdk.features.extended.robotics_movement.RoboticsMovement
 class SetNavigationMode(
     feature : RoboticsMovement,
     val action : List<RoboticsActionBits>,
-    val navigationMode: UByte,
+    val navigationMode: NavigationMode,
     val armed: UByte,
     val res: Long
 ) : FeatureCommand(feature = feature , commandId = RoboticsMovement.SET_NAVIGATION_MODE)

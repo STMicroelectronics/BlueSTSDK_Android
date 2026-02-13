@@ -228,6 +228,77 @@ class BlueManagerImpl @Inject constructor(
     val leList = mutableListOf<LeNode>()
 
     @SuppressLint("MissingPermission")
+    override suspend fun scanLeNodesUntilStopCommand(): Flow<Resource<List<LeNode>>> =
+        callbackFlow {
+
+            if (context.hasBluetoothPermission().not()) {
+                throw IllegalStateException("Missing BlueTooth Permissions")
+            }
+
+            stopDeviceScan = false
+            leList.clear()
+
+            val bleScanner = bleManager.adapter.bluetoothLeScanner
+
+            trySend(Resource.loading())
+
+            val scanCallback = object : ScanCallback() {
+                override fun onScanFailed(errorCode: Int) {
+                    super.onScanFailed(errorCode)
+                    bleScanner.stopScan(this)
+                    trySend(
+                        Resource.error(
+                            R.string.blue_st_sdk_error_ble_scan_failed, errorCode, null
+                        )
+                    )
+                    close()
+                }
+
+                override fun onScanResult(callbackType: Int, result: ScanResult?) {
+                    super.onScanResult(callbackType, result)
+                    result?.let {
+                        if (stopDeviceScan.not()) {
+                            if (createOrUpdateLeDeviceToCollection(
+                                    listOf(LeBlueSTSDKAdvertiseFilter()),
+                                    it
+                                )
+                            ) {
+                                launch {
+                                    trySend(
+                                        Resource.loading(leList)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            val scanSettings =
+                ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).build()
+
+            bleScanner.startScan(listOf(), scanSettings, scanCallback)
+
+            launch {
+                while (stopDeviceScan.not()) {
+                    delay(500)
+                }
+
+                trySend(
+                    Resource.success(leList)
+                )
+                close()
+            }
+            awaitClose {
+                bleScanner.stopScan(scanCallback)
+            }
+
+        }.flowOn(Dispatchers.IO).catch { e ->
+            Log.e(TAG, "scan exception", e)
+            emit(Resource.error(R.string.blue_st_sdk_error_ble_scan_failed, data = null))
+        }
+
+    @SuppressLint("MissingPermission")
     override suspend fun scanLeNodes(): Flow<Resource<List<LeNode>>> = callbackFlow {
 
         if (context.hasBluetoothPermission().not()) {
@@ -257,7 +328,11 @@ class BlueManagerImpl @Inject constructor(
                 super.onScanResult(callbackType, result)
                 result?.let {
                     if (stopDeviceScan.not()) {
-                        if (createOrUpdateLeDeviceToCollection(listOf(LeBlueSTSDKAdvertiseFilter()), it)) {
+                        if (createOrUpdateLeDeviceToCollection(
+                                listOf(LeBlueSTSDKAdvertiseFilter()),
+                                it
+                            )
+                        ) {
                             launch {
                                 trySend(
                                     Resource.loading(leList)
@@ -397,13 +472,14 @@ class BlueManagerImpl @Inject constructor(
         if (filters.isNotEmpty()) {
             val nodeId = scanResult.device.address
             val advertiseInfo =
-                filters.asSequence().map { it.decodeAdvertiseData( nodeId,advertisingData.bytes) }
+                filters.asSequence().map { it.decodeAdvertiseData(nodeId, advertisingData.bytes) }
                     .filter { advInfo -> advInfo != null }.firstOrNull() ?: return false
 
             //check if there is already one device
-            val address = leList.indexOfFirst {it -> it.device.address == scanResult.device.address}
+            val address =
+                leList.indexOfFirst { it -> it.device.address == scanResult.device.address }
 
-            if(address != -1){
+            if (address != -1) {
                 //Update the device
                 leList[address] = LeNode(scanResult.device, advertiseInfo)
             } else {

@@ -83,7 +83,7 @@ sealed class RoboticsActionBits {
             val actionReceived = mutableListOf<RoboticsActionBits>()
 
             if (highBits == 0b11110000u.toUByte()) {
-                val errorCode = ErrorCode.values().find { it.code == lowBits }
+                val errorCode = ErrorCode.entries.find { it.code == lowBits }
                 if (errorCode != null) {
                     actionReceived.add(ERROR(errorCode))
                 } else {
@@ -94,7 +94,7 @@ sealed class RoboticsActionBits {
                     actionReceived.add(ACK_FLAG)
                 }
                 if (highBits and 0b01000000u.toUByte() != 0u.toUByte()) {
-                    val interval = Interval.values().find { it.code == lowBits }
+                    val interval = Interval.entries.find { it.code == lowBits }
                     if (interval != null) {
                         actionReceived.add(PERIODIC_READ(interval))
                     }

@@ -73,7 +73,7 @@ class BoardCatalogRepoImpl @Inject constructor(
         hideNotReleaseFwMaturity = true
         coroutineScope.launch {
             getBoardCatalog()
-            //fillCachesFromDB()
+            fillCachesFromDB()
         }
     }
 
@@ -221,6 +221,10 @@ class BoardCatalogRepoImpl @Inject constructor(
 
                 firmwares.sensorAdapters?.let {
                     db.addSensors(it)
+//                    it.forEach { sensor ->
+//                        Log.i("Pezz","sensorAdapters=$sensor")
+//                    }
+
                     cacheSensorAdapters.addAll(it)
                 }
 
@@ -292,22 +296,22 @@ class BoardCatalogRepoImpl @Inject constructor(
         return cache.toList()
     }
 
-//    private suspend fun fillCachesFromDB() {
-//        Log.i("DB","fillCachesFromDB()")
-//        Log.i("DB","caches ${cache.size} ${cacheBoardsDescription.size}")
-//        cache.clear()
-//        cache.addAll(db.getDeviceFirmwares())
-//        cacheBoardsDescription.clear()
-//        cacheSensorAdapters.clear()
-//        cacheBleCharacteristics.clear()
-//        val descr = db.getBoardsDescription()
-//        cacheBoardsDescription.addAll(descr)
-//        val sensors = db.getSensorsDescription()
-//        cacheSensorAdapters.addAll(sensors)
-//        val bleChars = db.getBleCharacteristics()
-//        cacheBleCharacteristics.addAll(bleChars)
-//        Log.i("DB","caches2 ${cache.size} ${cacheBoardsDescription.size}")
-//    }
+    private suspend fun fillCachesFromDB() {
+        Log.i("DB","fillCachesFromDB()")
+        Log.i("DB","caches ${cache.size} ${cacheBoardsDescription.size}")
+        cache.clear()
+        cache.addAll(db.getDeviceFirmwares())
+        cacheBoardsDescription.clear()
+        cacheSensorAdapters.clear()
+        cacheBleCharacteristics.clear()
+        val descr = db.getBoardsDescription()
+        cacheBoardsDescription.addAll(descr)
+        val sensors = db.getSensorsDescription()
+        cacheSensorAdapters.addAll(sensors)
+        val bleChars = db.getBleCharacteristics()
+        cacheBleCharacteristics.addAll(bleChars)
+        Log.i("DB","caches2 ${cache.size} ${cacheBoardsDescription.size}")
+    }
 
     override suspend fun getBoardsDescription(): List<BoardDescription> {
 //        Log.i("DB","getBoardsDescription()")

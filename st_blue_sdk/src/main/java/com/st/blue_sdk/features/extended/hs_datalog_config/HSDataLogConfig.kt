@@ -24,6 +24,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.decodeFromJsonElement
 
+@Deprecated("No more used")
 class HSDataLogConfig(
     name: String = NAME,
     type: Type = Type.EXTENDED,

@@ -24,8 +24,8 @@ android {
         applicationId = "com.st.demo"
         minSdk = 26
         targetSdk = 36
-        versionCode = 13
-        versionName = "5.2.13"
+        versionCode = 15
+        versionName = "5.3.0"
 
         vectorDrawables { useSupportLibrary = true }
 
@@ -38,7 +38,8 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
 
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -104,6 +105,7 @@ dependencies {
     implementation(libs.androidx.material2)
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
+    ksp(libs.kotlin.metadata)
 
     debugImplementation(libs.androidx.compose.uitestmanifest)
 }

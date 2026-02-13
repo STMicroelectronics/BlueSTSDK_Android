@@ -36,9 +36,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
+import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.NavKey
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import com.st.demo.DeviceDetailNavKey
 import com.st.demo.R
 import kotlinx.coroutines.delay
 
@@ -64,7 +66,7 @@ fun LeDevice(
         var isAnimated by remember { mutableStateOf(false) }
 
         LaunchedEffect(key1 = timestamp) {
-            if (timestamp!=0L) {
+            if (timestamp != 0L) {
                 isAnimated = true
                 delay(100)
                 isAnimated = false
@@ -137,7 +139,8 @@ fun LeDevice(
 @SuppressLint("MissingPermission")
 @Composable
 fun BleDeviceList(
-    viewModel: BleDeviceListViewModel, navController: NavHostController
+    viewModel: BleDeviceListViewModel,
+    backStack: NavBackStack<NavKey>
 ) {
 
     var doNotShowRationale by rememberSaveable {
@@ -161,6 +164,11 @@ fun BleDeviceList(
     )
 
     if (locationPermissionState.allPermissionsGranted) {
+
+        LaunchedEffect(Unit) {
+            viewModel.cleanListOfDevices()
+        }
+
         // remember calculates the value passed to it only during the first composition. It then
         // returns the same value for every subsequent composition. More details are available in the
         // comments below.
@@ -199,7 +207,7 @@ fun BleDeviceList(
 
             Spacer(modifier = Modifier.height(4.dp))
 
-            if(isBleScanning) {
+            if (isBleScanning) {
                 Text(text = stringResource(R.string.st_le_deviceList_title))
             } else {
                 Text(text = stringResource(R.string.st_deviceList_title))
@@ -213,7 +221,7 @@ fun BleDeviceList(
             })
 
             if (devices.value.isEmpty() && devicesLe.value.second.isEmpty() && isRefreshing.not()) {
-                Box(modifier = Modifier.fillMaxSize(),contentAlignment = Alignment.Center) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(
                         text = "Press one button\nfor searching\ncompatible devices",
                         modifier = Modifier.fillMaxWidth(),
@@ -234,7 +242,7 @@ fun BleDeviceList(
                             shape = RoundedCornerShape(4.dp),
                             shadowElevation = 10.dp,
                             onClick = {
-                                navController.navigate("detail/${item.device.address}")
+                                backStack.add(DeviceDetailNavKey(item.device.address))
                             }) {
                             Column(
                                 modifier = Modifier

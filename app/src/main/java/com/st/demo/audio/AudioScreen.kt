@@ -10,7 +10,6 @@ package com.st.demo.audio
 import android.media.AudioFormat
 import android.media.AudioManager
 import android.media.AudioTrack
-import android.os.Build
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,7 +20,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
+import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.NavKey
 import com.st.blue_sdk.services.audio.codec.DecodeParams
 import com.st.demo.R
 import kotlinx.coroutines.flow.launchIn
@@ -30,7 +30,7 @@ import kotlinx.coroutines.flow.onStart
 
 @Composable
 fun AudioScreen(
-    navController: NavHostController,
+    backStack: NavBackStack<NavKey>,
     viewModel: AudioScreenViewModel,
     deviceId: String,
     modifier: Modifier = Modifier
@@ -38,7 +38,7 @@ fun AudioScreen(
 
     BackHandler(true) {
         viewModel.stopAudioDemo(deviceId)
-        navController.navigateUp()
+        backStack.removeLastOrNull()
     }
 
     LaunchedEffect(key1 = deviceId) {

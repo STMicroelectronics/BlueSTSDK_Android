@@ -50,6 +50,8 @@ interface BlueManager {
 
     suspend fun scanLeNodes(): Flow<Resource<List<LeNode>>>
 
+    suspend fun scanLeNodesUntilStopCommand(): Flow<Resource<List<LeNode>>>
+
     fun stopScan()
 
     fun getRssi(nodeId: String)

@@ -12,6 +12,7 @@ import com.st.blue_sdk.features.logging.sd.commands.StartLogging
 import com.st.blue_sdk.features.logging.sd.commands.StopLogging
 import com.st.blue_sdk.utils.NumberConversion
 
+@Deprecated("No more used")
 class SDLoggingFeature(
     isEnabled: Boolean,
     type: Type = Type.STANDARD,

@@ -40,20 +40,22 @@ class FwFileDescriptor(
     }
 
     private fun getFileType(): FirmwareFileType {
-        fileUri.lastPathSegment?.lowercase(Locale.getDefault())?.let { name ->
-            return when {
+        return fileUri.lastPathSegment?.lowercase(Locale.getDefault())?.let { name ->
+             when {
                 name.endsWith("bin") -> FirmwareFileType.BIN
                 name.endsWith("img") -> FirmwareFileType.IMG
                 else -> FirmwareFileType.UNKNOWN
             }
-        } ?: return FirmwareFileType.UNKNOWN
+        } ?: FirmwareFileType.UNKNOWN
     }
 
     private fun getFileLength(): Long {
         return kotlin.runCatching {
-            val stream = resolver.openInputStream(fileUri)!!
+            val stream: InputStream
             var nBytes = 0
+
             try {
+                stream = resolver.openInputStream(fileUri)!!
                 while (stream.read() >= 0) {
                     nBytes++;
                 }//while

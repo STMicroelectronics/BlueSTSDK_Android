@@ -38,7 +38,7 @@ class Pedometer(
                 max = Long.MAX_VALUE,
                 min = 0,
                 name = "Steps",
-                unit = "dB",
+                unit = "Steps",
                 value = NumberConversion.LittleEndian.bytesToUInt32(data, dataOffset)
             ),
             frequency = FeatureField(

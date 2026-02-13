@@ -15,6 +15,7 @@ import com.st.blue_sdk.utils.NumberConversion
 import java.nio.charset.StandardCharsets
 import kotlin.math.roundToInt
 
+@Deprecated("No more used")
 class AiLogging(
     name: String = NAME,
     type: Type = Type.EXTENDED,

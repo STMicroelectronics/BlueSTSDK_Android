@@ -25,8 +25,5 @@ enum class TopologyBit {
     ALARM,
     HEADLIGHTS,
     WARNING_LIGHTS,
-    REMOTE_CONTROL,
-    FREE_NAVIGATION,
-    FOLLOW_ME,
-    RFU,
+    RFU
 }

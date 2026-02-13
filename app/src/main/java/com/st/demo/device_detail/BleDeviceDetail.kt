@@ -30,14 +30,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
+import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.NavKey
 import com.st.blue_sdk.models.NodeState
+import com.st.demo.DeviceAudioNavKey
+import com.st.demo.FeatureDetailNavKey
 import com.st.demo.R
 
 @SuppressLint("MissingPermission")
 @Composable
 fun BleDeviceDetail(
-    navController: NavHostController,
+    backStack: NavBackStack<NavKey>,
     viewModel: BleDeviceDetailViewModel,
     deviceId: String
 ) {
@@ -57,7 +60,7 @@ fun BleDeviceDetail(
     BackHandler(enabled = backHandlingEnabled) {
         viewModel.disconnect(deviceId = deviceId)
 
-        navController.popBackStack()
+        backStack.removeLastOrNull()
     }
 
     val scrollState = rememberScrollState()
@@ -83,7 +86,7 @@ fun BleDeviceDetail(
                     enabled = bleDevice.value?.connectionStatus?.current?.equals(NodeState.Ready)
                         ?: false,
                     onClick = {
-                        navController.navigate("audio/${deviceId}")
+                        backStack.add(DeviceAudioNavKey(deviceId))
                     }) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.Send,
@@ -114,9 +117,15 @@ fun BleDeviceDetail(
 
                 Card(
                     modifier = Modifier
-                        .fillMaxWidth().padding(bottom = 4.dp,top = 4.dp)
+                        .fillMaxWidth()
+                        .padding(bottom = 4.dp, top = 4.dp)
                         .clickable {
-                            navController.navigate("feature/${deviceId}/${item.name}")
+                            backStack.add(
+                                FeatureDetailNavKey(
+                                    deviceId = deviceId,
+                                    featureName = item.name
+                                )
+                            )
                         },
                     colors = CardDefaults.cardColors(containerColor = Color(color = 0xFFF7F8FA) /*Grey1*/),
                 ) {
