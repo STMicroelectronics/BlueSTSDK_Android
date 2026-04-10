@@ -73,6 +73,9 @@ object Boards {
         /** STEAVL-ROBKIT1 */
         STEVALROBKIT,
 
+        /** DEMO-MEMSTWS2V0 */
+        MEMSTWS2V0,
+
         /** WB Boards  */
         WB55_NUCLEO_BOARD, //0x81
         STM32WB5MM_DK, //0x82
@@ -129,7 +132,8 @@ object Boards {
             Model.STWIN_BOX,
             Model.STWIN_BOXB,
             Model.STEVALROBKIT,
-            Model.WB05_NUCLEO_BOARD-> Family.BLUENRG_FAMILY
+            Model.WB05_NUCLEO_BOARD,
+            Model.MEMSTWS2V0 -> Family.BLUENRG_FAMILY
 
             Model.DISCOVERY_IOT01A,
             Model.B_L475E_IOT01A,
@@ -194,6 +198,7 @@ object Boards {
                     0x12 -> Model.STWIN_BOXB
                     0x13 -> Model.SENSOR_TILE_BOX_PROC
                     0xC3 -> Model.STEVALROBKIT
+                    0xD1 -> Model.MEMSTWS2V0
                     0x80 -> Model.NUCLEO
                     0x7F -> Model.NUCLEO_F401RE
                     0x7E -> Model.NUCLEO_L476RG
@@ -242,6 +247,7 @@ object Boards {
                     0x12 -> Model.STWIN_BOXB
                     0x13 -> Model.SENSOR_TILE_BOX_PROC
                     0xC3 -> Model.STEVALROBKIT
+                    0xD1 -> Model.MEMSTWS2V0
                     0x80 -> Model.NUCLEO
                     0x7F -> Model.NUCLEO_F401RE
                     0x7E -> Model.NUCLEO_L476RG

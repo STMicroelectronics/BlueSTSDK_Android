@@ -40,7 +40,7 @@ class MedicalSignal16BitFeature(
         if(signalType.precision == MedicalPrecision.UBIT16) {
             for (i in 0 until numberOfSamples) {
                 values.add(
-                    NumberConversion.LittleEndian.bytesToUInt16(data, dataOffset + 5 + i * 2).toInt()
+                    NumberConversion.LittleEndian.bytesToUInt16(data, dataOffset + 5 + i * 2)
                 )
             }
         } else {

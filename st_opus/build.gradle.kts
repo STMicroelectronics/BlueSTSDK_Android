@@ -11,13 +11,15 @@ plugins {
     alias(libs.plugins.kotlinAndroid)
 }
 
-apply {
-    from("publish.gradle")
-}
+apply(from = "publish.gradle")
 
 android {
     namespace = "com.st.BlueSTSDK.Features.Audio.Opus"
-    compileSdk = 36
+    compileSdk {
+        version = release(36) {
+            minorApiLevel = 1
+        }
+    }
 
     defaultConfig {
         minSdk = 26

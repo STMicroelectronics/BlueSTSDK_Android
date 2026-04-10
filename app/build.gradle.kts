@@ -18,23 +18,24 @@ plugins {
 
 android {
     namespace = "com.st.demo"
-    compileSdk = 36
+    compileSdk {
+        version = release(36) {
+            minorApiLevel = 1
+        }
+    }
 
     defaultConfig {
         applicationId = "com.st.demo"
         minSdk = 26
         targetSdk = 36
-        versionCode = 15
-        versionName = "5.3.0"
+        versionCode = 16
+        versionName = "5.3.2"
 
         vectorDrawables { useSupportLibrary = true }
 
         manifestPlaceholders["appAuthRedirectScheme"] = "com.st.demo"
     }
 
-    hilt {
-        enableAggregatingTask = true
-    }
 
     buildTypes {
         release {
@@ -59,17 +60,16 @@ android {
     }
 
 
-    ksp {
-        arg("room.schemaLocation", "$projectDir/schemas")
-        arg("room.generateKotlin", "true")
-    }
-
-    buildFeatures {
-        buildConfig = true
-        compose = true
-    }
-
     packaging { resources { excludes += "/META-INF/{AL2.0,LGPL2.1}" } }
+}
+
+hilt {
+    enableAggregatingTask = true
+}
+
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+    arg("room.generateKotlin", "true")
 }
 
 licenseReport {
@@ -106,6 +106,4 @@ dependencies {
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
     ksp(libs.kotlin.metadata)
-
-    debugImplementation(libs.androidx.compose.uitestmanifest)
 }

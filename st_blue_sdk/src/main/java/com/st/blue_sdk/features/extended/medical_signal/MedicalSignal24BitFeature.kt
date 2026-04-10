@@ -46,7 +46,7 @@ class MedicalSignal24BitFeature(
         } else {
             for (i in 0 until numberOfSamples) {
                 values.add(
-                    NumberConversion.LittleEndian.bytesToInt24(data, dataOffset + 5 + i * 3).toInt()
+                    NumberConversion.LittleEndian.bytesToInt24(data, dataOffset + 5 + i * 3)
                 )
             }
         }

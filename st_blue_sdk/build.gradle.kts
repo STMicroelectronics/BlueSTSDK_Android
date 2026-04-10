@@ -14,13 +14,15 @@ plugins {
     alias(libs.plugins.ksp)
 }
 
-apply {
-    from("publish.gradle")
-}
+apply(from = "publish.gradle")
 
 android {
     namespace = "com.st.blue_sdk"
-    compileSdk = 36
+    compileSdk {
+        version = release(36) {
+            minorApiLevel = 1
+        }
+    }
 
     defaultConfig {
         minSdk = 26
@@ -125,10 +127,6 @@ android {
     ksp {
         arg("room.schemaLocation", "$projectDir/schemas")
         arg("room.generateKotlin", "true")
-    }
-
-    buildFeatures {
-        buildConfig = true
     }
 }
 

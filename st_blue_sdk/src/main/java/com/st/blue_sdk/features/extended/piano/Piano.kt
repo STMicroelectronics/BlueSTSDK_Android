@@ -91,7 +91,7 @@ class Piano(
                         packCommandRequest(
                             featureBit,
                             CommandPianoSound.PIANO_COMMAND_TYPE_START,
-                            byteArrayOf(command.key.toByte())
+                            byteArrayOf(command.key)
                         )
                     }
                 }
