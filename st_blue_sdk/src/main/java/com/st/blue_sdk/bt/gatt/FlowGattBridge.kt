@@ -108,20 +108,30 @@ class GattBridgeFlow : BluetoothGattCallback(), GattBridge {
         }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onCharacteristicRead(
         gatt: BluetoothGatt,
         characteristic: BluetoothGattCharacteristic,
         status: Int
     ) {
+        onCharacteristicRead(gatt, characteristic, characteristic.value, status)
+    }
+
+    override fun onCharacteristicRead(
+        gatt: BluetoothGatt,
+        characteristic: BluetoothGattCharacteristic,
+        value: ByteArray,
+        status: Int
+    ) {
         Log.i(
             TAG,
-            "Characteristic with uid ${characteristic.uuid} has been red with data ${characteristic.value}"
+            "Characteristic with uid ${characteristic.uuid} has been read with data ${value.contentToString()}"
         )
         bleEventsFlow.tryEmit(
             BleEvent.CharacteristicRead(
                 status == BluetoothGatt.GATT_SUCCESS,
                 characteristic,
-                characteristic.value
+                value
             )
         )
     }
@@ -146,16 +156,25 @@ class GattBridgeFlow : BluetoothGattCallback(), GattBridge {
         )
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onCharacteristicChanged(
         gatt: BluetoothGatt?,
         characteristic: BluetoothGattCharacteristic?) {
         characteristic?.let {
+            onCharacteristicChanged(gatt ?: return, it, it.value)
+        }
+    }
+
+    override fun onCharacteristicChanged(
+        gatt: BluetoothGatt,
+        characteristic: BluetoothGattCharacteristic,
+        value: ByteArray
+    ) {
             Log.d(
                 TAG,
-                "Characteristic with uid ${it.uuid} has changed with data ${it.value.contentToString()}"
+            "Characteristic with uid ${characteristic.uuid} has changed with data ${value.contentToString()}"
             )
-            notificationFlow.tryEmit(BleNotification(it, it.value))
-        }
+        notificationFlow.tryEmit(BleNotification(characteristic, value))
     }
 
     override fun onDescriptorWrite(

@@ -23,7 +23,7 @@ class DateConverter {
     }
 
     @TypeConverter
-    fun toDate(value: String): Date {
+    fun toDate(value: String): Date? {
         val formatter = SimpleDateFormat(DATE_FORMAT, Locale.getDefault())
         return formatter.parse(value)
     }

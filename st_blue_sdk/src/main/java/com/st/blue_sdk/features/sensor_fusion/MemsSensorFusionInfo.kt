@@ -25,7 +25,9 @@ data class MemsSensorFusionInfo(
 
     override fun toString(): String {
         val sampleValue = StringBuilder()
-        quaternions.forEach { sampleValue.append("\t${it.name} = ${it.value} ${it.unit ?: ""}\n") }
+        sampleValue.append("Quaternions = [\n")
+        quaternions.forEach { sampleValue.append("{\n${it.value}},\n") }
+        sampleValue.append("]\n")
         return sampleValue.toString()
     }
 }

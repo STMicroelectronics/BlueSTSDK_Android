@@ -43,6 +43,7 @@ import kotlinx.coroutines.flow.onEach
 import java.io.InputStream
 import kotlin.coroutines.resume
 import kotlin.math.min
+import kotlin.time.Duration.Companion.milliseconds
 
 class CharacteristicFwUpgrade(
     private val bleManager: BluetoothManager,
@@ -153,7 +154,7 @@ class CharacteristicFwUpgrade(
 
         coroutineScope.launch {
             try {
-                withTimeout(DISCONNECTION_TIMEOUT) {
+                withTimeout(DISCONNECTION_TIMEOUT.milliseconds) {
                     nodeService.getDeviceStatus().firstOrNull {
                         it.connectionStatus.current == NodeState.Disconnected
                     }
@@ -175,7 +176,7 @@ class CharacteristicFwUpgrade(
             responseTimeout = UPLOAD_RESPONSE_DELAY
         )
 
-        delay(200)
+        delay(200.milliseconds)
         nodeService.disconnect()
     }
 
@@ -214,7 +215,7 @@ class CharacteristicFwUpgrade(
 
             launch {
                 try {
-                    withTimeout(OTA_NODE_READY_TIMEOUT) {
+                    withTimeout(OTA_NODE_READY_TIMEOUT.milliseconds) {
                         otaNodeService.getDeviceStatus().firstOrNull {
                             Log.d(TAG, "OTA board status : ${it.connectionStatus.current}")
                             it.connectionStatus.current == NodeState.Ready
@@ -234,7 +235,7 @@ class CharacteristicFwUpgrade(
 
     @SuppressLint("MissingPermission")
     private suspend fun scanForOTADevices(targetDeviceAddress: String): Pair<ScanResult, BleAdvertiseInfo>? {
-        return withTimeoutOrNull(BLE_SCAN_TIMEOUT) {
+        return withTimeoutOrNull(BLE_SCAN_TIMEOUT.milliseconds) {
 
             val advertiseFilter = BlueSTSDKAdvertiseFilter()
 
@@ -249,7 +250,7 @@ class CharacteristicFwUpgrade(
                                 advertiseFilter.decodeAdvertiseData(
                                     scanResult.scanRecord?.bytes ?: byteArrayOf()
                                 )?.let { advInfo ->
-                                    bleManager.adapter.bluetoothLeScanner.stopScan(this)
+                                    bleManager.adapter.bluetoothLeScanner?.stopScan(this)
                                     if (continuation.isCompleted.not()) {
                                         continuation.resume(Pair(scanResult, advInfo))
                                     }
@@ -259,10 +260,10 @@ class CharacteristicFwUpgrade(
                     }
                 }
 
-                bleManager.adapter.bluetoothLeScanner.startScan(scanCallback)
+                bleManager.adapter.bluetoothLeScanner?.startScan(scanCallback)
 
                 continuation.invokeOnCancellation {
-                    bleManager.adapter.bluetoothLeScanner.stopScan(scanCallback)
+                    bleManager.adapter.bluetoothLeScanner?.stopScan(scanCallback)
                 }
             }
         }

@@ -20,7 +20,12 @@ data class Quaternion(
 ) {
 
     override fun toString(): String {
-        return "\tTS= $timeStamp\n\t\tqi = $qi\n\t\tqj = $qj\n\t\tqk = $qk\n\t\tqs = $qs\n"
+        val sampleValue = StringBuilder()
+        sampleValue.append("\tqi = $qi,\n")
+        sampleValue.append("\tqj = $qj,\n")
+        sampleValue.append("\tqk = $qk,\n")
+        sampleValue.append("\tqs = $qs\n")
+        return sampleValue.toString()
     }
 
     companion object {

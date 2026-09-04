@@ -85,14 +85,14 @@ class ISPUControlFeature(
         try {
             while (myReader.readLine().also { myDataRow = it } != null) {
                 if (myDataRow!!.contains("Ac")) {
-                    val data = myDataRow!!.removePrefix("Ac ").split("".toRegex())
+                    val data = myDataRow.removePrefix("Ac ").split("".toRegex())
                     if (data.size != 2) {
                         result = null
                         throw IllegalArgumentException("one Ac line need 2 Values: Reg + Value")
                     }
                     resultString += data[0] + data[1]
-                } else if (myDataRow!!.contains("WAIT")) {
-                    val data = myDataRow!!.removePrefix("WAIT ").split("".toRegex())
+                } else if (myDataRow.contains("WAIT")) {
+                    val data = myDataRow.removePrefix("WAIT ").split("".toRegex())
                     if (data.size != 1) {
                         result = null
                         throw IllegalArgumentException("one WAIT line need 1 Value: Millisecond")

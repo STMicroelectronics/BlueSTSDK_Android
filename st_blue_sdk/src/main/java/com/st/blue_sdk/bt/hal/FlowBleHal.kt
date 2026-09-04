@@ -13,8 +13,10 @@ import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattDescriptor
 import android.bluetooth.BluetoothGattService
+import android.bluetooth.BluetoothStatusCodes
 import android.content.Context
 import android.content.IntentFilter
+import android.os.Build
 import android.util.Log
 import com.st.blue_sdk.bt.BleBondingBroadcastReceiver
 import com.st.blue_sdk.bt.advertise.BleAdvertiseInfo
@@ -386,9 +388,18 @@ class FlowBleHal(
                             "Writing characteristic with uuid ${characteristic.uuid}, value ${chunk.contentToString()}"
                         )
 
+                        val hasWriteData = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            node.deviceGatt.writeCharacteristic(
+                                characteristic,
+                                chunk,
+                                characteristic.writeType
+                            ) == BluetoothStatusCodes.SUCCESS
+                        } else {
+                            @Suppress("DEPRECATION")
                         characteristic.value = chunk
-
-                        val hasWriteData = node.deviceGatt.writeCharacteristic(characteristic)
+                            @Suppress("DEPRECATION")
+                            node.deviceGatt.writeCharacteristic(characteristic)
+                        }
 
                         if (awaitFeedback.not()) {
                             emit(BleEvent.CharacteristicWrite(hasWriteData, characteristic))
@@ -548,21 +559,26 @@ class FlowBleHal(
 
         val descriptor = characteristic.getDescriptor(NOTIFICATION_UUID) ?: return false
 
-        when {
+        val value = when {
             (characteristic.properties and BluetoothGattCharacteristic.PROPERTY_NOTIFY) != 0 -> {
-                descriptor.value =
                     if (enabled) BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE else BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE
             }
 
             (characteristic.properties and BluetoothGattCharacteristic.PROPERTY_INDICATE) != 0 -> {
-                descriptor.value =
                     if (enabled) BluetoothGattDescriptor.ENABLE_INDICATION_VALUE else BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE
             }
 
             else -> return false
         }
 
-        return gatt.writeDescriptor(descriptor)
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            gatt.writeDescriptor(descriptor, value) == BluetoothStatusCodes.SUCCESS
+        } else {
+            @Suppress("DEPRECATION")
+            descriptor.value = value
+            @Suppress("DEPRECATION")
+            gatt.writeDescriptor(descriptor)
+        }
     }
 
     @SuppressLint("MissingPermission")

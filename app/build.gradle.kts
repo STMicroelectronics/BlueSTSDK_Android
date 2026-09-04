@@ -18,18 +18,14 @@ plugins {
 
 android {
     namespace = "com.st.demo"
-    compileSdk {
-        version = release(36) {
-            minorApiLevel = 1
-        }
-    }
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.st.demo"
         minSdk = 26
-        targetSdk = 36
-        versionCode = 16
-        versionName = "5.3.2"
+        targetSdk = 37
+        versionCode = 17
+        versionName = "5.3.3"
 
         vectorDrawables { useSupportLibrary = true }
 
@@ -61,6 +57,10 @@ android {
 
 
     packaging { resources { excludes += "/META-INF/{AL2.0,LGPL2.1}" } }
+}
+
+configurations.all {
+    exclude(group = "org.bouncycastle", module = "bcprov-jdk18on")
 }
 
 hilt {

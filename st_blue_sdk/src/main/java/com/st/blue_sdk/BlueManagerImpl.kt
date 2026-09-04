@@ -62,6 +62,7 @@ import kotlinx.coroutines.flow.flowOn
 import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.time.Duration.Companion.milliseconds
 
 
 @Singleton
@@ -170,7 +171,7 @@ class BlueManagerImpl @Inject constructor(
         val scanCallback = object : ScanCallback() {
             override fun onScanFailed(errorCode: Int) {
                 super.onScanFailed(errorCode)
-                bleScanner.stopScan(this)
+                bleScanner?.stopScan(this)
                 trySend(
                     Resource.error(
                         R.string.blue_st_sdk_error_ble_scan_failed, errorCode, null
@@ -200,12 +201,12 @@ class BlueManagerImpl @Inject constructor(
         val scanSettings =
             ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).build()
 
-        bleScanner.startScan(listOf(), scanSettings, scanCallback)
+        bleScanner?.startScan(listOf(), scanSettings, scanCallback)
 
         launch {
-            withTimeoutOrNull(scanPeriod) {
+            withTimeoutOrNull(scanPeriod.milliseconds) {
                 while (stopDeviceScan.not()) {
-                    delay(200)
+                    delay(200.milliseconds)
                 }
             }
 
@@ -217,7 +218,7 @@ class BlueManagerImpl @Inject constructor(
         }
 
         awaitClose {
-            bleScanner.stopScan(scanCallback)
+            bleScanner?.stopScan(scanCallback)
         }
 
     }.flowOn(Dispatchers.IO).catch { e ->
@@ -245,7 +246,7 @@ class BlueManagerImpl @Inject constructor(
             val scanCallback = object : ScanCallback() {
                 override fun onScanFailed(errorCode: Int) {
                     super.onScanFailed(errorCode)
-                    bleScanner.stopScan(this)
+                    bleScanner?.stopScan(this)
                     trySend(
                         Resource.error(
                             R.string.blue_st_sdk_error_ble_scan_failed, errorCode, null
@@ -277,11 +278,11 @@ class BlueManagerImpl @Inject constructor(
             val scanSettings =
                 ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).build()
 
-            bleScanner.startScan(listOf(), scanSettings, scanCallback)
+            bleScanner?.startScan(listOf(), scanSettings, scanCallback)
 
             launch {
                 while (stopDeviceScan.not()) {
-                    delay(500)
+                    delay(500.milliseconds)
                 }
 
                 trySend(
@@ -290,7 +291,7 @@ class BlueManagerImpl @Inject constructor(
                 close()
             }
             awaitClose {
-                bleScanner.stopScan(scanCallback)
+                bleScanner?.stopScan(scanCallback)
             }
 
         }.flowOn(Dispatchers.IO).catch { e ->
@@ -315,7 +316,7 @@ class BlueManagerImpl @Inject constructor(
         val scanCallback = object : ScanCallback() {
             override fun onScanFailed(errorCode: Int) {
                 super.onScanFailed(errorCode)
-                bleScanner.stopScan(this)
+                bleScanner?.stopScan(this)
                 trySend(
                     Resource.error(
                         R.string.blue_st_sdk_error_ble_scan_failed, errorCode, null
@@ -347,12 +348,12 @@ class BlueManagerImpl @Inject constructor(
         val scanSettings =
             ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).build()
 
-        bleScanner.startScan(listOf(), scanSettings, scanCallback)
+        bleScanner?.startScan(listOf(), scanSettings, scanCallback)
 
         launch {
-            withTimeoutOrNull(scanPeriod) {
+            withTimeoutOrNull(scanPeriod.milliseconds) {
                 while (stopDeviceScan.not()) {
-                    delay(200)
+                    delay(200.milliseconds)
                 }
             }
 
@@ -363,7 +364,7 @@ class BlueManagerImpl @Inject constructor(
         }
 
         awaitClose {
-            bleScanner.stopScan(scanCallback)
+            bleScanner?.stopScan(scanCallback)
         }
 
     }.flowOn(Dispatchers.IO).catch { e ->

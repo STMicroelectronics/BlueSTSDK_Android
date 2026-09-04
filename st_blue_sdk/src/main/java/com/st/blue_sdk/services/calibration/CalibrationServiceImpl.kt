@@ -26,6 +26,7 @@ import kotlinx.coroutines.withTimeout
 import java.util.regex.Pattern
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.time.Duration.Companion.milliseconds
 
 @Singleton
 class CalibrationServiceImpl @Inject constructor(
@@ -65,11 +66,11 @@ class CalibrationServiceImpl @Inject constructor(
         } else {
             val debugService = service.debugService
             //The SensorTile.box and SensorTile.box-Pro don't have Configuration BLE Char
-            debugService.write(GET_COMMAND)
+            //debugService.write(GET_COMMAND)
             try {
                 supervisorScope {
                     launch {
-                        withTimeout(3000L) {
+                        withTimeout(3000L.milliseconds) {
                             debugService.getDebugMessages()
                                 .filter { it.isError.not() }
                                 .map { it.payload }

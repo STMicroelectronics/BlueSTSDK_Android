@@ -15,17 +15,17 @@ apply(from = "publish.gradle")
 
 android {
     namespace = "com.st.BlueSTSDK.Features.Audio.Opus"
-    compileSdk {
-        version = release(36) {
-            minorApiLevel = 1
-        }
-    }
+    compileSdk = 37
 
     defaultConfig {
         minSdk = 26
         ndk {
             abiFilters.addAll(listOf("arm64-v8a", "armeabi-v7a","x86", "x86_64")) // Add what you need
         }
+    }
+
+    configurations.all {
+        exclude(group = "org.bouncycastle", module = "bcprov-jdk18on")
     }
 
     defaultConfig {

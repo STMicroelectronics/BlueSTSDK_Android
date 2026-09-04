@@ -24,10 +24,10 @@ class CallbackGattBridge : BluetoothGattCallback(), GattBridge {
     private var writeListener: ((characteristic: BluetoothGattCharacteristic?, successful: Boolean) -> Unit)? =
         null
 
-    private var readListener: ((characteristic: BluetoothGattCharacteristic, successful: Boolean) -> Unit)? =
+    private var readListener: ((characteristic: BluetoothGattCharacteristic, value: ByteArray, successful: Boolean) -> Unit)? =
         null
 
-    private var notificationListener: ((characteristic: BluetoothGattCharacteristic?) -> Unit)? =
+    private var notificationListener: ((characteristic: BluetoothGattCharacteristic?, value: ByteArray) -> Unit)? =
         null
 
     private var descriptorWriteListener: ((characteristic: BluetoothGattCharacteristic?, successful: Boolean) -> Unit)? =
@@ -49,11 +49,11 @@ class CallbackGattBridge : BluetoothGattCallback(), GattBridge {
         this.writeListener = writeListener
     }
 
-    fun setReadListener(readListener: (characteristic: BluetoothGattCharacteristic, successful: Boolean) -> Unit) {
+    fun setReadListener(readListener: (characteristic: BluetoothGattCharacteristic, value: ByteArray, successful: Boolean) -> Unit) {
         this.readListener = readListener
     }
 
-    fun setNotificationListener(notificationListener: (characteristic: BluetoothGattCharacteristic?) -> Unit) {
+    fun setNotificationListener(notificationListener: (characteristic: BluetoothGattCharacteristic?, value: ByteArray) -> Unit) {
         this.notificationListener = notificationListener
     }
 
@@ -118,12 +118,22 @@ class CallbackGattBridge : BluetoothGattCallback(), GattBridge {
         }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onCharacteristicRead(
         gatt: BluetoothGatt,
         characteristic: BluetoothGattCharacteristic,
         status: Int
     ) {
-        readListener?.invoke(characteristic, status == BluetoothGatt.GATT_SUCCESS)
+        onCharacteristicRead(gatt, characteristic, characteristic.value, status)
+    }
+
+    override fun onCharacteristicRead(
+        gatt: BluetoothGatt,
+        characteristic: BluetoothGattCharacteristic,
+        value: ByteArray,
+        status: Int
+    ) {
+        readListener?.invoke(characteristic, value, status == BluetoothGatt.GATT_SUCCESS)
     }
 
     override fun onCharacteristicWrite(
@@ -134,11 +144,20 @@ class CallbackGattBridge : BluetoothGattCallback(), GattBridge {
         writeListener?.invoke(characteristic, status == BluetoothGatt.GATT_SUCCESS)
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onCharacteristicChanged(
         gatt: BluetoothGatt,
         characteristic: BluetoothGattCharacteristic
     ) {
-        notificationListener?.invoke(characteristic)
+        onCharacteristicChanged(gatt, characteristic, characteristic.value)
+    }
+
+    override fun onCharacteristicChanged(
+        gatt: BluetoothGatt,
+        characteristic: BluetoothGattCharacteristic,
+        value: ByteArray
+    ) {
+        notificationListener?.invoke(characteristic, value)
     }
 
     override fun onDescriptorWrite(

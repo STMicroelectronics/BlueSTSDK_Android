@@ -13,8 +13,10 @@ import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattDescriptor
 import android.bluetooth.BluetoothGattService
+import android.bluetooth.BluetoothStatusCodes
 import android.content.Context
 import android.content.IntentFilter
+import android.os.Build
 import android.util.Log
 import com.st.blue_sdk.bt.BleBondingBroadcastReceiver
 import com.st.blue_sdk.bt.BleOperation
@@ -371,16 +373,26 @@ class CallbackBleHAL(
             successful =
                 successful && bleOperationsQueue.enqueueOperation(BleOperation.WriteCharacteristic {
 
-                    characteristic.value = chunk
                     Log.d(
                         TAG,
                         "Writing characteristic ${characteristic.uuid} with data ${chunk.contentToString()}"
                     )
 
                     if (awaitFeedback.not()) {
-                        return@WriteCharacteristic node.deviceGatt.writeCharacteristic(
+                        return@WriteCharacteristic if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            node.deviceGatt.writeCharacteristic(
+                                characteristic,
+                                chunk,
+                                characteristic.writeType
+                            ) == BluetoothStatusCodes.SUCCESS
+                        } else {
+                            @Suppress("DEPRECATION")
+                            characteristic.value = chunk
+                            @Suppress("DEPRECATION")
+                            node.deviceGatt.writeCharacteristic(
                             characteristic
                         )
+                    }
                     }
 
                     executeAsyncBleOperation(
@@ -389,7 +401,21 @@ class CallbackBleHAL(
                         operation = {
                             characteristicWriteContinuation?.cancel()
                             characteristicWriteContinuation = it
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                val status = node.deviceGatt.writeCharacteristic(
+                                    characteristic,
+                                    chunk,
+                                    characteristic.writeType
+                                )
+                                if (status != BluetoothStatusCodes.SUCCESS) {
+                                    @OptIn(ExperimentalCoroutinesApi::class)
+                                    it.resume(false, null)
+                                }
+                            } else {
+                                @Suppress("DEPRECATION")
+                                characteristic.value = chunk
                             node.deviceGatt.writeCharacteristic(characteristic)
+                            }
 
                             chunkStateFlow.tryEmit(
                                 value = ChunkProgress(
@@ -531,19 +557,26 @@ class CallbackBleHAL(
 
         val descriptor = characteristic.getDescriptor(NOTIFICATION_UUID) ?: return false
 
-        when {
+        val value = when {
             (characteristic.properties and BluetoothGattCharacteristic.PROPERTY_NOTIFY) != 0 -> {
-                descriptor.value =
                     if (enabled) BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE else BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE
             }
+
             (characteristic.properties and BluetoothGattCharacteristic.PROPERTY_INDICATE) != 0 -> {
-                descriptor.value =
                     if (enabled) BluetoothGattDescriptor.ENABLE_INDICATION_VALUE else BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE
             }
+
             else -> return false
         }
 
-        return gatt.writeDescriptor(descriptor)
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            gatt.writeDescriptor(descriptor, value) == BluetoothStatusCodes.SUCCESS
+        } else {
+            @Suppress("DEPRECATION")
+            descriptor.value = value
+            @Suppress("DEPRECATION")
+            gatt.writeDescriptor(descriptor)
+        }
     }
 
     @SuppressLint("MissingPermission")
@@ -606,8 +639,8 @@ class CallbackBleHAL(
             serviceDiscoveryContinuation?.resume(services ?: emptyList(), null)
         }
 
-        gattBridge.setReadListener { characteristic, successful ->
-            val data = if (successful) characteristic.value else byteArrayOf()
+        gattBridge.setReadListener { characteristic, value, successful ->
+            val data = if (successful) value else byteArrayOf()
             characteristicReadContinuation?.resume(data, null)
         }
 
@@ -615,13 +648,13 @@ class CallbackBleHAL(
             characteristicWriteContinuation?.resume(successful, null)
         }
 
-        gattBridge.setNotificationListener {
-            it?.let {
+        gattBridge.setNotificationListener { characteristic, value ->
+            characteristic?.let {
                 Log.d(
                     TAG,
-                    "received notification on characteristic ${it.uuid} with data ${it.value.contentToString()}"
+                    "received notification on characteristic ${it.uuid} with data ${value.contentToString()}"
                 )
-                notificationsFlow.tryEmit(BleNotification(it, it.value))
+                notificationsFlow.tryEmit(BleNotification(it, value))
             }
         }
 

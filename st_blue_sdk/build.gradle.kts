@@ -18,11 +18,7 @@ apply(from = "publish.gradle")
 
 android {
     namespace = "com.st.blue_sdk"
-    compileSdk {
-        version = release(36) {
-            minorApiLevel = 1
-        }
-    }
+    compileSdk = 37
 
     defaultConfig {
         minSdk = 26
@@ -30,6 +26,10 @@ android {
 
     hilt {
         enableAggregatingTask = true
+    }
+
+    configurations.all {
+        exclude(group = "org.bouncycastle", module = "bcprov-jdk18on")
     }
 
     buildTypes {
